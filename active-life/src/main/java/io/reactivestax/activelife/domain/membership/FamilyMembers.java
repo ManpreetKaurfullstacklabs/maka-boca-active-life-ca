@@ -1,18 +1,16 @@
 package io.reactivestax.activelife.domain.membership;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import io.reactivestax.activelife.Enums.GroupOwner;
 import io.reactivestax.activelife.Enums.PreferredMode;
 import io.reactivestax.activelife.Enums.Status;
-import io.reactivestax.activelife.domain.Login;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigInteger;
 import java.time.LocalDate;
-import java.util.Date;
+import java.util.UUID;
+
 
 @Data
 @AllArgsConstructor
@@ -67,9 +65,11 @@ public class FamilyMembers {
     @Column(name = "language")
     private String language;
 
-    @Column(name = "member_login_id")
-    private Long memberLogin;
+    @Column(name = "pin")
+    private String pin;
 
+    @Column(name = "member_login_id",unique = true)
+    private String memberLogin;
 
     @Column(name = "is_active")
     @Enumerated(EnumType.STRING)
@@ -79,9 +79,11 @@ public class FamilyMembers {
     @Enumerated(EnumType.STRING)
     private GroupOwner groupOwner;
 
-    @ManyToOne()
-    @JsonBackReference
-    @JoinColumn(name = "family_group_id",nullable = false)
-    private  FamilyGroups familyGroup;
+    @Column(name="uuid", unique = true)
+    private String verificationUUID;
+
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "family_group_id")
+    private  FamilyGroups familyGroupId;
 
 }

@@ -10,7 +10,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -31,9 +30,10 @@ public class FamilyMemberDTO {
     private String homePhoneNo;
     private String bussinessPhoneNo;
     private String language;
-    private Long memberLoginId;
+    private String memberLoginId;
+    private String pin;
     private GroupOwner groupOwner;
     private Status status;
-    private FamilyGroups familyGroups;
+    private  Long  familyGroupId;
 
 }

@@ -1,6 +1,7 @@
-server.port: 8081
+server.port: 8082
+
 spring:
-  application.name: active-life
+  application.name: ems
   datasource:
     url: jdbc:postgresql://localhost:5432/active_life
     username: postgres
@@ -13,3 +14,16 @@ spring:
   jpa:
     hibernate.ddl-auto: update
     show-sql: true
+  activemq:
+    broker-url: tcp://localhost:61616
+    user: admin
+    password: admin
+    queue:
+      ensqueue: queue
+  jms:
+    pub-sub-domain: false
+  twilio:
+    account:
+      sid: ${TWILIO_ACCOUNT_SID}
+    auth:
+      token: ${TWILIO_AUTH_TOKEN}

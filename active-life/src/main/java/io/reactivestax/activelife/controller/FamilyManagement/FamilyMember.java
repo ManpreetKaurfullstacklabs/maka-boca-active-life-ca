@@ -1,13 +1,13 @@
 package io.reactivestax.activelife.controller.FamilyManagement;
 
 import io.reactivestax.activelife.dto.FamilyMemberDTO;
+import io.reactivestax.activelife.dto.LoginDTO;
 import io.reactivestax.activelife.service.FamilyMemberService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/familymember")
@@ -22,21 +22,22 @@ public class FamilyMember {
         return ResponseEntity.ok("family member added sucessfully");
     }
 
-    @PostMapping("/members") // didnt test now
-    public ResponseEntity<String> addFamilyMembersToExisting(@Valid @RequestBody FamilyMemberDTO familyMemberDTO) {
-        familyMemberService.addFamilyToExistingGroupID(familyMemberDTO);
-        return ResponseEntity.ok("member added to existing family group.  "+ familyMemberDTO.getMemberLoginId());
+    @PostMapping("/login")
+    public ResponseEntity<String>  addFamilyMemberAlongFamilyGroup( @RequestBody LoginDTO login) {
+        String value  = familyMemberService.loginExistingMember(login);
+        return ResponseEntity.ok( value);
     }
 
 
-    @GetMapping("/members/{id}")
-    public ResponseEntity<FamilyMemberDTO> getFamilyMember(@PathVariable Long id) {
+
+    @GetMapping("/familymember/{id}")
+    public ResponseEntity<FamilyMemberDTO> getFamilyMember(@PathVariable String id) {
         FamilyMemberDTO allMembersbygivenMemberId = familyMemberService.getAllMembersbygivenMemberId(id);
         return ResponseEntity.ok(allMembersbygivenMemberId);
 
     }
 
-    @PatchMapping("/members/")
+    @PatchMapping("/members")
     public ResponseEntity<FamilyMemberDTO> updateMemberInformation(@RequestBody FamilyMemberDTO  familyMemberDTO) {
         familyMemberService.updateExistingFamilyMember(familyMemberDTO);
         return ResponseEntity.ok(familyMemberDTO);
@@ -48,4 +49,9 @@ public class FamilyMember {
         return ResponseEntity.ok("family member removed sucessfully");
     }
 
+    @GetMapping("/verify/{id}")
+    public ResponseEntity<String> verifySignup( @PathVariable String id) {
+        familyMemberService.findFamilyMemberByVerificationId(id);
+        return ResponseEntity.ok("verified");
+    }
 }

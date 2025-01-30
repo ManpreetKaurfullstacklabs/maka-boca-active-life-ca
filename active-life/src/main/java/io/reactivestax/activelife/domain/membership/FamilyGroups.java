@@ -6,10 +6,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
-
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -48,6 +45,6 @@ public class FamilyGroups {
     private Long lastUpdatedBy;
 
     @JsonManagedReference
-    @OneToMany(mappedBy = "familyGroup" )
+    @OneToMany(mappedBy = "familyGroupId")
     private List<FamilyMembers> familyMembers;
 }
