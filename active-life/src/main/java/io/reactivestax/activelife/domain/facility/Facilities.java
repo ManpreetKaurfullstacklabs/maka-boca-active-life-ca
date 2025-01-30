@@ -5,19 +5,20 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigInteger;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity(name = "facilities")
-public class Facitlities {
+@Entity
+@Table(name = "facilities")
+public class Facilities {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "FACILITY_ID")
-    private Integer id;
+    private Long id;
 
     @Column(name = "NAME", length = 200)
     private String name;
@@ -44,10 +45,10 @@ public class Facitlities {
     private String description;
 
     @Column(name = "CREATED_TS")
-    private Date createdTs;
+    private LocalDate createdTs;
 
     @Column(name = "LAST_UPDATED_TS")
-    private Date lastUpdatedTs;
+    private LocalDate lastUpdatedTs;
 
     @Column(name = "CREATED_BY")
     private Long createdBy;

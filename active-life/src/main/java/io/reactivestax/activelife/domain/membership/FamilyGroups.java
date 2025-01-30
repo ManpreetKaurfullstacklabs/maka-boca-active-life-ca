@@ -1,22 +1,53 @@
-package io.reactivestax.activelife.domain;
+package io.reactivestax.activelife.domain.membership;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import io.reactivestax.activelife.Enums.Status;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
-// for audit purpose only not interactiong with user
+import java.util.List;
+
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Entity(name = "family_group")
 public class FamilyGroups {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "family_group_id")
+    private Long familyGroupId;
+
+    @Column(name = "family_pin")
     private String familyPin;
-    private BigInteger credits;
-    private String status;
-    private int failedAttempts;
+
+    @Column(name = "credits")
+    private BigDecimal credits;
+
+    @Column(name = "status")
+    @Enumerated(EnumType.STRING)
+    private Status status;
+
+    @Column(name = "createdAt")
     private LocalDateTime createdAt;
+
+    @Column(name = "updatedAt")
     private LocalDateTime updatedAt;
-    private BigInteger createdBy;
-    private BigInteger lastUpdatedBy;
+
+    @Column(name = "createdBy")
+    private Long createdBy;
+
+    @Column(name = "last_updated_by")
+    private Long lastUpdatedBy;
+
+    @JsonManagedReference
+    @OneToMany(mappedBy = "familyGroup" )
+    private List<FamilyMembers> familyMembers;
 }

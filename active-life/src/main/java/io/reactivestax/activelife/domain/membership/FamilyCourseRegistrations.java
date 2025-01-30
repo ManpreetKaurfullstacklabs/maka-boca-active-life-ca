@@ -1,44 +1,67 @@
-package io.reactivestax.activelife.domain;
+package io.reactivestax.activelife.domain.membership;
 
+import io.reactivestax.activelife.Enums.IsWithdrawn;
+
+import io.reactivestax.activelife.domain.course.OfferedCourses;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Date;
+
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Entity(name = "family_course_registration")
 public class FamilyCourseRegistrations {
 
 
-    private BigInteger familyCourseRegistrationId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "family_course_registration_id")
+    private Long familyCourseRegistrationId;
 
+    @Column(name = "cost")
     private BigDecimal cost;
 
-    private Date enrollmentDate;
+    @Column(name = "enrollment_date")
+    private LocalDate enrollmentDate;
 
-    private Character isWithdrawn;
+    @Column(name= "isWithdrawn")
+    @Enumerated(EnumType.STRING)
+    private IsWithdrawn isWithdrawn;
 
+    @Column(name= "withdrawn_credits")
     private BigDecimal withdrawnCredits;
 
+    @Column(name= "enrollment_actor")
     private String enrollmentActor ;
 
-    private BigInteger enrollmentActorId;
+    @Column(name= "enrollment_actor_id")
+    private Long enrollmentActorId;
 
+    @Column(name= "created_at")
     private LocalDateTime createdAt;
 
-    private  BigDecimal offeredCourseId;
+    @ManyToOne
+    @JoinColumn(name="offer_course_id" )
+    private OfferedCourses offeredCourseId;
 
-    private BigDecimal familyMemberId;
+    @ManyToOne
+    @JoinColumn(name="family_member_id" )
+    private FamilyMembers familyMemberId;
 
+    @Column(name="last_updated_time")
     private LocalDateTime lastUpdatedTime;
 
-    private BigDecimal createdBy;
+    @Column(name="created_by")
+    private Long createdBy;
 
-    private BigDecimal lastUpdateBy;
+    @Column(name="last_updated_by")
+    private Long lastUpdateBy;
 
 }
