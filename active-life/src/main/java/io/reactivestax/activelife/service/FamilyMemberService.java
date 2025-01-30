@@ -5,6 +5,7 @@ import io.reactivestax.activelife.domain.Login;
 import io.reactivestax.activelife.domain.membership.FamilyGroups;
 import io.reactivestax.activelife.domain.membership.FamilyMembers;
 import io.reactivestax.activelife.dto.FamilyMemberDTO;
+import io.reactivestax.activelife.exception.MemberNotFoundException;
 import io.reactivestax.activelife.repository.FamilMemberRepository;
 import io.reactivestax.activelife.repository.FamilyGroupRepository;
 import io.reactivestax.activelife.repository.LoginRepository;
@@ -90,7 +91,10 @@ public class FamilyMemberService {
             familyMemberDTO.setFamilyGroups(familyMembers.getFamilyGroup());
             return  familyMemberDTO;
         }
-        return null;
+        else{
+            throw new MemberNotFoundException("this member is not registered ");
+        }
+
     }
 
 
