@@ -1,6 +1,7 @@
 package io.reactivestax.activelife.service;
 
 import io.reactivestax.activelife.Enums.Status;
+import io.reactivestax.activelife.controller.FamilyManagement.FamilyMember;
 import io.reactivestax.activelife.domain.Login;
 import io.reactivestax.activelife.domain.membership.FamilyGroups;
 import io.reactivestax.activelife.domain.membership.FamilyMembers;
@@ -96,6 +97,36 @@ public class FamilyMemberService {
         }
 
     }
+
+    public void updateExistingFamilyMember(FamilyMemberDTO  familyMemberDTO){
+        Optional<FamilyMembers> byId = familyMemberRepository.findById(familyMemberDTO.getMemberLoginId());
+        FamilyMembers familyMembers = byId.get();
+        familyMembers.setMemberName(familyMemberDTO.getMemberName());
+        familyMembers.setMemberName(familyMemberDTO.getMemberName());
+        familyMembers.setDob(familyMemberDTO.getDob());
+        familyMembers.setGender(familyMemberDTO.getGender());
+        familyMembers.setEmail(familyMemberDTO.getEmail());
+        familyMembers.setStreetNo(familyMemberDTO.getStreetNo());
+        familyMembers.setStreetName(familyMemberDTO.getStreetName());
+        familyMembers.setCity(familyMemberDTO.getCity());
+        familyMembers.setProvince(familyMemberDTO.getProvince());
+        familyMembers.setPostalCode(familyMemberDTO.getPostalCode());
+        familyMembers.setPreferredMode(familyMemberDTO.getPreferredMode());
+        familyMembers.setGroupOwner(familyMemberDTO.getGroupOwner());
+        familyMembers.setCountry(familyMemberDTO.getCountry());
+        familyMembers.setHomePhoneNo(familyMemberDTO.getHomePhoneNo());
+        familyMembers.setBussinessPhoneNo(familyMemberDTO.getBussinessPhoneNo());
+        familyMembers.setLanguage(familyMemberDTO.getLanguage());
+        familyMemberRepository.save(familyMembers);
+
+    }
+    public void deleteFamilyMemberById(long id ){// not a hard delete its soft delete
+        FamilyMembers familyMembers = familyMemberRepository.findById(id).get();
+        familyMembers.setStatus(Status.INACTIVE);
+        familyMemberRepository.save(familyMembers);
+
+    }
+
 
 
     private void setFamilyMemberDetails(FamilyMemberDTO familyMemberDTO, FamilyMembers familyMembers) {

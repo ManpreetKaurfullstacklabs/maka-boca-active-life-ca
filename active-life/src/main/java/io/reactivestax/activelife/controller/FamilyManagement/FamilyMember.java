@@ -22,30 +22,30 @@ public class FamilyMember {
         return ResponseEntity.ok("family member added sucessfully");
     }
 
-    @PostMapping("/members")// didnt test
+    @PostMapping("/members") // didnt test now
     public ResponseEntity<String> addFamilyMembersToExisting(@Valid @RequestBody FamilyMemberDTO familyMemberDTO) {
         familyMemberService.addFamilyToExistingGroupID(familyMemberDTO);
         return ResponseEntity.ok("member added to existing family group.  "+ familyMemberDTO.getMemberLoginId());
     }
 
 
-    @GetMapping("/familymembers/{id}")
+    @GetMapping("/members/{id}")
     public ResponseEntity<FamilyMemberDTO> getFamilyMember(@PathVariable Long id) {
         FamilyMemberDTO allMembersbygivenMemberId = familyMemberService.getAllMembersbygivenMemberId(id);
         return ResponseEntity.ok(allMembersbygivenMemberId);
 
     }
 
-    @PatchMapping("/members/{id}")
-    public ResponseEntity<Map<String, String>> updateMemberInformation(@PathVariable Long id) {
-
-        return null;
+    @PatchMapping("/members/")
+    public ResponseEntity<FamilyMemberDTO> updateMemberInformation(@RequestBody FamilyMemberDTO  familyMemberDTO) {
+        familyMemberService.updateExistingFamilyMember(familyMemberDTO);
+        return ResponseEntity.ok(familyMemberDTO);
     }
 
     @DeleteMapping("/members/{id}")
-    public ResponseEntity<Map<String, String>> deactivateMember(@PathVariable Long id) {
-
-        return null;
+    public ResponseEntity<String> deactivateMember(@PathVariable Long id) {
+        familyMemberService.deleteFamilyMemberById(id);
+        return ResponseEntity.ok("family member removed sucessfully");
     }
 
 }
