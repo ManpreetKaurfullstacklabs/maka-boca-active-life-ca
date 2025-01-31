@@ -1,6 +1,7 @@
 package io.reactivestax.activelife.service;
-
+import com.twilio.rest.api.v2010.account.Message;
 import io.reactivestax.activelife.Enums.Status;
+import io.reactivestax.activelife.distribution.SmsMessage;
 import io.reactivestax.activelife.distribution.SmsService;
 import io.reactivestax.activelife.domain.Login;
 import io.reactivestax.activelife.domain.membership.FamilyGroups;
@@ -12,7 +13,10 @@ import io.reactivestax.activelife.interfaces.FamilyMemberMapper;
 import io.reactivestax.activelife.repository.familymemberrepositries.FamilMemberRepository;
 import io.reactivestax.activelife.repository.familymemberrepositries.FamilyGroupRepository;
 import io.reactivestax.activelife.repository.login.LoginRepository;
+import org.springframework.jms.JmsException;
+import org.springframework.jms.core.JmsTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,6 +43,9 @@ public class FamilyMemberService {
 
     @Autowired
     private SmsService smsService;
+
+    @Autowired
+    private JmsTemplate jmsTemplate;
 
     @Transactional
     public String addNewFamilyMemberOnSignup(FamilyMemberDTO familyMemberDTO) {
@@ -102,6 +109,7 @@ public class FamilyMemberService {
         login.setLocalDateTime(LocalDateTime.now());
         login.setCreatedBy("System");
         login.setFamilyPin(familyMembers.getPin());
+
         String verificationId = UUID.randomUUID().toString();
         login.setVerificationUUID(verificationId);
         loginRepository.save(login);
@@ -110,16 +118,11 @@ public class FamilyMemberService {
     public void findFamilyMemberByVerificationId(String verificationId) {
         Optional<FamilyMembers> byVerificationId = familyMemberRepository.findByVerificationUUID(verificationId);
         FamilyMembers familyMembers = byVerificationId.get();
+        FamilyGroups familyGroupId = byVerificationId.get().getFamilyGroupId();
         familyMembers.setStatus(Status.ACTIVE);
+        familyGroupId.setStatus(Status.ACTIVE);
         familyMemberRepository.save(familyMembers);
     }
-
-//
-//    public  FamilyMembers findFamilyMemberByOtpVerification(LoginDTO loginDTO){
-//        Optional<FamilyMembers> byPin = loginRepository.findByPin(loginDTO.getPin());
-//        familyMemberRepository.
-//    }
-
 
     public String loginExistingMember(LoginDTO loginDTO) {
         Optional<FamilyMembers> byMemberLoginId = familyMemberRepository.findByMemberLogin(loginDTO.getMemberLoginId());
@@ -140,8 +143,8 @@ public class FamilyMemberService {
             } else {
                 String verificationId = UUID.randomUUID().toString();
                 familyMembers.setVerificationUUID(verificationId);
-                String verificationLink = "http://localhost:8082/api/v1/familymember/verify" + verificationId;
-                smsService.verificationLink(familyMembers.getHomePhoneNo(), verificationLink);
+                String verificationLink = "http://localhost:8082/api/v1/familymember/verify/" + verificationId;
+               smsService.verificationLink(familyMembers.getHomePhoneNo(), verificationLink);
                 return "Verification link sent successfully";
             }
         }
@@ -187,8 +190,9 @@ public class FamilyMemberService {
 
         String verificationId = UUID.randomUUID().toString();
         familyMembers.setVerificationUUID(verificationId);
-        String verificationLink = "http://localhost:8082/api/v1/familymember/verify" + verificationId;
-    //   smsService.sendSms(familyMembers.getHomePhoneNo(), "Please verify using this link: " + verificationLink);
+        String verificationLink = "http://localhost:8082/api/v1/familymember/verify/" + verificationId;
+    //    sendSmsToQueue(familyMembers.getHomePhoneNo(),verificationLink);
+      smsService.sendSms(familyMembers.getHomePhoneNo(), "Please verify using this link: " + verificationLink);
 
         String pin1 = familyMembers.getPin();
         return pin1;
@@ -214,4 +218,23 @@ public class FamilyMemberService {
         }
         return pin.toString();
     }
+
+    public String findFamilyMemberByOtpVerification(LoginDTO loginDTO) {
+        Optional<FamilyMembers> familyMemberOpt = familyMemberRepository.findByMemberLogin(loginDTO.getMemberLoginId());
+
+        if(familyMemberOpt.isEmpty()){
+            throw new MemberNotFoundException("this member does not exist");
+        }
+        FamilyMembers familyMembers = familyMemberOpt.get();
+        if(!familyMembers.getMemberLogin().equals(loginDTO.getMemberLoginId())){
+            throw  new MemberNotFoundException("Member with this id does not exist");
+        }
+        if(!familyMembers.getPin().equals(loginDTO.getPin())){
+            throw  new RuntimeException("wrong pin ");
+        }
+        familyMembers.setStatus(Status.ACTIVE);
+        familyMemberRepository.save(familyMembers);
+        return "Otp verified";
+    }
+    
 }

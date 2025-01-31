@@ -22,7 +22,7 @@ public class Login {
     private LocalDateTime localDateTime;
 
     @ManyToOne
-    @JoinColumn(name = "family_member_id", referencedColumnName = "family_member_id", nullable = false)
+    @JoinColumn(name = "family_member_id", referencedColumnName = "family_member_id")
     private FamilyMembers familyMember;
 
     @Column(name = "created_by")
@@ -33,5 +33,6 @@ public class Login {
 
     @Column(name="uuid", unique = true)
     private String verificationUUID;
+
 
 }

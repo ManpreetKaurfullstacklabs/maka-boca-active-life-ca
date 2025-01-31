@@ -1,4 +1,4 @@
-package io.reactivestax.activelife.controller.familymanagement;
+package io.reactivestax.activelife.controller;
 
 import io.reactivestax.activelife.dto.FamilyMemberDTO;
 import io.reactivestax.activelife.dto.LoginDTO;
@@ -54,7 +54,7 @@ public class FamilyMember {
     }
     @PostMapping("login/verify")
     public ResponseEntity<String> verifyLogin( @RequestBody LoginDTO loginDTO) {
-        //familyMemberService.findFamilyMemberByOtpVerification();
+        familyMemberService.findFamilyMemberByOtpVerification(loginDTO);
         return ResponseEntity.ok("verified");
     }
 }
