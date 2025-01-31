@@ -1,5 +1,6 @@
 package io.reactivestax.activelife.controller.FamilyManagement;
 
+import io.reactivestax.activelife.domain.membership.FamilyMembers;
 import io.reactivestax.activelife.dto.FamilyMemberDTO;
 import io.reactivestax.activelife.dto.LoginDTO;
 import io.reactivestax.activelife.service.FamilyMemberService;
@@ -18,8 +19,8 @@ public class FamilyMember {
 
     @PostMapping("/signup")
     public ResponseEntity<String>  addNewFamilyMemberAlongFamilyGroup(@Valid @RequestBody FamilyMemberDTO familyMemberDTO) {
-        familyMemberService.addNewFamilyMemberOnSignup(familyMemberDTO);
-        return ResponseEntity.ok("family member added sucessfully");
+        String pin = familyMemberService.addNewFamilyMemberOnSignup(familyMemberDTO);
+        return ResponseEntity.ok("family member added sucessfully with pin number : " + pin);
     }
 
     @PostMapping("/login")
@@ -28,10 +29,8 @@ public class FamilyMember {
         return ResponseEntity.ok( value);
     }
 
-
-
-    @GetMapping("/familymember/{id}")
-    public ResponseEntity<FamilyMemberDTO> getFamilyMember(@PathVariable String id) {
+    @GetMapping("/member/{id}")
+    public ResponseEntity<FamilyMemberDTO> getFamilyMember(@RequestHeader("Member-ID") @PathVariable String id) {
         FamilyMemberDTO allMembersbygivenMemberId = familyMemberService.getAllMembersbygivenMemberId(id);
         return ResponseEntity.ok(allMembersbygivenMemberId);
 
@@ -46,12 +45,17 @@ public class FamilyMember {
     @DeleteMapping("/members/{id}")
     public ResponseEntity<String> deactivateMember(@PathVariable Long id) {
         familyMemberService.deleteFamilyMemberById(id);
-        return ResponseEntity.ok("family member removed sucessfully");
+        return ResponseEntity.ok("family member removed successfully");
     }
 
     @GetMapping("/verify/{id}")
     public ResponseEntity<String> verifySignup( @PathVariable String id) {
         familyMemberService.findFamilyMemberByVerificationId(id);
+        return ResponseEntity.ok("verified");
+    }
+    @PostMapping("login/verify")
+    public ResponseEntity<String> verifyLogin( @RequestBody LoginDTO loginDTO) {
+        //familyMemberService.findFamilyMemberByOtpVerification();
         return ResponseEntity.ok("verified");
     }
 }
