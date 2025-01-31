@@ -39,7 +39,7 @@ public class OfferedCourses {
     @Column(name="course_start_time")
     private LocalDateTime startTime;
 
-    @Column(name="course_end _time")
+    @Column(name="course_end_time")
     private LocalDateTime endTime;
 
     @Column(name="is_course_allday")
@@ -47,9 +47,9 @@ public class OfferedCourses {
     private IsAllDay isAllDay;
 
     @Column(name="registration_start_date")
-    private Date registrationStartDate;
+    private LocalDate registrationStartDate;
 
-    @Column(name="availabe_for_enrollment")
+    @Column(name="available_for_enrollment")
     @Enumerated(EnumType.STRING)
     private AvailableForEnrollment availableForEnrollment;
 
@@ -72,4 +72,7 @@ public class OfferedCourses {
 
     @Column(name = "no_of_seats")
     private Long noOfSeats;
+
+    @Column(name = "last_updated_by")
+    private Long lastUpdatedBy;
 }

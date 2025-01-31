@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 import java.util.Date;
 
 @Data
-public class FamilyCourseRegistration {
+public class FamilyCourseRegistrationDTO {
 
     private BigInteger familyCourseRegistrationId;
 

@@ -1,4 +1,4 @@
-package io.reactivestax.activelife.repository;
+package io.reactivestax.activelife.repository.login;
 
 import io.reactivestax.activelife.domain.Login;
 import io.reactivestax.activelife.domain.membership.FamilyMembers;

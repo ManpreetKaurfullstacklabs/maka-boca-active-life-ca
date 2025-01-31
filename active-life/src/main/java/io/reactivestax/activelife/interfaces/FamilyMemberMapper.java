@@ -10,7 +10,6 @@ import org.mapstruct.factory.Mappers;
 public interface FamilyMemberMapper {
 
     FamilyMemberMapper INSTANCE = Mappers.getMapper(FamilyMemberMapper.class);
-
     @Mapping(source = "familyGroupId.familyGroupId", target = "familyGroupId")
     FamilyMemberDTO toDto(FamilyMembers familyMembers);
 

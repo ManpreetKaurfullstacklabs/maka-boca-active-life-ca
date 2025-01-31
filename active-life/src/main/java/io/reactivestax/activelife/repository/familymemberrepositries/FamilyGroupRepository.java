@@ -1,4 +1,4 @@
-package io.reactivestax.activelife.repository;
+package io.reactivestax.activelife.repository.familymemberrepositries;
 
 import io.reactivestax.activelife.domain.membership.FamilyGroups;
 import org.springframework.data.jpa.repository.JpaRepository;

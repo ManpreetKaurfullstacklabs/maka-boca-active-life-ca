@@ -30,7 +30,7 @@ public class Categories {
     @Column(name = "created_at")
     private LocalDate createdTimestamp;
 
-    @Column(name = "lastUpdated_at")
+    @Column(name = "last_updated_at")
     private LocalDate lastUpdatedTimestamp;
 
     @Column(name = "created_by")

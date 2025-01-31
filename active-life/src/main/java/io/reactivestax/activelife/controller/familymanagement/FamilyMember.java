@@ -1,6 +1,5 @@
-package io.reactivestax.activelife.controller.FamilyManagement;
+package io.reactivestax.activelife.controller.familymanagement;
 
-import io.reactivestax.activelife.domain.membership.FamilyMembers;
 import io.reactivestax.activelife.dto.FamilyMemberDTO;
 import io.reactivestax.activelife.dto.LoginDTO;
 import io.reactivestax.activelife.service.FamilyMemberService;
