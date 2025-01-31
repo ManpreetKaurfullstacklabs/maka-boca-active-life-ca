@@ -24,7 +24,7 @@ public class FamilyGroups {
     private String familyPin;
 
     @Column(name = "credits")
-    private BigDecimal credits;
+    private Long credits;
 
     @Column(name = "status")
     @Enumerated(EnumType.STRING)

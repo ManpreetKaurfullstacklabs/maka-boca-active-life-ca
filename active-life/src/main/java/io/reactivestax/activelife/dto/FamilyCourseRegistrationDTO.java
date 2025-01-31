@@ -1,39 +1,45 @@
 package io.reactivestax.activelife.dto;
 
+import io.reactivestax.activelife.Enums.IsWithdrawn;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class FamilyCourseRegistrationDTO {
 
-    private BigInteger familyCourseRegistrationId;
+    private Long familyCourseRegistrationId;
 
-    private BigDecimal cost;
+    private Long cost;
 
-    private Date enrollmentDate;
+    private LocalDate enrollmentDate;
 
-    private Character isWithdrawn;
+    private IsWithdrawn isWithdrawn;
 
-    private BigDecimal withdrawnCredits;
+    private Long withdrawnCredits;
 
     private String enrollmentActor ;
 
-    private BigInteger enrollmentActorId;
+    private Long enrollmentActorId;
 
     private LocalDateTime createdAt;
 
-    private  BigDecimal offeredCourseId;
+    private  Long offeredCourseId;
 
-    private BigDecimal familyMemberId;
+    private Long familyMemberId;
 
     private LocalDateTime lastUpdatedTime;
 
-    private BigDecimal createdBy;
+    private Long createdBy;
 
-    private BigDecimal lastUpdateBy;
+    private Long lastUpdateBy;
 
 }

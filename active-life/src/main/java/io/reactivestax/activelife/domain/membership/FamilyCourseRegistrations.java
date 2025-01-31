@@ -26,7 +26,7 @@ public class FamilyCourseRegistrations {
     private Long familyCourseRegistrationId;
 
     @Column(name = "cost")
-    private BigDecimal cost;
+    private Long cost;
 
     @Column(name = "enrollment_date")
     private LocalDate enrollmentDate;
@@ -36,7 +36,7 @@ public class FamilyCourseRegistrations {
     private IsWithdrawn isWithdrawn;
 
     @Column(name= "withdrawn_credits")
-    private BigDecimal withdrawnCredits;
+    private Long withdrawnCredits;
 
     @Column(name= "enrollment_actor")
     private String enrollmentActor ;

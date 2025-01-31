@@ -198,7 +198,7 @@ public class FamilyMemberService {
         FamilyGroups familyGroups = new FamilyGroups();
         familyGroups.setFamilyPin(pin);
         familyGroups.setStatus(Status.INACTIVE);
-        familyGroups.setCredits(new BigDecimal(0));
+        familyGroups.setCredits(0L);
         familyGroups.setCreatedAt(LocalDateTime.now());
         familyGroups.setUpdatedAt(LocalDateTime.now());
         familyGroups.setCreatedBy(1L);
