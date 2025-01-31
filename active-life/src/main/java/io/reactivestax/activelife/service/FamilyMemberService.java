@@ -1,26 +1,21 @@
 package io.reactivestax.activelife.service;
-import com.twilio.rest.api.v2010.account.Message;
 import io.reactivestax.activelife.Enums.Status;
-import io.reactivestax.activelife.distribution.SmsMessage;
 import io.reactivestax.activelife.distribution.SmsService;
 import io.reactivestax.activelife.domain.Login;
 import io.reactivestax.activelife.domain.membership.FamilyGroups;
 import io.reactivestax.activelife.domain.membership.FamilyMembers;
 import io.reactivestax.activelife.dto.FamilyMemberDTO;
 import io.reactivestax.activelife.dto.LoginDTO;
-import io.reactivestax.activelife.exception.MemberNotFoundException;
+import io.reactivestax.activelife.exception.InvalidMemberIdException;
 import io.reactivestax.activelife.interfaces.FamilyMemberMapper;
 import io.reactivestax.activelife.repository.familymemberrepositries.FamilMemberRepository;
 import io.reactivestax.activelife.repository.familymemberrepositries.FamilyGroupRepository;
 import io.reactivestax.activelife.repository.login.LoginRepository;
-import org.springframework.jms.JmsException;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Random;
@@ -85,20 +80,20 @@ public class FamilyMemberService {
             FamilyMembers familyMembers = byMemberLogin.get();
             return familyMemberMapper.toDto(familyMembers);
         } else {
-            throw new MemberNotFoundException("This member is not registered");
+            throw new InvalidMemberIdException("This member is not registered");
         }
     }
 
     public void updateExistingFamilyMember(FamilyMemberDTO familyMemberDTO) {
         Optional<FamilyMembers> byId = familyMemberRepository.findByMemberLogin(familyMemberDTO.getMemberLoginId());
-        FamilyMembers familyMembers = byId.orElseThrow(() -> new MemberNotFoundException("Member not found"));
+        FamilyMembers familyMembers = byId.orElseThrow(() -> new InvalidMemberIdException("Member not found"));
         familyMemberMapper.toEntity(familyMemberDTO);
         familyMemberRepository.save(familyMembers);
     }
 
     public void deleteFamilyMemberById(long id) {
         FamilyMembers familyMembers = familyMemberRepository.findById(id)
-                .orElseThrow(() -> new MemberNotFoundException("Family member not found"));
+                .orElseThrow(() -> new InvalidMemberIdException("Family member not found"));
         familyMembers.setStatus(Status.INACTIVE);
         familyMemberRepository.save(familyMembers);
     }
@@ -139,7 +134,7 @@ public class FamilyMemberService {
         }
         if (familyMembers.getMemberLogin().equals(loginDTO.getMemberLoginId()) && familyMembers.getStatus().equals(Status.INACTIVE)) {
             if (!familyMembers.getPin().equals(loginDTO.getPin())) {
-                throw new MemberNotFoundException("Password does not match with Member login Id: " + familyMembers.getMemberLogin());
+                throw new InvalidMemberIdException("Password does not match with Member login Id: " + familyMembers.getMemberLogin());
             } else {
                 String verificationId = UUID.randomUUID().toString();
                 familyMembers.setVerificationUUID(verificationId);
@@ -223,11 +218,11 @@ public class FamilyMemberService {
         Optional<FamilyMembers> familyMemberOpt = familyMemberRepository.findByMemberLogin(loginDTO.getMemberLoginId());
 
         if(familyMemberOpt.isEmpty()){
-            throw new MemberNotFoundException("this member does not exist");
+            throw new InvalidMemberIdException("this member does not exist");
         }
         FamilyMembers familyMembers = familyMemberOpt.get();
         if(!familyMembers.getMemberLogin().equals(loginDTO.getMemberLoginId())){
-            throw  new MemberNotFoundException("Member with this id does not exist");
+            throw  new InvalidMemberIdException("Member with this id does not exist");
         }
         if(!familyMembers.getPin().equals(loginDTO.getPin())){
             throw  new RuntimeException("wrong pin ");

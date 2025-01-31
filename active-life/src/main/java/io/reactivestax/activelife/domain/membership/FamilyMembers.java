@@ -1,5 +1,6 @@
 package io.reactivestax.activelife.domain.membership;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import io.reactivestax.activelife.Enums.GroupOwner;
 import io.reactivestax.activelife.Enums.PreferredMode;
 import io.reactivestax.activelife.Enums.Status;
@@ -82,6 +83,7 @@ public class FamilyMembers {
     @Column(name="uuid", unique = true)
     private String verificationUUID;
 
+    @JsonBackReference
     @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "family_group_id")
     private  FamilyGroups familyGroupId;

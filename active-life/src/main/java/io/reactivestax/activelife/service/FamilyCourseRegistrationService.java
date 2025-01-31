@@ -6,16 +6,15 @@ import io.reactivestax.activelife.domain.course.OfferedCourses;
 import io.reactivestax.activelife.domain.membership.FamilyCourseRegistrations;
 import io.reactivestax.activelife.domain.membership.FamilyMembers;
 import io.reactivestax.activelife.dto.FamilyCourseRegistrationDTO;
-import io.reactivestax.activelife.exception.CourseNotFoundException;
-import io.reactivestax.activelife.exception.MemberNotFoundException;
-import io.reactivestax.activelife.repository.OfferedCourseRepository;
+import io.reactivestax.activelife.exception.InvalidCourseIdException;
+import io.reactivestax.activelife.exception.InvalidMemberIdException;
+import io.reactivestax.activelife.repository.courses.OfferedCourseRepository;
 import io.reactivestax.activelife.repository.familymemberrepositries.FamilMemberRepository;
 import io.reactivestax.activelife.repository.familymemberrepositries.FamilyCourseRegistrationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.Optional;
 
 @Service
@@ -53,7 +52,7 @@ public class FamilyCourseRegistrationService {
         if(offeredCourses.getOfferedCourseId().equals(courseId)){
             return offeredCourses;
         }
-        throw new CourseNotFoundException("course not found");
+        throw new InvalidCourseIdException("course not found");
     }
 
     public FamilyMembers memberIsActiveOrNot(Long id){
@@ -62,7 +61,7 @@ public class FamilyCourseRegistrationService {
         if(familyMembers.getStatus().equals(Status.INACTIVE)){
             return familyMembers;
         }
-        throw new MemberNotFoundException("Cannot Assign this member is inactive ");
+        throw new InvalidMemberIdException("Cannot Assign this member is inactive ");
     }
  public FamilyCourseRegistrationDTO getAllFamilyMemberRegistration(Long id){
         FamilyCourseRegistrationDTO familyCourseRegistrationDTO = new FamilyCourseRegistrationDTO();
@@ -92,13 +91,13 @@ public class FamilyCourseRegistrationService {
         if(familyMembers.getStatus().equals(Status.INACTIVE)){
             return familyMembers ;
         }
-        throw new MemberNotFoundException("Cannot Assign this member is inactive ");
+        throw new InvalidMemberIdException("Cannot Assign this member is inactive ");
     }
 
     public void deleteFamilyMemeberFromRegisteredCourse(Long id){
         Optional<FamilyCourseRegistrations> familyCourseRegistrationRepositorybyId = familyCourseRegistrationRepository.findById(id);
         if(familyCourseRegistrationRepositorybyId.isEmpty()){
-            throw  new MemberNotFoundException("member is not enrolled in any course");
+            throw  new InvalidMemberIdException("member is not enrolled in any course");
         }
         FamilyCourseRegistrations familyCourseRegistrations = familyCourseRegistrationRepositorybyId.get();
         if(familyCourseRegistrations.getIsWithdrawn().equals(IsWithdrawn.YES)){

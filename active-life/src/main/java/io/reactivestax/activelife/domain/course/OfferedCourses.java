@@ -1,5 +1,6 @@
 package io.reactivestax.activelife.domain.course;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import io.reactivestax.activelife.Enums.AvailableForEnrollment;
 import io.reactivestax.activelife.Enums.IsAllDay;
 import io.reactivestax.activelife.domain.facility.Facilities;
@@ -48,6 +49,11 @@ public class OfferedCourses {
 
     @Column(name="registration_start_date")
     private LocalDate registrationStartDate;
+
+    @JsonManagedReference
+    @ManyToOne(cascade = CascadeType.PERSIST)
+    @JoinColumn(name="courses_fee_id")
+    private OfferedCourseFee offeredCourseFee;
 
     @Column(name="available_for_enrollment")
     @Enumerated(EnumType.STRING)

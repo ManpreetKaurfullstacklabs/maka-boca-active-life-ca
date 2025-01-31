@@ -3,6 +3,7 @@ package io.reactivestax.activelife.dto;
 import io.reactivestax.activelife.Enums.AvailableForEnrollment;
 import io.reactivestax.activelife.Enums.IsAllDay;
 import io.reactivestax.activelife.domain.course.Courses;
+import io.reactivestax.activelife.domain.course.OfferedCourseFee;
 import io.reactivestax.activelife.domain.facility.Facilities;
 import lombok.Data;
 
@@ -22,9 +23,9 @@ public class OfferedCourseDTO {
     private LocalDate registrationStartDate;
    private AvailableForEnrollment availableForEnrollment;
    private LocalDateTime updatedAt;
-
-   private List<Courses> courses;
-   private List<Facilities> facilities;
+   private Long coursesId;
+   private Long facilities;
+   private OfferedCourseFee offeredCourseFee;
 
 
 }

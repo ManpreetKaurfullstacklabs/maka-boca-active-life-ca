@@ -1,5 +1,6 @@
 package io.reactivestax.activelife.domain.course;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import io.reactivestax.activelife.Enums.FeeType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -10,6 +11,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDate;
 import java.util.Date;
+import java.util.List;
 import java.util.NavigableMap;
 
 @Data
@@ -31,9 +33,9 @@ public class OfferedCourseFee {
     @Column(name = "course_fee")
     private BigDecimal courseFee;
 
-    @ManyToOne
-    @JoinColumn(name = "offered_course_id")
-    private  OfferedCourses offeredCourseId;
+    @JsonBackReference
+    @OneToMany(mappedBy = "offeredCourseFee", cascade = CascadeType.PERSIST)
+    private List<OfferedCourses> offeredCourses;
 
     @Column(name = "created_at")
     private LocalDate createdTimestamp;
