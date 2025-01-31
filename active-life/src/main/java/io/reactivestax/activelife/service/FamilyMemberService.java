@@ -12,7 +12,6 @@ import io.reactivestax.activelife.exception.MemberNotFoundException;
 import io.reactivestax.activelife.repository.FamilMemberRepository;
 import io.reactivestax.activelife.repository.FamilyGroupRepository;
 import io.reactivestax.activelife.repository.LoginRepository;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.Random;
 import java.util.UUID;
 
 @Service
@@ -47,12 +47,12 @@ public class FamilyMemberService {
 
         Optional<FamilyMembers> existingFamilyMember = familyMemberRepository.findByMemberLogin(familyMemberDTO.getMemberLoginId());
         FamilyMembers familyMembers = existingFamilyMember.orElseGet(FamilyMembers::new);
-
         if (familyMemberDTO.getFamilyGroupId() != null) {
             addFamilyToExistingGroupID(familyMemberDTO, familyMembers);
         } else {
             FamilyGroups familyGroups = createNewFamilyGroup();
             familyMembers.setFamilyGroupId(familyGroups);
+            familyGroupRepository.save(familyGroups);
         }
         setFamilyMemberDetails(familyMemberDTO, familyMembers);
         familyMemberRepository.save(familyMembers);
@@ -136,6 +136,7 @@ public class FamilyMemberService {
 
     }
     private void setFamilyMemberDetails(FamilyMemberDTO familyMemberDTO, FamilyMembers familyMembers) {
+
         familyMembers.setMemberName(familyMemberDTO.getMemberName());
         familyMembers.setDob(familyMemberDTO.getDob());
         familyMembers.setGender(familyMemberDTO.getGender());
@@ -153,7 +154,6 @@ public class FamilyMemberService {
         familyMembers.setHomePhoneNo(familyMemberDTO.getHomePhoneNo());
         familyMembers.setBussinessPhoneNo(familyMemberDTO.getBussinessPhoneNo());
         familyMembers.setLanguage(familyMemberDTO.getLanguage());
-        familyMembers.setMemberLogin(familyMemberDTO.getMemberLoginId());
         familyMembers.setStatus(familyMemberDTO.getStatus());
         String verificationId = UUID.randomUUID().toString();
         familyMembers.setVerificationUUID(verificationId);
@@ -193,21 +193,43 @@ public class FamilyMemberService {
     public String loginExistingMember(LoginDTO loginDTO) {
         Optional<FamilyMembers> byMemberLoginId = familyMemberRepository.findByMemberLogin(loginDTO.getMemberLoginId());
         if(byMemberLoginId.isEmpty()){
-            return "Memeber Login Id does not exists : "+ loginDTO.getMemberLoginId();
-
+            return "Member Login Id does not exists : "+ loginDTO.getMemberLoginId();
         }
         FamilyMembers familyMembers = byMemberLoginId.get();
-
-
         if(familyMembers.getMemberLogin().equals(loginDTO.getMemberLoginId())){
-            String verificationId = UUID.randomUUID().toString();
-            familyMembers.setVerificationUUID(verificationId);
-            String verificationLink = "http://localhost:8082/api/v1/familymember//verify"+ verificationId+ "verify the link";
-            smsService.sendSms(verificationId, verificationLink);
+            if(familyMembers.getPin().equals(loginDTO.getPin()) && familyMembers.getStatus().equals(Status.ACTIVE)){
+                String otp = generateOtp();
+                smsService.sendSms(familyMembers.getHomePhoneNo(),"your otp number is " + otp);
+                return "your otp send successfully";
+            }
         }
-        if(loginDTO.getMemberLoginId().equals(familyMembers.getMemberLogin()) && loginDTO.getPin().equals(familyMembers.getPin()) && familyMembers.getStatus()==Status.ACTIVE){
+
+        if(familyMembers.getMemberLogin().equals(loginDTO.getMemberLoginId()) && familyMembers.getStatus().equals(Status.INACTIVE)){
+            if(!familyMembers.getPin().equals(loginDTO.getPin())){
+                throw  new MemberNotFoundException("password does not match with Member login Id : " + familyMembers.getMemberLogin());
+            }
+            else {
+                String verificationId = UUID.randomUUID().toString();
+                familyMembers.setVerificationUUID(verificationId);
+                String verificationLink = "http://localhost:8082/api/v1/familymember//verify"+ verificationId+ "verify the link";
+                smsService.verificationLink(verificationId, verificationLink);
+                return "verification link send successfully";
+            }
+
+        }
+        if(loginDTO.getMemberLoginId().equals(familyMembers.getMemberLogin()) && loginDTO.getPin().equals(familyMembers.getPin()) && familyMembers.getStatus().equals(Status.ACTIVE)){
             return "successfully verified";
         }
-        return "Try again later or Member is Inactive";
+        return "";
     }
+    public String generateOtp() {
+        Random random = new Random();
+        StringBuilder otp = new StringBuilder();
+        for (int i = 0; i < 6; i++) {
+            otp.append(random.nextInt(10));
+        }
+        return otp.toString();
+    }
+
+
 }

@@ -1,5 +1,4 @@
 package io.reactivestax.activelife.domain.membership;
-
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import io.reactivestax.activelife.Enums.Status;
 import jakarta.persistence.*;
@@ -9,7 +8,6 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
-
 
 @Data
 @AllArgsConstructor
@@ -45,6 +43,6 @@ public class FamilyGroups {
     private Long lastUpdatedBy;
 
     @JsonManagedReference
-    @OneToMany(mappedBy = "familyGroupId")
+    @OneToMany(mappedBy = "familyGroupId" )
     private List<FamilyMembers> familyMembers;
 }

@@ -82,7 +82,7 @@ public class FamilyMembers {
     @Column(name="uuid", unique = true)
     private String verificationUUID;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "family_group_id")
     private  FamilyGroups familyGroupId;
 
