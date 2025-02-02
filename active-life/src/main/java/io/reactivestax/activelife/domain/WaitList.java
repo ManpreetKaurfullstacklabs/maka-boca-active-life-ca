@@ -1,4 +1,5 @@
 package io.reactivestax.activelife.domain;
+import io.reactivestax.activelife.Enums.IsWaitListed;
 import io.reactivestax.activelife.Enums.Status;
 import io.reactivestax.activelife.domain.course.OfferedCourses;
 import io.reactivestax.activelife.domain.membership.FamilyMembers;
@@ -34,4 +35,10 @@ public class WaitList {
 
     @Column(name = "no_of_seats")
     private Long noOfSeats;
+
+    @Column(name="isWaitlisted")
+    @Enumerated(EnumType.STRING)
+    private IsWaitListed isWaitListed;
+
+
 }

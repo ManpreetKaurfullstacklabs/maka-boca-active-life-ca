@@ -6,6 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 
-public interface WaitlistRepository extends JpaRepository<WaitList, Long>{
-  //  Optional<WaitList>findFirstByOfferedCoursesIdAndStatus(Long offereCourseId, IsWaitListed waitListed);
+public interface WaitlistRepository extends JpaRepository<WaitList, Long> {
+    Long countByOfferedCourses_OfferedCourseIdAndIsWaitListed(Long offeredCourseId, IsWaitListed isWaitListed);
 }

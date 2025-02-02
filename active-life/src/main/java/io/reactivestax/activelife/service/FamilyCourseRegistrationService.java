@@ -4,6 +4,7 @@ import io.reactivestax.activelife.Enums.AvailableForEnrollment;
 import io.reactivestax.activelife.Enums.IsWaitListed;
 import io.reactivestax.activelife.Enums.IsWithdrawn;
 import io.reactivestax.activelife.Enums.Status;
+import io.reactivestax.activelife.distribution.SmsService;
 import io.reactivestax.activelife.domain.course.OfferedCourseFee;
 import io.reactivestax.activelife.domain.course.OfferedCourses;
 import io.reactivestax.activelife.domain.membership.FamilyCourseRegistrations;
@@ -41,66 +42,74 @@ public class FamilyCourseRegistrationService {
     @Autowired
     private WaitlistRepository waitlistRepository;
 
+    @Autowired
+    private SmsService smsService;
 
-
+    private static final int MAX_WAITLIST_SIZE = 5;
 
     @Transactional
-    public void enrollFamilyMemberInCourse(Long familyMemberId, Long offeredCourseId) {
-
-        // Retrieve the offered course
-        OfferedCourses offeredCourse = getOfferedCourse(offeredCourseId);
+    public void enrollFamilyMemberInCourse(FamilyCourseRegistrationDTO familyCourseRegistrationDTO) {
+        OfferedCourses offeredCourse = getOfferedCourse(familyCourseRegistrationDTO.getOfferedCourseId());
         Long availableSeats = offeredCourse.getNoOfSeats();
-
-        // Count the number of members already enrolled (non-withdrawn)
         Long enrolledCount = familyCourseRegistrationRepository.countByOfferedCourseIdAndIsWithdrawn(offeredCourse, IsWithdrawn.NO);
+        FamilyMembers familyMember = getFamilyMember(familyCourseRegistrationDTO.getFamilyMemberId());
+        Optional<FamilyCourseRegistrations> existingRegistration = familyCourseRegistrationRepository
+                .findByFamilyMemberIdAndOfferedCourseId(familyMember, offeredCourse);
 
-        // If there are seats available, proceed with enrollment
+        if (existingRegistration.isPresent()) {
+            throw new RuntimeException("Family member is already enrolled in this course.");
+        }
+
         if (enrolledCount < availableSeats) {
-            // Proceed with regular enrollment
-            enrollMember(familyMemberId, offeredCourseId, offeredCourse.getCost(), IsWaitListed.NO);
+            enrollMember(familyCourseRegistrationDTO, IsWaitListed.NO);
         } else {
-            // If no seats are available, check the waitlist
-            handleWaitlist(familyMemberId, offeredCourseId, availableSeats);
+            handleWaitlist(familyCourseRegistrationDTO.getFamilyMemberId(), familyCourseRegistrationDTO.getOfferedCourseId());
         }
     }
 
-
-    private void handleWaitlist(Long familyMemberId, Long offeredCourseId, Long availableSeats) {
-
-        // Check the number of people already on the waitlist for the course
-        Long waitlistCount = familyCourseRegistrationRepository.countByOfferedCourseIdAndIsWaitListed(getOfferedCourse(offeredCourseId), IsWaitListed.YES);
-
-        // If there's space on the waitlist
-        if (waitlistCount < availableSeats) {
-            // Add the member to the waitlist
+    private void handleWaitlist(Long familyMemberId, Long offeredCourseId) {
+        Long waitlistCount = waitlistRepository.countByOfferedCourses_OfferedCourseIdAndIsWaitListed(offeredCourseId, IsWaitListed.YES);
+        if (waitlistCount < MAX_WAITLIST_SIZE) {
             addToWaitlist(familyMemberId, offeredCourseId);
         } else {
-            // If the waitlist is full, throw an exception
             throw new RuntimeException("Waitlist is full for this course.");
         }
     }
 
-
     private void addToWaitlist(Long familyMemberId, Long offeredCourseId) {
         FamilyMembers familyMember = getFamilyMember(familyMemberId);
         OfferedCourses offeredCourse = getOfferedCourse(offeredCourseId);
-
         WaitList waitList = new WaitList();
         waitList.setFamilyMember(familyMember);
         waitList.setOfferedCourses(offeredCourse);
-        waitList.setStatus(Status.INACTIVE); // Mark the member as pending on the waitlist
-        waitList.setNoOfSeats(1L); // Assuming one seat per member
+        waitList.setStatus(Status.INACTIVE);
+        waitList.setNoOfSeats(1L);
+        waitList.setIsWaitListed(IsWaitListed.YES);
         waitlistRepository.save(waitList);
     }
 
-    private void enrollMember(Long familyMemberId, Long offeredCourseId, Long fee, IsWaitListed waitListed) {
+
+    @Transactional
+    private void enrollMember(FamilyCourseRegistrationDTO familyCourseRegistrationDTO, IsWaitListed waitListed) {
+
         FamilyCourseRegistrations familyCourseRegistrations = new FamilyCourseRegistrations();
-        familyCourseRegistrations.setFamilyMemberId(getFamilyMember(familyMemberId));
-        familyCourseRegistrations.setOfferedCourseId(getOfferedCourse(offeredCourseId));
-        familyCourseRegistrations.setCost(fee);
-        familyCourseRegistrations.setEnrollmentDate(java.time.LocalDate.now());
-        familyCourseRegistrations.setIsWithdrawn(IsWithdrawn.NO);
+        familyCourseRegistrations.setFamilyMemberId(getFamilyMember(familyCourseRegistrationDTO.getFamilyMemberId()));
+        familyCourseRegistrations.setOfferedCourseId(getOfferedCourse(familyCourseRegistrationDTO.getOfferedCourseId()));
+        familyCourseRegistrations.setCost(getCostOfferedFromCourses(familyCourseRegistrationDTO.getOfferedCourseId()));
+        familyCourseRegistrations.setEnrollmentDate(familyCourseRegistrationDTO.getEnrollmentDate());
+        familyCourseRegistrations.setIsWithdrawn(IsWithdrawn.NO); // Convert string to enum
+        familyCourseRegistrations.setWithdrawnCredits(familyCourseRegistrationDTO.getWithdrawnCredits());
+        familyCourseRegistrations.setNoOfseats(getNoOfSeatsFromOfferedCoursesTable(familyCourseRegistrationDTO.getOfferedCourseId()));
+        familyCourseRegistrations.setEnrollmentActorId(familyCourseRegistrationDTO.getFamilyMemberId());
+        familyCourseRegistrations.setCreatedAt(familyCourseRegistrationDTO.getCreatedAt());
+        familyCourseRegistrations.setOfferedCourseId(getOfferedCourse(familyCourseRegistrationDTO.getOfferedCourseId()));
         familyCourseRegistrations.setIsWaitListed(waitListed);
+        familyCourseRegistrations.setFamilyMemberId(getFamilyMember(familyCourseRegistrationDTO.getFamilyMemberId()));
+        familyCourseRegistrations.setLastUpdatedTime(familyCourseRegistrationDTO.getLastUpdatedTime());
+        familyCourseRegistrations.setCreatedBy(familyCourseRegistrationDTO.getCreatedBy());
+        familyCourseRegistrations.setLastUpdateBy(familyCourseRegistrationDTO.getLastUpdateBy());
+
+        // Save the registration entity
         familyCourseRegistrationRepository.save(familyCourseRegistrations);
     }
 
@@ -109,7 +118,6 @@ public class FamilyCourseRegistrationService {
         if (offeredCourseOpt.isEmpty()) {
             throw new InvalidCourseIdException("Offered course does not exist.");
         }
-
         OfferedCourses offeredCourse = offeredCourseOpt.get();
         if (offeredCourse.getAvailableForEnrollment().equals(AvailableForEnrollment.NO)) {
             throw new RuntimeException("Enrollment is not available for this course.");
@@ -129,53 +137,17 @@ public class FamilyCourseRegistrationService {
         return familyMembers;
     }
 
-    @Transactional
-    public void enrollFamilyMemberToFamilyRegistration(FamilyCourseRegistrationDTO familyCourseRegistrationDTO) {
-        // Validate family member
-        Optional<FamilyMembers> familyMemberOpt = familMemberRepository.findById(familyCourseRegistrationDTO.getFamilyMemberId());
-        if (familyMemberOpt.isEmpty()) {
-            throw new InvalidMemberIdException("Family member does not exist.");
-        }
-        FamilyMembers familyMember = familyMemberOpt.get();
-        if (familyMember.getStatus().equals(Status.INACTIVE)) {
-            throw new InvalidMemberIdException("Cannot enroll inactive member.");
-        }
-
-        // Validate course
-        OfferedCourses offeredCourses = offeredCourseExistsOrNot(familyCourseRegistrationDTO.getOfferedCourseId());
-
-        FamilyCourseRegistrations familyCourseRegistrations = new FamilyCourseRegistrations();
-        familyCourseRegistrations.setCost(getCostOfferedFromCourses(familyCourseRegistrationDTO.getOfferedCourseId()));
-        familyCourseRegistrations.setEnrollmentDate(familyCourseRegistrationDTO.getEnrollmentDate());
-        familyCourseRegistrations.setIsWithdrawn(IsWithdrawn.NO);
-        familyCourseRegistrations.setWithdrawnCredits(0L);
-        familyCourseRegistrations.setNoOfseats(getNoOfSeatsFromOfferedCoursesTable(familyCourseRegistrationDTO.getOfferedCourseId()));
-        familyCourseRegistrations.setEnrollmentActorId(familyCourseRegistrationDTO.getFamilyMemberId());
-        familyCourseRegistrations.setCreatedAt(familyCourseRegistrationDTO.getCreatedAt());
-        familyCourseRegistrations.setOfferedCourseId(offeredCourses);
-        familyCourseRegistrations.setFamilyMemberId(memberIsActiveOrNot(familyCourseRegistrationDTO.getFamilyMemberId()));
-        familyCourseRegistrations.setLastUpdatedTime(familyCourseRegistrationDTO.getLastUpdatedTime());
-        familyCourseRegistrations.setCreatedBy(familyCourseRegistrationDTO.getCreatedBy());
-        familyCourseRegistrations.setLastUpdateBy(familyCourseRegistrationDTO.getLastUpdateBy());
-
-        familyCourseRegistrationRepository.save(familyCourseRegistrations);
-    }
 
     public Long getNoOfSeatsFromOfferedCoursesTable(Long id) {
         Optional<OfferedCourses> byId = offeredCourseRepository.findById(id);
         if (byId.isEmpty()) {
             throw new InvalidCourseIdException("Course does not exist.");
         }
-        OfferedCourses offeredCourses = byId.get();
-        return offeredCourses.getNoOfSeats();
+        return byId.get().getNoOfSeats();
     }
 
     public Long getCostOfferedFromCourses(Long id) {
-        Optional<OfferedCourses> byId = offeredCourseRepository.findById(id);
-        if (byId.isEmpty()) {
-            throw new InvalidCourseIdException("Course does not exist.");
-        }
-        OfferedCourses offeredCourses = byId.get();
+        OfferedCourses offeredCourses = offeredCourseExistsOrNot(id);
         Long offeredCourseId = offeredCourses.getOfferedCourseId();
         Optional<OfferedCourseFee> feeOpt = offeredCourseFeeRepository.findById(offeredCourseId);
         OfferedCourseFee offeredCourseFee = feeOpt.orElseThrow(() -> new RuntimeException("Course fee not found."));
@@ -192,10 +164,7 @@ public class FamilyCourseRegistrationService {
 
     public FamilyMembers memberIsActiveOrNot(Long id) {
         Optional<FamilyMembers> byId = familMemberRepository.findById(id);
-        if (byId.isEmpty()) {
-            throw new InvalidMemberIdException("Member does not exist.");
-        }
-        FamilyMembers familyMembers = byId.get();
+        FamilyMembers familyMembers = byId.orElseThrow(() -> new InvalidMemberIdException("Member not found."));
         if (familyMembers.getStatus().equals(Status.INACTIVE)) {
             throw new InvalidMemberIdException("Member is inactive.");
         }

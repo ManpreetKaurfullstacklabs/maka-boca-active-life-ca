@@ -42,9 +42,6 @@ public class FamilyCourseRegistrations {
     @Column(name="no_of_seats")
     private Long noOfseats;
 
-    @Column(name= "enrollment_actor")
-    private String enrollmentActor ;
-
     @Column(name= "enrollment_actor_id")
     private Long enrollmentActorId;
 
