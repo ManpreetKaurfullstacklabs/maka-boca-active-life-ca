@@ -3,13 +3,17 @@ import io.reactivestax.activelife.Enums.Status;
 import io.reactivestax.activelife.domain.course.OfferedCourses;
 import io.reactivestax.activelife.domain.membership.FamilyMembers;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigInteger;
 
 @Data
 @Entity
-@Table(name = "wait_list")
+@AllArgsConstructor
+@NoArgsConstructor
+@Table(name = "waitlist")
 public class WaitList {
 
     @Id
@@ -27,4 +31,7 @@ public class WaitList {
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private Status status;
+
+    @Column(name = "no_of_seats")
+    private Long noOfSeats;
 }

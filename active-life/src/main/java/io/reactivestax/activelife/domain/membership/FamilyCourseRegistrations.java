@@ -1,5 +1,6 @@
 package io.reactivestax.activelife.domain.membership;
 
+import io.reactivestax.activelife.Enums.IsWaitListed;
 import io.reactivestax.activelife.Enums.IsWithdrawn;
 
 import io.reactivestax.activelife.domain.course.OfferedCourses;
@@ -38,6 +39,9 @@ public class FamilyCourseRegistrations {
     @Column(name= "withdrawn_credits")
     private Long withdrawnCredits;
 
+    @Column(name="no_of_seats")
+    private Long noOfseats;
+
     @Column(name= "enrollment_actor")
     private String enrollmentActor ;
 
@@ -63,5 +67,9 @@ public class FamilyCourseRegistrations {
 
     @Column(name="last_updated_by")
     private Long lastUpdateBy;
+
+    @Column(name="isWaitlisted")
+    @Enumerated(EnumType.STRING)
+    private IsWaitListed isWaitListed;
 
 }

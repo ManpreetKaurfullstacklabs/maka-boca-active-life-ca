@@ -15,7 +15,7 @@ public class FamilyMemberCourseRegistration {
 
     @PostMapping("/member")
     public ResponseEntity<String>  addNewMemberToOfferedCourse( @RequestBody FamilyCourseRegistrationDTO familyCourseRegistrationDTO) {
-        familyCourseRegistrationService.addfamilyMemberToCourse(familyCourseRegistrationDTO);
+        familyCourseRegistrationService.enrollFamilyMemberToFamilyRegistration(familyCourseRegistrationDTO);
         return ResponseEntity.ok("family member added sucessfully to a course : " );
     }
 
@@ -32,7 +32,7 @@ public class FamilyMemberCourseRegistration {
 
     @DeleteMapping("/member/{id}")
     public ResponseEntity<String> withdrawMemberFromCourse(@PathVariable Long id) {
-        familyCourseRegistrationService.deleteFamilyMemeberFromRegisteredCourse(id);
+        familyCourseRegistrationService.deleteFamilyMemberFromRegisteredCourse(id);
         return ResponseEntity.ok("family member withdraw from course successfully");
     }
 

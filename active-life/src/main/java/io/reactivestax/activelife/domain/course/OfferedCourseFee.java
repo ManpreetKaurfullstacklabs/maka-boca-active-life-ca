@@ -1,6 +1,7 @@
 package io.reactivestax.activelife.domain.course;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import io.reactivestax.activelife.Enums.FeeType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -31,9 +32,9 @@ public class OfferedCourseFee {
     private FeeType feeType;
 
     @Column(name = "course_fee")
-    private BigDecimal courseFee;
+    private Long courseFee;
 
-    @JsonBackReference
+    @JsonManagedReference
     @OneToMany(mappedBy = "offeredCourseFee", cascade = CascadeType.PERSIST)
     private List<OfferedCourses> offeredCourses;
 

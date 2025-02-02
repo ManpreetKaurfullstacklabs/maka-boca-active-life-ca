@@ -18,17 +18,11 @@ public class FamilyCourseRegistrationDTO {
 
     private Long familyCourseRegistrationId;
 
-    private Long cost;
-
     private LocalDate enrollmentDate;
 
     private IsWithdrawn isWithdrawn;
 
     private Long withdrawnCredits;
-
-    private String enrollmentActor ;
-
-    private Long enrollmentActorId;
 
     private LocalDateTime createdAt;
 

@@ -84,7 +84,7 @@ public class FamilyMembers {
     private String verificationUUID;
 
     @JsonBackReference
-    @ManyToOne(cascade = CascadeType.PERSIST)
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "family_group_id")
     private  FamilyGroups familyGroupId;
 

@@ -14,19 +14,23 @@ public class OfferedCourses {
     @Autowired
     private OfferredCourseService offerredCourseService;
 
-    @PostMapping("/course")
+    @PostMapping
     public ResponseEntity<String> addNewCourseToOfferedCourse(@RequestBody OfferedCourseDTO offeredCourseDTO) {
     offerredCourseService.addOfferedCourseToDatabase(offeredCourseDTO);
         return ResponseEntity.ok("Courses added sucessfully : " );
     }
 
-    @GetMapping("course/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<OfferedCourseDTO> getOfferedCourse( @PathVariable Long id) {
         OfferedCourseDTO offeredCoursesDTO = offerredCourseService.getOfferedCoursesById(id);
         return ResponseEntity.ok(offeredCoursesDTO);
-
     }
 
+    @PatchMapping("/{id}")
+    public ResponseEntity<String> updateCourseToOfferedCourse(@PathVariable Long id,  @RequestBody  OfferedCourseDTO offeredCourseDTO) {
+        offerredCourseService.updateOfferedCourseToDatabase(offeredCourseDTO,id);
+        return ResponseEntity.ok("Courses updated sucessfully : " );
+    }
 
 
 }

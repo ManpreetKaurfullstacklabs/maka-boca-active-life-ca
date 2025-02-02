@@ -28,8 +28,8 @@ public class FamilyMember {
         return ResponseEntity.ok( value);
     }
 
-    @GetMapping("/member/{id}")
-    public ResponseEntity<FamilyMemberDTO> getFamilyMember(@RequestHeader("Member-ID") @PathVariable String id) {
+    @GetMapping("/member")
+    public ResponseEntity<FamilyMemberDTO> getFamilyMember(@RequestHeader("Member-ID")  String id) {
         FamilyMemberDTO allMembersbygivenMemberId = familyMemberService.getAllMembersbygivenMemberId(id);
         return ResponseEntity.ok(allMembersbygivenMemberId);
 

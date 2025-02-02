@@ -1,8 +1,10 @@
 package io.reactivestax.activelife.domain.course;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import io.reactivestax.activelife.Enums.AvailableForEnrollment;
 import io.reactivestax.activelife.Enums.IsAllDay;
+import io.reactivestax.activelife.Enums.IsWaitListed;
 import io.reactivestax.activelife.domain.facility.Facilities;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -50,7 +52,7 @@ public class OfferedCourses {
     @Column(name="registration_start_date")
     private LocalDate registrationStartDate;
 
-    @JsonManagedReference
+    @JsonBackReference
     @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name="courses_fee_id")
     private OfferedCourseFee offeredCourseFee;
@@ -79,6 +81,13 @@ public class OfferedCourses {
     @Column(name = "no_of_seats")
     private Long noOfSeats;
 
+    @Column(name = "cost")
+    private Long cost;
+
     @Column(name = "last_updated_by")
     private Long lastUpdatedBy;
+
+    @Column(name="isWaitlisted")
+    @Enumerated(EnumType.STRING)
+    private IsWaitListed isWaitListed;
 }

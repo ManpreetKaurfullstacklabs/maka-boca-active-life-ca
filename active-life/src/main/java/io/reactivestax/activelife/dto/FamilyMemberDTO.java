@@ -34,6 +34,6 @@ public class FamilyMemberDTO {
     private String pin;
     private GroupOwner groupOwner;
     private Status status;
-    private  Long  familyGroupId;
+    private Long familyGroupId;
 
 }
