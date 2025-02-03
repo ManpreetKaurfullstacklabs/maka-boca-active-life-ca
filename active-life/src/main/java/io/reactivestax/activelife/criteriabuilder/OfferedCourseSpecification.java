@@ -20,7 +20,6 @@ public class OfferedCourseSpecification {
                 );
     }
 
-
     public static Specification<OfferedCourses> withStartDate(LocalDate startDate) {
         return (root, query, criteriaBuilder) ->
                 startDate == null
@@ -69,15 +68,18 @@ public class OfferedCourseSpecification {
         ));
     }
 
-
-
+    public static Specification<OfferedCourses> withAgeGroup(Integer age) {
+        return ((root, query, criteriaBuilder) -> age == null
+                ? criteriaBuilder.conjunction()
+                : criteriaBuilder.equal(
+                root.get("courses").get("ageGroups").get("age"),
+                age
+        ));
+    }
 
     public static String getWildcardSearch(String search) {
         return "%" + search.trim().toLowerCase() + "%";
     }
 
-    public static String getWildcardDateSearch(LocalDate search) {
-        return "%" + search+ "%";
-    }
 
 }

@@ -13,5 +13,6 @@ public class OfferedCouseSearchRequest {
     String province;
     String categoryName;
     String subCategory;
+    int ageGroup;
 
 }

@@ -150,7 +150,8 @@ public class OfferredCourseService {
                         .and(offeredCourseSpecification.withCity(offeredCouseSearchRequest.getCity()))
                         .and(offeredCourseSpecification.withProvince(offeredCouseSearchRequest.getProvince()))
                         .and(offeredCourseSpecification.hasCategory(offeredCouseSearchRequest.getCategoryName()))
-                        .and(offeredCourseSpecification.hasSubCategory(offeredCouseSearchRequest.getSubCategory()));
+                        .and(offeredCourseSpecification.hasSubCategory(offeredCouseSearchRequest.getSubCategory()))
+                        .and(offeredCourseSpecification.withAgeGroup(offeredCouseSearchRequest.getAgeGroup()));
 
         List<OfferedCourses> offeredCoursesList = offeredCourseRepository.findAll(offeredCoursesSpecification);
         return offeredCoursesList.stream()

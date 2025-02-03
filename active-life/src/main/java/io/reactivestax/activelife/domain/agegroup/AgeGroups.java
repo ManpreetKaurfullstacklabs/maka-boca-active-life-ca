@@ -20,7 +20,7 @@ public class AgeGroups {
     private Long ageGroupId;
 
     @Column(name = "age")
-    private int shortCode;
+    private int age;
 
     @Column(name = "description")
     private  String description;

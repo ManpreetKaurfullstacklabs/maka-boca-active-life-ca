@@ -11,10 +11,8 @@ import org.mapstruct.factory.Mappers;
 public interface OfferedCourseMapper {
 
     OfferedCourseMapper INSTANCE = Mappers.getMapper(OfferedCourseMapper.class);
-
     @Mapping(source = "facilities.id", target = "facilities")
     OfferedCourseDTO offeredCourseToOfferedCourseDTO(OfferedCourses offeredCourses);
-
     default Long map(Facilities facilities) {
         return facilities != null ? facilities.getId() : null;
     }
