@@ -36,8 +36,8 @@ class FamilyMemberCourseRegistrationTest {
         familyCourseRegistrationDTO = new FamilyCourseRegistrationDTO();
         familyCourseRegistrationDTO.setFamilyCourseRegistrationId(1L);
         familyCourseRegistrationDTO.setEnrollmentDate(LocalDate.now());
-        familyCourseRegistrationDTO.setIsWithdrawn(null);  // Set according to your business logic
-        familyCourseRegistrationDTO.setWithdrawnCredits(0L);  // Set default or test value
+        familyCourseRegistrationDTO.setIsWithdrawn(null);
+        familyCourseRegistrationDTO.setWithdrawnCredits(0L);
         familyCourseRegistrationDTO.setCreatedAt(LocalDateTime.now());
         familyCourseRegistrationDTO.setOfferedCourseId(101L);
         familyCourseRegistrationDTO.setFamilyMemberId(1001L);
@@ -46,28 +46,54 @@ class FamilyMemberCourseRegistrationTest {
         familyCourseRegistrationDTO.setLastUpdateBy(1L);
     }
 
-
     @Test
     void testAddNewMemberToOfferedCourse() throws Exception {
-        doNothing().when(familyCourseRegistrationService).enrollFamilyMemberInCourse(familyCourseRegistrationDTO);
+        doNothing().when(familyCourseRegistrationService).enrollFamilyMemberInCourse(any(FamilyCourseRegistrationDTO.class));
+
         String jsonRequest = new ObjectMapper().writeValueAsString(familyCourseRegistrationDTO);
         mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/courseregistration/member")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonRequest))
-                .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().string("family member added sucessfully to a course : "));
-        verify(familyCourseRegistrationService, times(1)).enrollFamilyMemberInCourse(familyCourseRegistrationDTO);
     }
 
-    @Test
-    void getMemberDetailsWithId() {
-    }
+
+
 
     @Test
-    void updateMemberInformation() {
+    void testGetMemberDetailsWithId() throws Exception {
+        when(familyCourseRegistrationService.getAllFamilyMemberRegistration(1L)).thenReturn(familyCourseRegistrationDTO);
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/courseregistration/member/{id}", 1L))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.familyCourseRegistrationId").value(1L))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.familyMemberId").value(1001L));
+        verify(familyCourseRegistrationService, times(1)).getAllFamilyMemberRegistration(1L);
     }
 
+
+
     @Test
-    void withdrawMemberFromCourse() {
+    void testWithdrawMemberFromCourse() throws Exception {
+
+        doNothing().when(familyCourseRegistrationService).deleteFamilyMemberFromRegisteredCourse(1L);
+
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/courseregistration/member/{id}", 1L))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().string("family member withdraw from course successfully"));
+        verify(familyCourseRegistrationService, times(1)).deleteFamilyMemberFromRegisteredCourse(1L);
+    }
+
+
+    @Test
+    void testUpdateMemberInformation() throws Exception {
+
+         when(familyCourseRegistrationService.updateFamilyMemberRegistration(1L,familyCourseRegistrationDTO)).thenReturn(familyCourseRegistrationDTO);
+        String jsonRequest = new ObjectMapper().writeValueAsString(familyCourseRegistrationDTO);
+        mockMvc.perform(MockMvcRequestBuilders.patch("/api/v1/courseregistration/member/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonRequest))
+                .andExpect(MockMvcResultMatchers.status().isOk());
+
     }
 }

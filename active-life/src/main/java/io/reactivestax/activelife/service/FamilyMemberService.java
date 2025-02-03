@@ -132,7 +132,7 @@ public class FamilyMemberService {
                 String verificationId = UUID.randomUUID().toString();
                 familyMembers.setVerificationUUID(verificationId);
                 String verificationLink = "http://localhost:8082/api/v1/familymember/verify/" + verificationId;
-                //   smsService.verificationLink(familyMembers.getHomePhoneNo(), verificationLink);
+                   smsService.verificationLink(familyMembers.getHomePhoneNo(), verificationLink);
                 return "Verification link sent successfully";
             }
         }
@@ -173,13 +173,10 @@ public class FamilyMemberService {
         String verificationId = UUID.randomUUID().toString();
         familyMembers.setVerificationUUID(verificationId);
         String verificationLink = "http://localhost:8082/api/v1/familymember/verify/" + verificationId;
-        //    sendSmsToQueue(familyMembers.getHomePhoneNo(), verificationLink);
-        // smsService.sendSms(familyMembers.getHomePhoneNo(), "Please verify using this link: " + verificationLink);
+        smsService.sendSms(familyMembers.getHomePhoneNo(), "Please verify using this link: " + verificationLink);
         String pin1 = familyMembers.getPin();
         return pin1;
     }
-
-
 
     public FamilyGroups createNewFamilyGroup(String pin) {
         FamilyGroups familyGroups = new FamilyGroups();

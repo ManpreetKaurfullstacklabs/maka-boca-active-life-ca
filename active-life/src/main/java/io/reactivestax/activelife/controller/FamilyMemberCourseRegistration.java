@@ -25,8 +25,9 @@ public class FamilyMemberCourseRegistration {
         return ResponseEntity.ok(allFamilyMemberRegistration);
     }
 
-    @PatchMapping("/member")
-    public ResponseEntity<FamilyCourseRegistrationDTO> updateMemberInformation(@RequestBody FamilyCourseRegistrationDTO  familyCourseRegistrationDTO) {
+    @PatchMapping("/member/{id}")
+    public ResponseEntity<FamilyCourseRegistrationDTO> updateMemberInformation(@PathVariable Long id, @RequestBody FamilyCourseRegistrationDTO  familyCourseRegistrationDTO) {
+        familyCourseRegistrationService.updateFamilyMemberRegistration(id, familyCourseRegistrationDTO);
         return ResponseEntity.ok(familyCourseRegistrationDTO);
     }
 
