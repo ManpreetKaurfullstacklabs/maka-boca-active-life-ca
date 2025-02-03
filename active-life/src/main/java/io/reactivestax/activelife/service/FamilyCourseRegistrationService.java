@@ -81,7 +81,7 @@ public class FamilyCourseRegistrationService {
 
     }
 
-    private void addToWaitlist(Long familyMemberId, Long offeredCourseId) {
+    public void addToWaitlist(Long familyMemberId, Long offeredCourseId) {
         FamilyMembers familyMember = getFamilyMember(familyMemberId);
         OfferedCourses offeredCourse = getOfferedCourse(offeredCourseId);
         WaitList waitList = new WaitList();
@@ -90,8 +90,6 @@ public class FamilyCourseRegistrationService {
         waitList.setNoOfSeats(1L);
         waitList.setIsWaitListed(IsWaitListed.YES);
         waitlistRepository.save(waitList);
-
-
     }
 
 
@@ -129,7 +127,7 @@ public class FamilyCourseRegistrationService {
         return offeredCourse;
     }
 
-    private FamilyMembers getFamilyMember(Long familyMemberId) {
+    public FamilyMembers getFamilyMember(Long familyMemberId) {
         Optional<FamilyMembers> byId = familMemberRepository.findById(familyMemberId);
         if (byId.isEmpty()) {
             throw new InvalidMemberIdException("Family member does not exist.");
@@ -180,7 +178,6 @@ public class FamilyCourseRegistrationService {
         if (byId.isEmpty()) {
             throw new InvalidMemberIdException("Family course registration not found.");
         }
-
         FamilyCourseRegistrations familyCourseRegistrations = byId.get();
         FamilyCourseRegistrationDTO familyCourseRegistrationDTO = new FamilyCourseRegistrationDTO();
         FamilyMembers member = memberIsEnrolledOrNot(familyCourseRegistrations.getFamilyMemberId().getFamilyMemberId());
@@ -231,7 +228,7 @@ public class FamilyCourseRegistrationService {
     }
 
 
-    private void notifyAllWaitlistedMembers(OfferedCourses offeredCourse) {
+    public void notifyAllWaitlistedMembers(OfferedCourses offeredCourse) {
         List<WaitList> waitlistedMembers = waitlistRepository.findByOfferedCourses_OfferedCourseIdAndIsWaitListed(offeredCourse.getOfferedCourseId(), IsWaitListed.YES);
 
         if (!waitlistedMembers.isEmpty()) {
@@ -256,7 +253,6 @@ public class FamilyCourseRegistrationService {
         if (existingRegistrationOpt.isEmpty()) {
             throw new InvalidMemberIdException("Family course registration not found for the given id.");
         }
-
         FamilyCourseRegistrations existingRegistration = existingRegistrationOpt.get();
         if (familyCourseRegistrationDTO.getEnrollmentDate() != null) {
             existingRegistration.setEnrollmentDate(familyCourseRegistrationDTO.getEnrollmentDate());
@@ -267,11 +263,8 @@ public class FamilyCourseRegistrationService {
         if (familyCourseRegistrationDTO.getLastUpdatedTime() != null) {
             existingRegistration.setLastUpdatedTime(familyCourseRegistrationDTO.getLastUpdatedTime());
         }
-
         existingRegistration.setLastUpdateBy(familyCourseRegistrationDTO.getLastUpdateBy());
-
         familyCourseRegistrationRepository.save(existingRegistration);
-
         return mapToDTO(existingRegistration);
     }
 
@@ -290,11 +283,9 @@ public class FamilyCourseRegistrationService {
         return dto;
     }
 
-
     public List<WaitList> getWaitlistedMembers() {
         return waitlistRepository.findByIsWaitListed(IsWaitListed.YES);
     }
-
     public List<Courses> getCoursesForWaitlistedMembers() {
         List<WaitList> waitlistedMembers = getWaitlistedMembers();
         List<Courses> waitlistedCourses = new ArrayList<>();

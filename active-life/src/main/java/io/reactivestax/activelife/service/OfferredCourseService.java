@@ -120,7 +120,6 @@ public class OfferredCourseService {
         return facilititesRepository.findById(id)
                 .orElseThrow(() -> new InvalidCourseIdException("Course with ID " + id + " not found"));
     }
-
     public String generateBarcode() {
         String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
         Random random = new Random();

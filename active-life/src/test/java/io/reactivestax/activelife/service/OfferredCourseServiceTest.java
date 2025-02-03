@@ -13,7 +13,6 @@ import io.reactivestax.activelife.repository.courses.OfferedCourseFeeRepository;
 import io.reactivestax.activelife.repository.facilities.FacilititesRepository;
 import io.reactivestax.activelife.repository.courses.OfferedCourseRepository;
 import io.reactivestax.activelife.exception.InvalidCourseIdException;
-import io.reactivestax.activelife.service.OfferredCourseService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
@@ -43,7 +42,7 @@ class OfferedCourseServiceTest {
     private OfferedCourseFeeRepository offeredCourseFeeRepository;
 
     private OfferedCourseDTO offeredCourseDTO;
-    private OfferedCourses offeredCourses;
+    private OfferedCourses offeredCourse;
     LocalDateTime localDateTime = LocalDateTime.now();
     LocalDate localDate = LocalDate.now();
     LocalDateTime endTime = LocalDateTime.now().plusHours(2);
@@ -61,23 +60,19 @@ class OfferedCourseServiceTest {
         offeredCourseDTO.setIsAllDay(IsAllDay.YES);
         offeredCourseDTO.setAvailableForEnrollment(AvailableForEnrollment.YES);
         offeredCourseDTO.setRegistrationStartDate(LocalDate.now());
-
         OfferedCourseFee offeredCourseFee = new OfferedCourseFee();
         offeredCourseFee.setFeeType(FeeType.RESIDENT);
         offeredCourseFee.setCourseFee(100L);
         offeredCourseDTO.setOfferedCourseFee(offeredCourseFee);
-
-
         offeredCourseDTO.setCoursesId(1L);
-
-        offeredCourses = new OfferedCourses();
-        offeredCourses.setStartDate(LocalDate.now());
-        offeredCourses.setEndDate(LocalDate.now().plusDays(5));
-        offeredCourses.setNoOfSeats(10L);
-        offeredCourses.setStartTime(localDateTime);
-        offeredCourses.setEndTime(endTime);
-        offeredCourses.setIsAllDay(IsAllDay.YES);
-        offeredCourses.setAvailableForEnrollment(AvailableForEnrollment.YES);
+        offeredCourse = new OfferedCourses();
+        offeredCourse.setStartDate(LocalDate.now());
+        offeredCourse.setEndDate(LocalDate.now().plusDays(5));
+        offeredCourse.setNoOfSeats(10L);
+        offeredCourse.setStartTime(localDateTime);
+        offeredCourse.setEndTime(endTime);
+        offeredCourse.setIsAllDay(IsAllDay.YES);
+        offeredCourse.setAvailableForEnrollment(AvailableForEnrollment.YES);
     }
 
 
@@ -96,13 +91,9 @@ class OfferedCourseServiceTest {
 
 
         offeredCourseDTO.setOfferedCourseFee(mockOfferedCourseFee);
-
-
         when(coursesRepository.findById(1L)).thenReturn(Optional.of(mockCourse));
         when(facilititesRepository.findById(1L)).thenReturn(Optional.of(mockFacility));
         when(offeredCourseFeeRepository.save(any(OfferedCourseFee.class))).thenReturn(mockOfferedCourseFee);
-
-
         offerredCourseService.addOfferedCourseToDatabase(offeredCourseDTO);
 
         verify(offeredCourseRepository, times(1)).save(any(OfferedCourses.class));
@@ -151,7 +142,6 @@ class OfferedCourseServiceTest {
     void testGenerateBarcode() {
 
         String barcode = offerredCourseService.generateBarcode();
-
         assertNotNull(barcode);
         assertEquals(6, barcode.length());
     }
@@ -192,7 +182,7 @@ class OfferedCourseServiceTest {
         assertNotNull(savedOfferedCourses.getLastUpdatedAt());
         assertEquals(mockCourse, savedOfferedCourses.getCourses());
         assertEquals(mockFacility, savedOfferedCourses.getFacilities());
-        assertEquals(mockOfferedCourseFee, savedOfferedCourses.getOfferedCourseFee());
+          assertEquals(mockOfferedCourseFee, savedOfferedCourses.getOfferedCourseFee());
     }
 
     @Test
@@ -204,5 +194,7 @@ class OfferedCourseServiceTest {
             offerredCourseService.getAvailabeCoursesFromCourses(1L);
         });
     }
+
+
 
 }
