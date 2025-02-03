@@ -7,5 +7,7 @@ import java.time.LocalDate;
 @Data
 public class OfferedCouseSearchRequest {
     String courseName;
-    LocalDate localDate;
+    LocalDate startDate;
+    LocalDate endDate;
+
 }

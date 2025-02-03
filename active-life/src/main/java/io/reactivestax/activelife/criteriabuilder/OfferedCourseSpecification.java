@@ -28,6 +28,15 @@ public class OfferedCourseSpecification {
                         : criteriaBuilder.equal(root.get("startDate"), startDate);
     }
 
+    public static Specification<OfferedCourses> withEndDate(LocalDate endDate) {
+        return (root, query, criteriaBuilder) ->
+                endDate == null
+                        ? criteriaBuilder.conjunction()
+                        : criteriaBuilder.equal(root.get("endDate"), endDate);
+    }
+
+
+
 
     public static String getWildcardSearch(String search) {
         return "%" + search.trim().toLowerCase() + "%";

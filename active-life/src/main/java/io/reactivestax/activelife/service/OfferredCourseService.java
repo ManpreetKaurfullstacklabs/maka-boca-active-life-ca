@@ -145,8 +145,8 @@ public class OfferredCourseService {
     public List<OfferedCourseDTO> searchOfferedCourse(OfferedCouseSearchRequest offeredCouseSearchRequest) {
         Specification<OfferedCourses> offeredCoursesSpecification =
                 Specification.where(OfferedCourseSpecification.withCourseName(offeredCouseSearchRequest.getCourseName()))
-                        .and(OfferedCourseSpecification.withStartDate(offeredCouseSearchRequest.getLocalDate()));
-
+                        .and(OfferedCourseSpecification.withStartDate(offeredCouseSearchRequest.getStartDate()))
+                        .and(offeredCourseSpecification.withEndDate(offeredCouseSearchRequest.getEndDate()));
 
         List<OfferedCourses> offeredCoursesList = offeredCourseRepository.findAll(offeredCoursesSpecification);
         return offeredCoursesList.stream()
