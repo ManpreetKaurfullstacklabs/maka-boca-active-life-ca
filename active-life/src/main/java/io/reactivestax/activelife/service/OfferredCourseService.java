@@ -1,6 +1,9 @@
 package io.reactivestax.activelife.service;
 
 import io.reactivestax.activelife.Enums.IsWaitListed;
+import io.reactivestax.activelife.criteriabuilder.OfferedCourseMapper;
+import io.reactivestax.activelife.criteriabuilder.OfferedCourseSpecification;
+import io.reactivestax.activelife.criteriabuilder.OfferedCouseSearchRequest;
 import io.reactivestax.activelife.domain.course.Courses;
 import io.reactivestax.activelife.domain.course.OfferedCourseFee;
 import io.reactivestax.activelife.domain.course.OfferedCourses;
@@ -12,11 +15,15 @@ import io.reactivestax.activelife.repository.courses.OfferedCourseFeeRepository;
 import io.reactivestax.activelife.repository.facilities.FacilititesRepository;
 import io.reactivestax.activelife.repository.courses.OfferedCourseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 @Service
 public class OfferredCourseService {
@@ -32,6 +39,9 @@ public class OfferredCourseService {
 
     @Autowired
     private OfferedCourseFeeRepository offeredCourseFeeRepository;
+
+    @Autowired
+    private OfferedCourseSpecification offeredCourseSpecification;
 
 
     public void addOfferedCourseToDatabase(OfferedCourseDTO offeredCourseDTO) {
@@ -130,4 +140,18 @@ public class OfferredCourseService {
         }
         return pin.toString();
     }
+
+
+    public List<OfferedCourseDTO> searchOfferedCourse(OfferedCouseSearchRequest offeredCouseSearchRequest) {
+        Specification<OfferedCourses> offeredCoursesSpecification =
+                Specification.where(OfferedCourseSpecification.withCourseName(offeredCouseSearchRequest.getCourseName()))
+                        .and(OfferedCourseSpecification.withStartDate(offeredCouseSearchRequest.getLocalDate()));
+
+
+        List<OfferedCourses> offeredCoursesList = offeredCourseRepository.findAll(offeredCoursesSpecification);
+        return offeredCoursesList.stream()
+                .map(OfferedCourseMapper.INSTANCE::offeredCourseToOfferedCourseDTO)
+                .collect(Collectors.toList());
+    }
+
 }

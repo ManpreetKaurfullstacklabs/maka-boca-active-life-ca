@@ -1,5 +1,6 @@
 package io.reactivestax.activelife.service;
 
+import io.reactivestax.activelife.Enums.GroupOwner;
 import io.reactivestax.activelife.Enums.Status;
 import io.reactivestax.activelife.distribution.SmsService;
 import io.reactivestax.activelife.domain.membership.Login;
@@ -163,7 +164,11 @@ public class FamilyMemberService {
         familyMembers.setPostalCode(familyMemberDTO.getPostalCode());
         familyMembers.setPreferredMode(familyMemberDTO.getPreferredMode());
         familyMembers.setMemberLogin(familyMemberDTO.getMemberLoginId());
-        familyMembers.setGroupOwner(familyMemberDTO.getGroupOwner());
+        Long familyGroupId = familyGroupRepository.findById(familyMemberDTO.getFamilyGroupId()).get().getFamilyGroupId();
+        if(familyGroupId.equals(familyMemberDTO.getFamilyGroupId())){
+            familyMembers.setGroupOwner(GroupOwner.NO);
+        }
+        familyMembers.setGroupOwner(GroupOwner.YES);
         familyMembers.setPin(pin);
         familyMembers.setCountry(familyMemberDTO.getCountry());
         familyMembers.setHomePhoneNo(familyMemberDTO.getHomePhoneNo());
