@@ -19,17 +19,16 @@ public class FamilyMember {
     @PostMapping("/signup")
     public ResponseEntity<String>  addNewFamilyMemberAlongFamilyGroup(@Valid @RequestBody FamilyMemberDTO familyMemberDTO) {
         String pin = familyMemberService.addNewFamilyMemberOnSignup(familyMemberDTO);
-        return ResponseEntity.ok("family member added sucessfully with pin number : " + pin);
+        return ResponseEntity.ok("family member added successfully with pin number : " + pin);
     }
 
     @PostMapping("/login")
     public ResponseEntity<String>  addFamilyMemberAlongFamilyGroup( @RequestBody LoginDTO login) {
         String value  = familyMemberService.loginExistingMember(login);
-        return ResponseEntity.ok( value);
+        return ResponseEntity.ok(value);
     }
-
-    @GetMapping("/member")
-    public ResponseEntity<FamilyMemberDTO> getFamilyMember(@RequestHeader("Member-ID")  String id) {
+    @GetMapping("/member/{id}")
+    public ResponseEntity<FamilyMemberDTO> getFamilyMember( @PathVariable  String id) {
         FamilyMemberDTO allMembersbygivenMemberId = familyMemberService.getAllMembersbygivenMemberId(id);
         return ResponseEntity.ok(allMembersbygivenMemberId);
 

@@ -15,8 +15,6 @@ public class FamilyMemberCourseRegistration {
 
     @PostMapping("/member")
     public ResponseEntity<String>  addNewMemberToOfferedCourse( @RequestBody FamilyCourseRegistrationDTO familyCourseRegistrationDTO) {
-
-
         familyCourseRegistrationService.enrollFamilyMemberInCourse(familyCourseRegistrationDTO);
         return ResponseEntity.ok("family member added sucessfully to a course : " );
     }

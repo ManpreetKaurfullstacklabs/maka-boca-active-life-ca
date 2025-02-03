@@ -1,5 +1,8 @@
 package io.reactivestax.activelife.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import io.reactivestax.activelife.Enums.GroupOwner;
 import io.reactivestax.activelife.Enums.PreferredMode;
 import io.reactivestax.activelife.Enums.Status;
@@ -17,6 +20,8 @@ import java.time.LocalDate;
 public class FamilyMemberDTO {
 
     private String memberName;
+    @JsonSerialize(using = LocalDateSerializer.class)
+    @JsonFormat(pattern="yyyy-MM-dd")
     private LocalDate dob;
     private String gender;
     private String email;

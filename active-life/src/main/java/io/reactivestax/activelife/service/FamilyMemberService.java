@@ -44,6 +44,7 @@ public class FamilyMemberService {
 
     @Transactional
     public String addNewFamilyMemberOnSignup(FamilyMemberDTO familyMemberDTO) {
+
         Optional<FamilyMembers> existingFamilyMember = familyMemberRepository.findByMemberLogin(familyMemberDTO.getMemberLoginId());
         if (existingFamilyMember.isPresent()) {
             throw new InvalidMemberIdException("Member Login ID already exists");
@@ -58,27 +59,13 @@ public class FamilyMemberService {
                 FamilyGroups newFamilyGroup = createNewFamilyGroup(pin);
                 familyMembers.setFamilyGroupId(newFamilyGroup);
             }
-        } else {
-            FamilyGroups newFamilyGroup = createNewFamilyGroup(pin);
-            familyMembers.setFamilyGroupId(newFamilyGroup);
         }
+
         setFamilyMemberDetails(familyMemberDTO, familyMembers, pin);
         familyMemberRepository.save(familyMembers);
         saveLoginAudit(familyMembers);
 
         return pin;
-    }
-
-    public void addFamilyToExistingGroupID(FamilyMemberDTO familyMemberDTO, FamilyMembers familyMembers, String pin) {
-        Optional<FamilyGroups> existingFamilyGroup = familyGroupRepository.findById(familyMemberDTO.getFamilyGroupId());
-        if (existingFamilyGroup.isPresent()) {
-            FamilyGroups familyGroups = existingFamilyGroup.get();
-            familyMembers.setFamilyGroupId(familyGroups);
-            familyMemberRepository.save(familyMembers);
-            saveLoginAudit(familyMembers);
-        } else {
-            setFamilyMemberDetails(familyMemberDTO, familyMembers, pin);
-        }
     }
 
     public FamilyMemberDTO getAllMembersbygivenMemberId(String id) {
