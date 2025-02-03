@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -64,6 +65,7 @@ public class FamilyCourseRegistrationService {
             enrollMember(familyCourseRegistrationDTO, IsWaitListed.NO);
         } else {
             handleWaitlist(familyCourseRegistrationDTO.getFamilyMemberId(), familyCourseRegistrationDTO.getOfferedCourseId());
+
         }
     }
 
@@ -74,6 +76,7 @@ public class FamilyCourseRegistrationService {
         } else {
             throw new RuntimeException("Waitlist is full for this course.");
         }
+
     }
 
     private void addToWaitlist(Long familyMemberId, Long offeredCourseId) {
@@ -82,22 +85,22 @@ public class FamilyCourseRegistrationService {
         WaitList waitList = new WaitList();
         waitList.setFamilyMember(familyMember);
         waitList.setOfferedCourses(offeredCourse);
-        waitList.setStatus(Status.INACTIVE);
         waitList.setNoOfSeats(1L);
         waitList.setIsWaitListed(IsWaitListed.YES);
         waitlistRepository.save(waitList);
+
+
     }
 
 
     @Transactional
     private void enrollMember(FamilyCourseRegistrationDTO familyCourseRegistrationDTO, IsWaitListed waitListed) {
-
         FamilyCourseRegistrations familyCourseRegistrations = new FamilyCourseRegistrations();
         familyCourseRegistrations.setFamilyMemberId(getFamilyMember(familyCourseRegistrationDTO.getFamilyMemberId()));
         familyCourseRegistrations.setOfferedCourseId(getOfferedCourse(familyCourseRegistrationDTO.getOfferedCourseId()));
         familyCourseRegistrations.setCost(getCostOfferedFromCourses(familyCourseRegistrationDTO.getOfferedCourseId()));
         familyCourseRegistrations.setEnrollmentDate(familyCourseRegistrationDTO.getEnrollmentDate());
-        familyCourseRegistrations.setIsWithdrawn(IsWithdrawn.NO); // Convert string to enum
+        familyCourseRegistrations.setIsWithdrawn(IsWithdrawn.NO);
         familyCourseRegistrations.setWithdrawnCredits(familyCourseRegistrationDTO.getWithdrawnCredits());
         familyCourseRegistrations.setNoOfseats(getNoOfSeatsFromOfferedCoursesTable(familyCourseRegistrationDTO.getOfferedCourseId()));
         familyCourseRegistrations.setEnrollmentActorId(familyCourseRegistrationDTO.getFamilyMemberId());
@@ -109,7 +112,6 @@ public class FamilyCourseRegistrationService {
         familyCourseRegistrations.setCreatedBy(familyCourseRegistrationDTO.getCreatedBy());
         familyCourseRegistrations.setLastUpdateBy(familyCourseRegistrationDTO.getLastUpdateBy());
 
-        // Save the registration entity
         familyCourseRegistrationRepository.save(familyCourseRegistrations);
     }
 
@@ -209,10 +211,40 @@ public class FamilyCourseRegistrationService {
             throw new InvalidMemberIdException("Member is not enrolled in any course.");
         }
         FamilyCourseRegistrations familyCourseRegistrations = registrationOpt.get();
+
         if (familyCourseRegistrations.getIsWithdrawn().equals(IsWithdrawn.YES)) {
             throw new RuntimeException("Member already withdrawn from the course.");
         }
+
         familyCourseRegistrations.setIsWithdrawn(IsWithdrawn.YES);
         familyCourseRegistrationRepository.save(familyCourseRegistrations);
+
+        OfferedCourses offeredCourse = familyCourseRegistrations.getOfferedCourseId();
+
+        Long waitlistCount = waitlistRepository.countByOfferedCourses_OfferedCourseIdAndIsWaitListed(offeredCourse.getOfferedCourseId(), IsWaitListed.YES);
+
+        if (waitlistCount > 0) {
+            notifyAllWaitlistedMembers(offeredCourse);
+        }
     }
+
+
+    private void notifyAllWaitlistedMembers(OfferedCourses offeredCourse) {
+        List<WaitList> waitlistedMembers = waitlistRepository.findByOfferedCourses_OfferedCourseIdAndIsWaitListed(offeredCourse.getOfferedCourseId(), IsWaitListed.YES);
+
+        if (!waitlistedMembers.isEmpty()) {
+            for (WaitList waitList : waitlistedMembers) {
+                FamilyMembers waitlistedFamilyMember = waitList.getFamilyMember();
+                waitList.setIsWaitListed(IsWaitListed.NO);
+                waitlistRepository.save(waitList);
+                String memberName = waitlistedFamilyMember.getMemberName();
+                String name = offeredCourse.getCourses().getName();
+
+                String message = "Hello " + memberName + ", a seat has opened up for the course: " + name +
+                        ". Please proceed with your enrollment if you wish to join.";
+                smsService.sendSms(waitlistedFamilyMember.getHomePhoneNo(), message);
+            }
+        }
+    }
+
 }

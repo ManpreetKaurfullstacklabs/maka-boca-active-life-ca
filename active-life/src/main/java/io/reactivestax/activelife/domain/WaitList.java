@@ -29,10 +29,6 @@ public class WaitList {
     @JoinColumn(name = "family_member_id")
     private FamilyMembers familyMember;
 
-    @Column(name = "status")
-    @Enumerated(EnumType.STRING)
-    private Status status;
-
     @Column(name = "no_of_seats")
     private Long noOfSeats;
 

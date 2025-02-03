@@ -8,6 +8,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -48,10 +49,12 @@ public class FamilyCourseRegistrations {
     @Column(name= "created_at")
     private LocalDateTime createdAt;
 
+    @ToString.Exclude
     @ManyToOne
     @JoinColumn(name="offer_course_id" )
     private OfferedCourses offeredCourseId;
 
+    @ToString.Exclude
     @ManyToOne
     @JoinColumn(name="family_member_id" )
     private FamilyMembers familyMemberId;
