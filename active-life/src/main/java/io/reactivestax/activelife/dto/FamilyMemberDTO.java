@@ -6,8 +6,6 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import io.reactivestax.activelife.Enums.GroupOwner;
 import io.reactivestax.activelife.Enums.PreferredMode;
 import io.reactivestax.activelife.Enums.Status;
-import io.reactivestax.activelife.domain.Login;
-import io.reactivestax.activelife.domain.membership.FamilyGroups;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

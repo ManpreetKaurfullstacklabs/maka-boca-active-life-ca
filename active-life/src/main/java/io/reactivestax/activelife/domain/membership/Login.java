@@ -1,12 +1,8 @@
-package io.reactivestax.activelife.domain;
-import io.reactivestax.activelife.domain.membership.FamilyMembers;
+package io.reactivestax.activelife.domain.membership;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.math.BigInteger;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.UUID;
 
 @Data
 @Entity

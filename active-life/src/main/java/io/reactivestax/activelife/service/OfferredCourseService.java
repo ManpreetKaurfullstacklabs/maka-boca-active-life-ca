@@ -87,7 +87,7 @@ public class OfferredCourseService {
         offeredCourseDTO.setFacilities(offeredCourses.getFacilities().getId());
         offeredCourseDTO.setIsAllDay(offeredCourses.getIsAllDay());
         offeredCourseDTO.setAvailableForEnrollment(offeredCourses.getAvailableForEnrollment());
-       // offeredCourseDTO.setUpdatedAt(offeredCourses.getCreatedAt());
+
         return offeredCourseDTO;
     }
     public void updateOfferedCourseToDatabase(OfferedCourseDTO offeredCourseDTO,Long id ) {
@@ -109,7 +109,6 @@ public class OfferredCourseService {
         offeredCourses.setCourses(availableCourses);
         Facilities availableFacilities = getAvailabeFacilititesFromFacilities(offeredCourseDTO.getFacilities());
         offeredCourses.setFacilities(availableFacilities);
-      //  offeredCourses.setOfferedCourseFee(offeredCourseFee);
         offeredCourseRepository.save(offeredCourses);
     }
 

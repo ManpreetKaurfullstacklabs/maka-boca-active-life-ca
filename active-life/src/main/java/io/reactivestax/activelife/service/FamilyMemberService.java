@@ -2,7 +2,7 @@ package io.reactivestax.activelife.service;
 
 import io.reactivestax.activelife.Enums.Status;
 import io.reactivestax.activelife.distribution.SmsService;
-import io.reactivestax.activelife.domain.Login;
+import io.reactivestax.activelife.domain.membership.Login;
 import io.reactivestax.activelife.domain.membership.FamilyGroups;
 import io.reactivestax.activelife.domain.membership.FamilyMembers;
 import io.reactivestax.activelife.dto.FamilyMemberDTO;
@@ -139,7 +139,7 @@ public class FamilyMemberService {
         if (loginDTO.getMemberLoginId().equals(familyMembers.getMemberLogin()) && loginDTO.getPin().equals(familyMembers.getPin()) && familyMembers.getStatus().equals(Status.ACTIVE)) {
             return "Successfully verified";
         }
-        return "";
+        return "Invalid " ;
     }
 
     public String generateOtp() {

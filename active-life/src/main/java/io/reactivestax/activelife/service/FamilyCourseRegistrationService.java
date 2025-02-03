@@ -5,11 +5,12 @@ import io.reactivestax.activelife.Enums.IsWaitListed;
 import io.reactivestax.activelife.Enums.IsWithdrawn;
 import io.reactivestax.activelife.Enums.Status;
 import io.reactivestax.activelife.distribution.SmsService;
+import io.reactivestax.activelife.domain.course.Courses;
 import io.reactivestax.activelife.domain.course.OfferedCourseFee;
 import io.reactivestax.activelife.domain.course.OfferedCourses;
 import io.reactivestax.activelife.domain.membership.FamilyCourseRegistrations;
 import io.reactivestax.activelife.domain.membership.FamilyMembers;
-import io.reactivestax.activelife.domain.WaitList;
+import io.reactivestax.activelife.domain.course.WaitList;
 import io.reactivestax.activelife.dto.FamilyCourseRegistrationDTO;
 import io.reactivestax.activelife.exception.InvalidCourseIdException;
 import io.reactivestax.activelife.exception.InvalidMemberIdException;
@@ -22,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -287,6 +289,24 @@ public class FamilyCourseRegistrationService {
         dto.setIsWithdrawn(familyCourseRegistrations.getIsWithdrawn());
         return dto;
     }
+
+
+    public List<WaitList> getWaitlistedMembers() {
+        return waitlistRepository.findByIsWaitListed(IsWaitListed.YES);
+    }
+
+    public List<Courses> getCoursesForWaitlistedMembers() {
+        List<WaitList> waitlistedMembers = getWaitlistedMembers();
+        List<Courses> waitlistedCourses = new ArrayList<>();
+        for (WaitList registration : waitlistedMembers) {
+            OfferedCourses offeredCourse = registration.getOfferedCourses();
+            if (offeredCourse != null) {
+                waitlistedCourses.add(offeredCourse.getCourses());
+            }
+        }
+        return waitlistedCourses;
+    }
+
 
 
 }

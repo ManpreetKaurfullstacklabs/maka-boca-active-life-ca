@@ -1,14 +1,10 @@
-package io.reactivestax.activelife.domain;
+package io.reactivestax.activelife.domain.course;
 import io.reactivestax.activelife.Enums.IsWaitListed;
-import io.reactivestax.activelife.Enums.Status;
-import io.reactivestax.activelife.domain.course.OfferedCourses;
 import io.reactivestax.activelife.domain.membership.FamilyMembers;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.math.BigInteger;
 
 @Data
 @Entity

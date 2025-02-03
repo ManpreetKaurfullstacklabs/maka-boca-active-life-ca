@@ -1,48 +1,499 @@
 package io.reactivestax.activelife.service;
 
+import io.reactivestax.activelife.Enums.Status;
+import io.reactivestax.activelife.domain.membership.FamilyGroups;
+import io.reactivestax.activelife.domain.membership.FamilyMembers;
+import io.reactivestax.activelife.dto.FamilyMemberDTO;
+import io.reactivestax.activelife.dto.LoginDTO;
+import io.reactivestax.activelife.exception.InvalidMemberIdException;
+import io.reactivestax.activelife.interfaces.FamilyMemberMapper;
+import io.reactivestax.activelife.repository.familymember.FamilMemberRepository;
+import io.reactivestax.activelife.repository.familymember.FamilyGroupRepository;
+import io.reactivestax.activelife.repository.login.LoginRepository;
+import io.reactivestax.activelife.distribution.SmsService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.*;
+import org.springframework.jms.core.JmsTemplate;
 
+import java.util.NoSuchElementException;
+import java.util.Optional;
+
+import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-class FamilyMemberServiceTest {
+public class FamilyMemberServiceTest {
 
-    @Test
-    void addNewFamilyMemberOnSignup() {
+    @InjectMocks
+    private FamilyMemberService familyMemberService;
+
+    @Mock
+    private FamilMemberRepository familyMemberRepository;
+
+    @Mock
+    private FamilyGroupRepository familyGroupRepository;
+
+    @Mock
+    private LoginRepository loginRepository;
+
+    @Mock
+    private SmsService smsService;
+
+    @Mock
+    private FamilyMemberMapper familyMemberMapper;
+
+    @Mock
+    private JmsTemplate jmsTemplate;
+
+    private FamilyMemberDTO familyMemberDTO;
+    private FamilyMembers familyMembers;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+
+        familyMemberDTO = new FamilyMemberDTO();
+        familyMemberDTO.setMemberLoginId("testLoginId");
+        familyMemberDTO.setMemberName("John Doe");
+
+        familyMembers = new FamilyMembers();
+        familyMembers.setMemberLogin("testLoginId");
+        familyMembers.setPin("123456");
+        familyMembers.setStatus(Status.ACTIVE);
     }
 
     @Test
-    void getAllMembersbygivenMemberId() {
+    void testAddNewFamilyMemberOnSignup_memberExists() {
+
+        when(familyMemberRepository.findByMemberLogin(familyMemberDTO.getMemberLoginId()))
+                .thenReturn(Optional.of(familyMembers));
+
+        InvalidMemberIdException exception = assertThrows(
+                InvalidMemberIdException.class,
+                () -> familyMemberService.addNewFamilyMemberOnSignup(familyMemberDTO)
+        );
+
+        assertEquals("Member Login ID already exists", exception.getMessage());
     }
 
     @Test
-    void updateExistingFamilyMember() {
+    void testAddNewFamilyMemberOnSignup_success() {
+
+        when(familyMemberRepository.findByMemberLogin(familyMemberDTO.getMemberLoginId()))
+                .thenReturn(Optional.empty());
+
+        FamilyGroups familyGroup = new FamilyGroups();
+        when(familyGroupRepository.findById(anyLong())).thenReturn(Optional.of(familyGroup));
+
+        String pin = familyMemberService.addNewFamilyMemberOnSignup(familyMemberDTO);
+
+        assertNotNull(pin);
+        assertEquals(6, pin.length());
+        verify(familyMemberRepository).save(any(FamilyMembers.class));
+
     }
 
     @Test
-    void deleteFamilyMemberById() {
+    void testGetAllMembersbygivenMemberId_memberNotFound() {
+
+        when(familyMemberRepository.findByMemberLogin("invalidId")).thenReturn(Optional.empty());
+        InvalidMemberIdException exception = assertThrows(
+                InvalidMemberIdException.class,
+                () -> familyMemberService.getAllMembersbygivenMemberId("invalidId")
+        );
+
+        assertEquals("This member is not registered", exception.getMessage());
     }
 
     @Test
-    void findFamilyMemberByVerificationId() {
+    void testLoginExistingMember_success() {
+
+        LoginDTO loginDTO = new LoginDTO();
+        loginDTO.setMemberLoginId("testLoginId");
+        loginDTO.setPin("123456");
+
+        when(familyMemberRepository.findByMemberLogin("testLoginId")).thenReturn(Optional.of(familyMembers));
+
+        String result = familyMemberService.loginExistingMember(loginDTO);
+
+        assertEquals("OTP sent successfully", result);
+        verify(smsService).sendSms(eq(familyMembers.getHomePhoneNo()), contains("Your OTP number"));
     }
 
     @Test
-    void loginExistingMember() {
+    void testLoginExistingMember_memberInactive() {
+
+        FamilyMembers inactiveFamilyMember = new FamilyMembers();
+        inactiveFamilyMember.setMemberLogin("testLoginId");
+        inactiveFamilyMember.setPin("123456");
+        inactiveFamilyMember.setStatus(Status.INACTIVE);
+
+        LoginDTO loginDTO = new LoginDTO();
+        loginDTO.setMemberLoginId("testLoginId");
+        loginDTO.setPin("123456");
+
+        when(familyMemberRepository.findByMemberLogin("testLoginId")).thenReturn(Optional.of(inactiveFamilyMember));
+        String result = familyMemberService.loginExistingMember(loginDTO);
+
+        assertEquals("Verification link sent successfully", result);
+        verify(smsService).verificationLink(eq(inactiveFamilyMember.getHomePhoneNo()), contains("http://localhost:8082/api/v1/familymember/verify/"));
     }
 
     @Test
-    void generateOtp() {
+    void testDeleteFamilyMemberById_success() {
+
+        when(familyMemberRepository.findById(anyLong())).thenReturn(Optional.of(familyMembers));
+        familyMemberService.deleteFamilyMemberById(1L);
+        assertEquals(Status.INACTIVE, familyMembers.getStatus());
+        verify(familyMemberRepository).save(familyMembers);
     }
 
     @Test
-    void createNewFamilyGroup() {
+    void testDeleteFamilyMemberById_notFound() {
+        when(familyMemberRepository.findById(anyLong())).thenReturn(Optional.empty());
+        InvalidMemberIdException exception = assertThrows(
+                InvalidMemberIdException.class,
+                () -> familyMemberService.deleteFamilyMemberById(1L)
+        );
+        assertEquals("Family member not found", exception.getMessage());
     }
 
     @Test
-    void generatePin() {
+    void loginExistingMember_memberNotFound() {
+        LoginDTO loginDTO = new LoginDTO();
+        loginDTO.setMemberLoginId("nonExistingLogin");
+        loginDTO.setPin("123456");
+
+        when(familyMemberRepository.findByMemberLogin(loginDTO.getMemberLoginId()))
+                .thenReturn(Optional.empty());
+
+        String result = familyMemberService.loginExistingMember(loginDTO);
+        assertTrue(result.contains("does not exist"));
     }
 
     @Test
-    void findFamilyMemberByOtpVerification() {
+    void loginExistingMember_successfulOtp() {
+        LoginDTO loginDTO = new LoginDTO();
+        loginDTO.setMemberLoginId("existingLogin");
+        loginDTO.setPin("123456");
+
+        FamilyMembers familyMembers = new FamilyMembers();
+        familyMembers.setMemberLogin("existingLogin");
+        familyMembers.setPin("123456");
+        familyMembers.setStatus(Status.ACTIVE);
+        familyMembers.setHomePhoneNo("123456789");
+
+        when(familyMemberRepository.findByMemberLogin(loginDTO.getMemberLoginId()))
+                .thenReturn(Optional.of(familyMembers));
+
+        String result = familyMemberService.loginExistingMember(loginDTO);
+        assertEquals("OTP sent successfully", result);
+    }
+
+    @Test
+    void findFamilyMemberByVerificationId_memberNotFound() {
+        when(familyMemberRepository.findByVerificationUUID(anyString()))
+                .thenReturn(Optional.empty());
+
+        assertThrows(NoSuchElementException.class, () -> {
+            familyMemberService.findFamilyMemberByVerificationId("nonExistingVerificationId");
+        });
+    }
+
+    @Test
+    void findFamilyMemberByVerificationId_successful() {
+        FamilyMembers familyMembers = new FamilyMembers();
+        familyMembers.setStatus(Status.INACTIVE);
+        familyMembers.setFamilyGroupId(new FamilyGroups());
+
+        when(familyMemberRepository.findByVerificationUUID(anyString()))
+                .thenReturn(Optional.of(familyMembers));
+
+        familyMemberService.findFamilyMemberByVerificationId("validVerificationId");
+
+        assertEquals(Status.ACTIVE, familyMembers.getStatus());
+    }
+
+    @Test
+    void findFamilyMemberByOtpVerification_memberNotFound() {
+        // Simulating that the member does not exist in the repository
+        LoginDTO loginDTO = new LoginDTO();
+        loginDTO.setMemberLoginId("nonExistingLogin");
+        loginDTO.setPin("123456");
+
+        when(familyMemberRepository.findByMemberLogin(loginDTO.getMemberLoginId()))
+                .thenReturn(Optional.empty());
+
+        assertThrows(InvalidMemberIdException.class, () -> {
+            familyMemberService.findFamilyMemberByOtpVerification(loginDTO);
+        });
+    }
+
+    @Test
+    void findFamilyMemberByOtpVerification_memberLoginMismatch() {
+        LoginDTO loginDTO = new LoginDTO();
+        loginDTO.setMemberLoginId("wrongLogin");
+        loginDTO.setPin("123456");
+
+        FamilyMembers familyMembers = new FamilyMembers();
+        familyMembers.setMemberLogin("correctLogin");
+
+        when(familyMemberRepository.findByMemberLogin(loginDTO.getMemberLoginId()))
+                .thenReturn(Optional.of(familyMembers));
+
+        assertThrows(InvalidMemberIdException.class, () -> {
+            familyMemberService.findFamilyMemberByOtpVerification(loginDTO);
+        });
+    }
+
+    @Test
+    void findFamilyMemberByOtpVerification_pinMismatch() {
+        LoginDTO loginDTO = new LoginDTO();
+        loginDTO.setMemberLoginId("correctLogin");
+        loginDTO.setPin("wrongPin");
+
+        FamilyMembers familyMembers = new FamilyMembers();
+        familyMembers.setMemberLogin("correctLogin");
+        familyMembers.setPin("correctPin");
+
+        when(familyMemberRepository.findByMemberLogin(loginDTO.getMemberLoginId()))
+                .thenReturn(Optional.of(familyMembers));
+
+        assertThrows(RuntimeException.class, () -> {
+            familyMemberService.findFamilyMemberByOtpVerification(loginDTO);
+        });
+    }
+
+    @Test
+    void findFamilyMemberByOtpVerification_successfulOtpVerification() {
+        LoginDTO loginDTO = new LoginDTO();
+        loginDTO.setMemberLoginId("correctLogin");
+        loginDTO.setPin("correctPin");
+
+        FamilyMembers familyMembers = new FamilyMembers();
+        familyMembers.setMemberLogin("correctLogin");
+        familyMembers.setPin("correctPin");
+        familyMembers.setStatus(Status.INACTIVE);
+
+        when(familyMemberRepository.findByMemberLogin(loginDTO.getMemberLoginId()))
+                .thenReturn(Optional.of(familyMembers));
+
+        String result = familyMemberService.findFamilyMemberByOtpVerification(loginDTO);
+        assertEquals(Status.ACTIVE, familyMembers.getStatus());
+        assertEquals("OTP verified", result);
+        verify(familyMemberRepository, times(1)).save(familyMembers);
+    }
+
+    @Test
+    void createNewFamilyGroup_shouldCreateAndSaveFamilyGroup() {
+
+        String pin = "123456";
+        FamilyGroups expectedFamilyGroup = new FamilyGroups();
+        expectedFamilyGroup.setFamilyPin(pin);
+        expectedFamilyGroup.setStatus(Status.INACTIVE);
+        expectedFamilyGroup.setCredits(0L);
+        expectedFamilyGroup.setCreatedBy(1L);
+        expectedFamilyGroup.setLastUpdatedBy(1L);
+
+        when(familyGroupRepository.save(any(FamilyGroups.class))).thenReturn(expectedFamilyGroup);
+
+        FamilyGroups result = familyMemberService.createNewFamilyGroup(pin);
+
+        verify(familyGroupRepository, times(1)).save(any(FamilyGroups.class));
+        assertNotNull(result);
+        assertEquals(pin, result.getFamilyPin());
+        assertEquals(Status.INACTIVE, result.getStatus());
+        assertEquals(0L, result.getCredits());
+        assertNotNull(result.getCreatedAt());
+        assertNotNull(result.getUpdatedAt());
+        assertEquals(1L, result.getCreatedBy());
+        assertEquals(1L, result.getLastUpdatedBy());
+    }
+
+    @Test
+    void loginExistingMember_memberDoesNotExist() {
+
+        LoginDTO loginDTO = new LoginDTO();
+        loginDTO.setMemberLoginId("inactiveMember");
+        loginDTO.setPin("123456");
+
+        when(familyMemberRepository.findByMemberLogin(loginDTO.getMemberLoginId())).thenReturn(Optional.empty());
+        String result = familyMemberService.loginExistingMember(loginDTO);
+        assertEquals("Member Login Id does not exist: inactiveMember", result);
+    }
+
+    @Test
+    void loginExistingMember_memberActiveWithCorrectPin() {
+        String memberLoginId = "activeMember";
+        String correctPin = "123456";
+        FamilyMembers familyMembers = new FamilyMembers();
+        familyMembers.setMemberLogin(memberLoginId);
+        familyMembers.setPin(correctPin);
+        familyMembers.setStatus(Status.ACTIVE);
+        familyMembers.setHomePhoneNo("123-456-7890");
+
+        LoginDTO loginDTO = new LoginDTO();
+        loginDTO.setMemberLoginId("activeMember");
+        loginDTO.setPin("123456");
+
+        when(familyMemberRepository.findByMemberLogin(memberLoginId)).thenReturn(Optional.of(familyMembers));
+        String result = familyMemberService.loginExistingMember(loginDTO);
+        verify(smsService, times(1)).sendSms(eq("123-456-7890"), startsWith("Your OTP number is"));
+        assertEquals("OTP sent successfully", result);
+    }
+
+    @Test
+    void loginExistingMember_memberInactiveWithIncorrectPin() {
+        String memberLoginId = "inactiveMember";
+        String incorrectPin = "wrongPin";
+        FamilyMembers familyMembers = new FamilyMembers();
+        familyMembers.setMemberLogin(memberLoginId);
+        familyMembers.setPin("123456");
+        familyMembers.setStatus(Status.INACTIVE);
+        familyMembers.setHomePhoneNo("123-456-7890");
+
+        LoginDTO loginDTO = new LoginDTO();
+        loginDTO.setMemberLoginId("inactiveMember");
+        loginDTO.setPin("wrongPin");
+
+
+        when(familyMemberRepository.findByMemberLogin(memberLoginId)).thenReturn(Optional.of(familyMembers));
+        InvalidMemberIdException exception = assertThrows(InvalidMemberIdException.class, () -> {
+            familyMemberService.loginExistingMember(loginDTO);
+        });
+        assertEquals("Password does not match with Member login Id: inactiveMember", exception.getMessage());
+    }
+
+    @Test
+    void loginExistingMember_memberInactiveWithCorrectPin() {
+
+        String memberLoginId = "inactiveMember";
+        String correctPin = "123456";
+        FamilyMembers familyMembers = new FamilyMembers();
+        familyMembers.setMemberLogin(memberLoginId);
+        familyMembers.setPin(correctPin);
+        familyMembers.setStatus(Status.INACTIVE);
+        familyMembers.setHomePhoneNo("123-456-7890");
+
+        LoginDTO loginDTO = new LoginDTO();
+        loginDTO.setMemberLoginId("inactiveMember");
+        loginDTO.setPin("123456");
+
+        when(familyMemberRepository.findByMemberLogin(memberLoginId)).thenReturn(Optional.of(familyMembers));
+
+        String result = familyMemberService.loginExistingMember(loginDTO);
+
+        assertEquals("Verification link sent successfully", result);
+    }
+
+    @Test
+    void loginExistingMember_memberActiveWithCorrectPinAndAlreadyVerified() {
+
+        String memberLoginId = "activeMember";
+        String correctPin = "123456";
+        FamilyMembers familyMembers = new FamilyMembers();
+        familyMembers.setMemberLogin(memberLoginId);
+        familyMembers.setPin(correctPin);
+        familyMembers.setStatus(Status.ACTIVE);
+
+        LoginDTO loginDTO = new LoginDTO();
+        loginDTO.setMemberLoginId("activeMember");
+        loginDTO.setPin("123456");
+
+        when(familyMemberRepository.findByMemberLogin(memberLoginId)).thenReturn(Optional.of(familyMembers));
+
+        String result = familyMemberService.loginExistingMember(loginDTO);
+
+        assertEquals("OTP sent successfully", result);
+    }
+
+    @Test
+    void updateExistingFamilyMember_memberExists() {
+        String memberLoginId = "existingMember";
+        FamilyMemberDTO familyMemberDTO = new FamilyMemberDTO();
+        familyMemberDTO.setMemberLoginId(memberLoginId);
+        FamilyMembers familyMembers = new FamilyMembers();
+        familyMembers.setMemberLogin(memberLoginId);
+
+        lenient().when(familyMemberRepository.findByMemberLogin(memberLoginId)).thenReturn(Optional.of(familyMembers));
+        familyMemberService.updateExistingFamilyMember(familyMemberDTO);
+        verify(familyMemberMapper, times(1)).toEntity(familyMemberDTO);
+
+    }
+    @Test
+    void getAllMembersbygivenMemberId_memberNotFound() {
+
+        String memberLoginId = "nonExistentMember";
+        when(familyMemberRepository.findByMemberLogin(memberLoginId)).thenReturn(Optional.empty());
+        InvalidMemberIdException exception = assertThrows(InvalidMemberIdException.class, () -> {
+            familyMemberService.getAllMembersbygivenMemberId(memberLoginId);
+        });
+
+        assertEquals("This member is not registered", exception.getMessage());
+        verify(familyMemberRepository, times(1)).findByMemberLogin(memberLoginId); // Ensure repository method is called
+    }
+
+    @Test
+    void getAllMembersbygivenMemberId_memberExists() {
+
+        String memberLoginId = "existingMember";
+        FamilyMembers familyMembers = new FamilyMembers();
+        familyMembers.setMemberLogin(memberLoginId);
+
+        FamilyMemberDTO expectedFamilyMemberDTO = new FamilyMemberDTO();
+        expectedFamilyMemberDTO.setMemberLoginId(memberLoginId);
+        when(familyMemberRepository.findByMemberLogin(memberLoginId)).thenReturn(Optional.of(familyMembers));
+        when(familyMemberMapper.toDto(familyMembers)).thenReturn(expectedFamilyMemberDTO);
+
+        FamilyMemberDTO result = familyMemberService.getAllMembersbygivenMemberId(memberLoginId);
+
+        assertNotNull(result);
+        assertEquals(memberLoginId, result.getMemberLoginId());
+        verify(familyMemberRepository, times(1)).findByMemberLogin(memberLoginId); // Ensure repository method is called
+        verify(familyMemberMapper, times(1)).toDto(familyMembers); // Ensure mapper is called
+    }
+
+    @Test
+    void addNewFamilyMemberOnSignup_familyGroupDoesNotExist() {
+
+        String loginId = "newLoginId";
+        Long familyGroupId = 1L;
+        FamilyMemberDTO familyMemberDTO = new FamilyMemberDTO();
+        familyMemberDTO.setMemberLoginId(loginId);
+        familyMemberDTO.setFamilyGroupId(familyGroupId);
+
+        FamilyMembers newFamilyMember = new FamilyMembers();
+
+        when(familyMemberRepository.findByMemberLogin(loginId)).thenReturn(Optional.empty());
+        when(familyGroupRepository.findById(familyGroupId)).thenReturn(Optional.empty());
+
+        String result = familyMemberService.addNewFamilyMemberOnSignup(familyMemberDTO);
+
+
+        assertNotNull(result);
+        assertEquals(6, result.length());
+        verify(familyMemberRepository, times(1)).findByMemberLogin(loginId);
+        verify(familyGroupRepository, times(1)).findById(familyGroupId);
+        verify(familyMemberRepository, times(1)).save(any(FamilyMembers.class));
+    }
+    @Test
+    void loginExistingMember_successfulVerification() {
+
+        String memberLoginId = "testLoginId";
+        String pin = "123456";
+        LoginDTO loginDTO = new LoginDTO();
+        loginDTO.setMemberLoginId(memberLoginId);
+        loginDTO.setPin(pin);
+
+        FamilyMembers familyMembers = new FamilyMembers();
+        familyMembers.setMemberLogin(memberLoginId);
+        familyMembers.setPin(pin);
+        familyMembers.setStatus(Status.ACTIVE);
+
+        when(familyMemberRepository.findByMemberLogin(memberLoginId)).thenReturn(Optional.of(familyMembers));
+        String result = familyMemberService.loginExistingMember(loginDTO);
+
+        assertEquals("OTP sent successfully", result);
+        verify(familyMemberRepository, times(1)).findByMemberLogin(memberLoginId);
     }
 }
