@@ -146,7 +146,11 @@ public class OfferredCourseService {
         Specification<OfferedCourses> offeredCoursesSpecification =
                 Specification.where(OfferedCourseSpecification.withCourseName(offeredCouseSearchRequest.getCourseName()))
                         .and(OfferedCourseSpecification.withStartDate(offeredCouseSearchRequest.getStartDate()))
-                        .and(offeredCourseSpecification.withEndDate(offeredCouseSearchRequest.getEndDate()));
+                        .and(offeredCourseSpecification.withEndDate(offeredCouseSearchRequest.getEndDate()))
+                        .and(offeredCourseSpecification.withCity(offeredCouseSearchRequest.getCity()))
+                        .and(offeredCourseSpecification.withProvince(offeredCouseSearchRequest.getProvince()))
+                        .and(offeredCourseSpecification.hasCategory(offeredCouseSearchRequest.getCategoryName()))
+                        .and(offeredCourseSpecification.hasSubCategory(offeredCouseSearchRequest.getSubCategory()));
 
         List<OfferedCourses> offeredCoursesList = offeredCourseRepository.findAll(offeredCoursesSpecification);
         return offeredCoursesList.stream()

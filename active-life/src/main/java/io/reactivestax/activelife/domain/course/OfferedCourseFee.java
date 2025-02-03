@@ -34,7 +34,7 @@ public class OfferedCourseFee {
     @Column(name = "course_fee")
     private Long courseFee;
 
-    @JsonBackReference
+    @JsonManagedReference
     @OneToMany(mappedBy = "offeredCourseFee", cascade = CascadeType.PERSIST)
     private List<OfferedCourses> offeredCourses;
 

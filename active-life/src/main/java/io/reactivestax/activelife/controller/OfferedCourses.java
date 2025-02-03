@@ -18,10 +18,11 @@ public class OfferedCourses {
     private OfferredCourseService offerredCourseService;
 
     @PostMapping
-    public ResponseEntity<String> addNewCourseToOfferedCourse(@RequestBody OfferedCourseDTO offeredCourseDTO) {
-    offerredCourseService.addOfferedCourseToDatabase(offeredCourseDTO);
-        return ResponseEntity.ok("Courses added sucessfully : " );
+    public ResponseEntity<OfferedCourseDTO> addOfferedCourse(@RequestBody OfferedCourseDTO offeredCourseDTO) {
+        offerredCourseService.addOfferedCourseToDatabase(offeredCourseDTO);
+        return ResponseEntity.ok(offeredCourseDTO);
     }
+
 
     @GetMapping("/{id}")
     public ResponseEntity<OfferedCourseDTO> getOfferedCourse( @PathVariable Long id) {

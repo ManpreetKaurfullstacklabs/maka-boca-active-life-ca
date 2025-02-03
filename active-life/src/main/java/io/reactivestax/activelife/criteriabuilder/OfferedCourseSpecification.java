@@ -35,6 +35,40 @@ public class OfferedCourseSpecification {
                         : criteriaBuilder.equal(root.get("endDate"), endDate);
     }
 
+    public static Specification<OfferedCourses> withCity(String cityName) {
+        return (root, query, criteriaBuilder) ->
+                cityName == null || cityName.trim().isEmpty()
+                        ? criteriaBuilder.conjunction()
+                        : criteriaBuilder.like(
+                        criteriaBuilder.lower(root.get("facilities").get("city")),
+                        getWildcardSearch(cityName)
+                );
+    }
+    public static Specification<OfferedCourses> withProvince(String province) {
+        return (root, query, criteriaBuilder) ->
+                province == null || province.trim().isEmpty()
+                        ? criteriaBuilder.conjunction()
+                        : criteriaBuilder.like(
+                        criteriaBuilder.lower(root.get("facilities").get("province")),
+                        getWildcardSearch(province)
+                );
+    }
+    public static Specification<OfferedCourses> hasCategory(String category) {
+        return ((root, query, criteriaBuilder) -> category == null || category.isEmpty()
+                ? criteriaBuilder.conjunction() : criteriaBuilder.like(
+                criteriaBuilder.lower(root.get("courses").get("subcategories")
+                        .get("categories").get("name")),
+                getWildcardSearch(category)
+        ));
+    }
+    public static Specification<OfferedCourses> hasSubCategory(String subCategory) {
+        return ((root, query, criteriaBuilder) -> subCategory == null || subCategory.isEmpty()
+                ? criteriaBuilder.conjunction() : criteriaBuilder.like(
+                criteriaBuilder.lower(root.get("courses").get("subcategories").get("name")),
+                getWildcardSearch(subCategory)
+        ));
+    }
+
 
 
 

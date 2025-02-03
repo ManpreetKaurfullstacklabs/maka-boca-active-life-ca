@@ -52,7 +52,7 @@ public class OfferedCourses {
     @Column(name="registration_start_date")
     private LocalDate registrationStartDate;
 
-    @JsonManagedReference
+    @JsonBackReference
     @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name="courses_fee_id")
     private OfferedCourseFee offeredCourseFee;
@@ -68,6 +68,7 @@ public class OfferedCourses {
     @JoinColumn(name = "course_id")
     private  Courses  courses;
 
+    @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "facility_id")
     private Facilities facilities;
