@@ -1,4 +1,4 @@
-package io.reactivestax.activelife.criteriabuilder;
+package io.reactivestax.activelife.utility.criteriabuilder;
 
 import io.reactivestax.activelife.domain.course.OfferedCourses;
 

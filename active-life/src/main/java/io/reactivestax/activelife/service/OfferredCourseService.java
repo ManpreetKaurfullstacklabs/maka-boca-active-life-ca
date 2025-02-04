@@ -2,7 +2,7 @@ package io.reactivestax.activelife.service;
 
 import io.reactivestax.activelife.Enums.IsWaitListed;
 import io.reactivestax.activelife.utility.interfaces.OfferedCourseMapper;
-import io.reactivestax.activelife.criteriabuilder.OfferedCourseSpecification;
+import io.reactivestax.activelife.utility.criteriabuilder.OfferedCourseSpecification;
 import io.reactivestax.activelife.dto.OfferedCouseSearchRequestDTO;
 import io.reactivestax.activelife.domain.course.Courses;
 import io.reactivestax.activelife.domain.course.OfferedCourseFee;

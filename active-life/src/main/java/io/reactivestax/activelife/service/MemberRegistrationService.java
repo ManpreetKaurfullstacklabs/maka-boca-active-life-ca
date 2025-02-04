@@ -12,7 +12,7 @@ import io.reactivestax.activelife.exception.InvalidMemberIdException;
 
 import io.reactivestax.activelife.repository.memberregistration.MemberRegistrationRepository;
 import io.reactivestax.activelife.repository.memberregistration.FamilyGroupRepository;
-import io.reactivestax.activelife.repository.login.LoginRepository;
+import io.reactivestax.activelife.repository.memberregistration.LoginRepository;
 import io.reactivestax.activelife.utility.distribution.SmsService;
 import io.reactivestax.activelife.utility.interfaces.FamilyMemberMapper;
 import org.springframework.jms.core.JmsTemplate;

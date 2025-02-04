@@ -1,4 +1,4 @@
-package io.reactivestax.activelife.repository.login;
+package io.reactivestax.activelife.repository.memberregistration;
 
 import io.reactivestax.activelife.controller.MemberRegistration;
 import io.reactivestax.activelife.domain.membership.Login;

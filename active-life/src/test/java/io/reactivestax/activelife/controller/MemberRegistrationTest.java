@@ -31,7 +31,7 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
 @WebMvcTest(MemberRegistration.class)
-class FamilyMemberTest {
+class MemberRegistrationTest {
 
     @Autowired
     private MockMvc mockMvc;
