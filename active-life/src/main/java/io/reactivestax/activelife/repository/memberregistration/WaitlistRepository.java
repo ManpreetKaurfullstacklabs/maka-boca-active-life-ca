@@ -8,8 +8,6 @@ import java.util.List;
 
 public interface WaitlistRepository extends JpaRepository<WaitList, Long> {
     Long countByOfferedCourses_OfferedCourseIdAndIsWaitListed(Long offeredCourseId, IsWaitListed isWaitListed);
-
     List<WaitList> findByOfferedCourses_OfferedCourseIdAndIsWaitListed(Long offeredCourseId, IsWaitListed isWaitListed);
-
     List<WaitList> findByIsWaitListed(IsWaitListed isWaitListed);
 }

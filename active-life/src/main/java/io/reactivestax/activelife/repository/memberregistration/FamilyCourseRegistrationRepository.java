@@ -14,7 +14,5 @@ public interface FamilyCourseRegistrationRepository extends JpaRepository<Family
 
 
     Long countByOfferedCourseIdAndIsWithdrawn(OfferedCourses offeredCourse, IsWithdrawn isWithdrawn);
-    List<FamilyCourseRegistrations> findByIsWaitListed(IsWaitListed isWaitListed);
     Optional<FamilyCourseRegistrations> findByFamilyMemberIdAndOfferedCourseId(FamilyMembers familyMember, OfferedCourses offeredCourse);
- //   List<FamilyCourseRegistrations> findByFamilyMemberId(Long memberId);
 }
