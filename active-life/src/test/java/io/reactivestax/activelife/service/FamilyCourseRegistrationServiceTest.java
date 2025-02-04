@@ -1,12 +1,12 @@
 package io.reactivestax.activelife.service;
 
 import io.reactivestax.activelife.Enums.*;
+import io.reactivestax.activelife.domain.membership.MemberRegistration;
 import io.reactivestax.activelife.repository.memberregistration.MemberRegistrationRepository;
 import io.reactivestax.activelife.utility.distribution.SmsService;
 import io.reactivestax.activelife.domain.course.OfferedCourseFee;
 import io.reactivestax.activelife.domain.course.OfferedCourses;
 import io.reactivestax.activelife.domain.course.WaitList;
-import io.reactivestax.activelife.domain.membership.FamilyMembers;
 import io.reactivestax.activelife.domain.membership.FamilyCourseRegistrations;
 import io.reactivestax.activelife.dto.FamilyCourseRegistrationDTO;
 import io.reactivestax.activelife.exception.InvalidCourseIdException;
@@ -93,7 +93,7 @@ class FamilyCourseRegistrationServiceTest {
 
 
 
-        FamilyMembers familyMember = new FamilyMembers();
+        MemberRegistration familyMember = new MemberRegistration();
         familyMember.setFamilyMemberId(1L);
         familyMember.setStatus(Status.ACTIVE);
 
@@ -115,7 +115,7 @@ class FamilyCourseRegistrationServiceTest {
         dto.setFamilyMemberId(familyMemberId);
         dto.setOfferedCourseId(offeredCourseId);
 
-        FamilyMembers familyMember = new FamilyMembers();
+        MemberRegistration familyMember = new MemberRegistration();
         familyMember.setFamilyMemberId(familyMemberId);
         familyMember.setStatus(Status.ACTIVE);
 
@@ -150,7 +150,7 @@ class FamilyCourseRegistrationServiceTest {
         dto.setOfferedCourseId(offeredCourseId);
 
 
-        FamilyMembers familyMember = new FamilyMembers();
+        MemberRegistration familyMember = new MemberRegistration();
         familyMember.setFamilyMemberId(familyMemberId);
         familyMember.setStatus(Status.ACTIVE);
 
@@ -213,7 +213,7 @@ class FamilyCourseRegistrationServiceTest {
         offeredCourse.setOfferedCourseId(1L);
         offeredCourse.setAvailableForEnrollment(AvailableForEnrollment.YES);
 
-        FamilyMembers familyMember = new FamilyMembers();
+        MemberRegistration familyMember = new MemberRegistration();
         familyMember.setFamilyMemberId(101L);
         familyMember.setStatus(Status.ACTIVE);
 
@@ -237,7 +237,7 @@ class FamilyCourseRegistrationServiceTest {
         Long familyMemberId = 101L;
         Long offeredCourseId = 1L;
 
-        FamilyMembers familyMember = new FamilyMembers();
+        MemberRegistration familyMember = new MemberRegistration();
         familyMember.setFamilyMemberId(familyMemberId);
         familyMember.setStatus(Status.ACTIVE);
 
@@ -274,7 +274,7 @@ class FamilyCourseRegistrationServiceTest {
         Long familyMemberId = 101L;
         Long offeredCourseId = 1L;
 
-        FamilyMembers familyMember = new FamilyMembers();
+        MemberRegistration familyMember = new MemberRegistration();
         familyMember.setFamilyMemberId(familyMemberId);
         familyMember.setStatus(Status.INACTIVE);
         OfferedCourses offeredCourse = new OfferedCourses();
@@ -294,7 +294,7 @@ class FamilyCourseRegistrationServiceTest {
     @Test
     void testNotifyAllWaitlistedMembers() {
         WaitList waitList = new WaitList();
-        FamilyMembers waitlistedFamilyMember = new FamilyMembers();
+        MemberRegistration waitlistedFamilyMember = new MemberRegistration();
         waitList.setFamilyMember(waitlistedFamilyMember);
         waitlistRepository.save(waitList);
         familyCourseRegistrationService.notifyAllWaitlistedMembers(new OfferedCourses());
@@ -333,12 +333,12 @@ class FamilyCourseRegistrationServiceTest {
     @Test
      void testGetFamilyMember_whenMemberExists() {
         Long familyMemberId = 1L;
-        FamilyMembers familyMember = new FamilyMembers();
+        MemberRegistration familyMember = new MemberRegistration();
         familyMember.setFamilyMemberId(1L);
         familyMember.setStatus(Status.ACTIVE);
         when(memberRegistrationRepository.findById(familyMemberId)).thenReturn(Optional.of(familyMember));
 
-        FamilyMembers result = familyCourseRegistrationService.getFamilyMember(familyMemberId);
+        MemberRegistration result = familyCourseRegistrationService.getFamilyMember(familyMemberId);
 
         assertNotNull(result);
         assertEquals(familyMemberId, result.getFamilyMemberId());
@@ -347,7 +347,7 @@ class FamilyCourseRegistrationServiceTest {
     @Test
      void testGetFamilyMember_whenMemberDoesNotExist() {
         Long familyMemberId = 1L;
-        FamilyMembers familyMember = new FamilyMembers();
+        MemberRegistration familyMember = new MemberRegistration();
         familyMember.setFamilyMemberId(1L);
         when(memberRegistrationRepository.findById(familyMemberId)).thenReturn(Optional.empty());
 

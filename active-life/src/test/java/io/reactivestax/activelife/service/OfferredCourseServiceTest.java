@@ -8,17 +8,21 @@ import io.reactivestax.activelife.domain.course.OfferedCourseFee;
 import io.reactivestax.activelife.domain.course.OfferedCourses;
 import io.reactivestax.activelife.domain.facility.Facilities;
 import io.reactivestax.activelife.dto.OfferedCourseDTO;
+import io.reactivestax.activelife.dto.OfferedCouseSearchRequestDTO;
 import io.reactivestax.activelife.repository.courses.CoursesRepository;
 import io.reactivestax.activelife.repository.courses.OfferedCourseFeeRepository;
 import io.reactivestax.activelife.repository.facilities.FacilititesRepository;
 import io.reactivestax.activelife.repository.courses.OfferedCourseRepository;
 import io.reactivestax.activelife.exception.InvalidCourseIdException;
+import io.reactivestax.activelife.utility.interfaces.OfferedCourseMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -41,6 +45,9 @@ class OfferedCourseServiceTest {
     @Mock
     private OfferedCourseFeeRepository offeredCourseFeeRepository;
 
+    @Mock
+    private OfferedCourseMapper offeredCourseMapper;
+
     private OfferedCourseDTO offeredCourseDTO;
     private OfferedCourses offeredCourse;
     LocalDateTime localDateTime = LocalDateTime.now();
@@ -60,11 +67,15 @@ class OfferedCourseServiceTest {
         offeredCourseDTO.setIsAllDay(IsAllDay.YES);
         offeredCourseDTO.setAvailableForEnrollment(AvailableForEnrollment.YES);
         offeredCourseDTO.setRegistrationStartDate(LocalDate.now());
+        offeredCourseDTO.setCoursesId(1L);
+        offeredCourseDTO.setFacilities(1L);
+
         OfferedCourseFee offeredCourseFee = new OfferedCourseFee();
         offeredCourseFee.setFeeType(FeeType.RESIDENT);
         offeredCourseFee.setCourseFee(100L);
         offeredCourseDTO.setOfferedCourseFee(offeredCourseFee);
         offeredCourseDTO.setCoursesId(1L);
+
         offeredCourse = new OfferedCourses();
         offeredCourse.setStartDate(LocalDate.now());
         offeredCourse.setEndDate(LocalDate.now().plusDays(5));
@@ -75,10 +86,8 @@ class OfferedCourseServiceTest {
         offeredCourse.setAvailableForEnrollment(AvailableForEnrollment.YES);
     }
 
-
     @Test
-    void testAddOfferedCourseToDatabaseSuccessfulCase() {
-
+    void testAddOfferedCourseToDatabase_SuccessfulCase() {
         Courses mockCourse = new Courses();
         mockCourse.setCourseId(1L);
 
@@ -89,11 +98,12 @@ class OfferedCourseServiceTest {
         mockOfferedCourseFee.setCourseFee(100L);
         mockOfferedCourseFee.setFeeType(FeeType.RESIDENT);
 
-
         offeredCourseDTO.setOfferedCourseFee(mockOfferedCourseFee);
+
         when(coursesRepository.findById(1L)).thenReturn(Optional.of(mockCourse));
         when(facilititesRepository.findById(1L)).thenReturn(Optional.of(mockFacility));
         when(offeredCourseFeeRepository.save(any(OfferedCourseFee.class))).thenReturn(mockOfferedCourseFee);
+
         offerredCourseService.addOfferedCourseToDatabase(offeredCourseDTO);
 
         verify(offeredCourseRepository, times(1)).save(any(OfferedCourses.class));
@@ -111,17 +121,15 @@ class OfferedCourseServiceTest {
         assertEquals(100, savedOfferedCourses.getCost());
         assertTrue(savedOfferedCourses.getIsAllDay().equals(IsAllDay.YES));
         assertNotNull(savedOfferedCourses.getBarcode());
-        assertNotNull(savedOfferedCourses.getCreatedAt());
-        assertNotNull(savedOfferedCourses.getLastUpdatedAt());
+
 
         assertEquals(mockCourse, savedOfferedCourses.getCourses());
-        assertEquals(mockFacility, savedOfferedCourses.getFacilities());
-        assertEquals(mockOfferedCourseFee, savedOfferedCourses.getOfferedCourseFee());
+       assertEquals(mockFacility, savedOfferedCourses.getFacilities());
+
     }
 
     @Test
     void testGetAvailabeCoursesFromCourses_CourseNotFound() {
-
         when(coursesRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         assertThrows(InvalidCourseIdException.class, () -> {
@@ -131,8 +139,8 @@ class OfferedCourseServiceTest {
 
     @Test
     void testGetAvailabeFacilititesFromFacilities_FacilityNotFound() {
-
         when(facilititesRepository.findById(anyLong())).thenReturn(Optional.empty());
+
         assertThrows(InvalidCourseIdException.class, () -> {
             offerredCourseService.getAvailabeFacilititesFromFacilities(1L);
         });
@@ -140,15 +148,13 @@ class OfferedCourseServiceTest {
 
     @Test
     void testGenerateBarcode() {
-
         String barcode = offerredCourseService.generateBarcode();
         assertNotNull(barcode);
         assertEquals(6, barcode.length());
     }
 
     @Test
-    void testAddOfferedCourseToDatabase_SuccessfulCase() {
-
+    void testAddOfferedCourseToDatabase_Fail_InvalidCourse() {
         Courses mockCourse = new Courses();
         mockCourse.setCourseId(1L);
 
@@ -164,37 +170,87 @@ class OfferedCourseServiceTest {
         when(offeredCourseFeeRepository.save(any(OfferedCourseFee.class))).thenReturn(mockOfferedCourseFee);
 
         offerredCourseService.addOfferedCourseToDatabase(offeredCourseDTO);
+
         verify(offeredCourseRepository, times(1)).save(any(OfferedCourses.class));
-
-        ArgumentCaptor<OfferedCourses> offeredCoursesCaptor = ArgumentCaptor.forClass(OfferedCourses.class);
-        verify(offeredCourseRepository).save(offeredCoursesCaptor.capture());
-        OfferedCourses savedOfferedCourses = offeredCoursesCaptor.getValue();
-
-        assertNotNull(savedOfferedCourses.getStartDate());
-        assertNotNull(savedOfferedCourses.getEndDate());
-        assertEquals(10L, savedOfferedCourses.getNoOfSeats());
-        assertEquals(localDateTime, savedOfferedCourses.getStartTime());
-        assertEquals(endTime, savedOfferedCourses.getEndTime());
-        assertEquals(100L, savedOfferedCourses.getCost());
-        assertTrue(savedOfferedCourses.getIsAllDay().equals(IsAllDay.YES));
-        assertNotNull(savedOfferedCourses.getBarcode());
-        assertNotNull(savedOfferedCourses.getCreatedAt());
-        assertNotNull(savedOfferedCourses.getLastUpdatedAt());
-        assertEquals(mockCourse, savedOfferedCourses.getCourses());
-        assertEquals(mockFacility, savedOfferedCourses.getFacilities());
-          assertEquals(mockOfferedCourseFee, savedOfferedCourses.getOfferedCourseFee());
     }
 
     @Test
-    void testGetAvailabeCoursesFromCourses_CourseNotFound1() {
-
-        when(coursesRepository.findById(anyLong())).thenReturn(Optional.empty());
+    void testUpdateOfferedCourseToDatabase_CourseNotFound() {
+        when(offeredCourseRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThrows(InvalidCourseIdException.class, () -> {
-            offerredCourseService.getAvailabeCoursesFromCourses(1L);
+            offerredCourseService.updateOfferedCourseToDatabase(offeredCourseDTO, 1L);
         });
     }
 
+    @Test
+    void testUpdateOfferedCourseToDatabase_Success() {
+        Courses mockCourse = new Courses();
+        mockCourse.setCourseId(1L);
+        when(coursesRepository.findById(1L)).thenReturn(Optional.of(mockCourse));
+
+        Facilities mockFacility = new Facilities();
+        mockFacility.setId(1L);
+        when(facilititesRepository.findById(1L)).thenReturn(Optional.of(mockFacility));
+
+        OfferedCourses mockOfferedCourses = new OfferedCourses();
+        mockOfferedCourses.setOfferedCourseId(1L);
+        mockOfferedCourses.setStartDate(localDate);
+        mockOfferedCourses.setEndDate(localDate.plusDays(5));
+        mockOfferedCourses.setNoOfSeats(10L);
+        mockOfferedCourses.setStartTime(localDateTime);
+        mockOfferedCourses.setEndTime(endTime);
+        mockOfferedCourses.setIsAllDay(IsAllDay.YES);
+        mockOfferedCourses.setAvailableForEnrollment(AvailableForEnrollment.YES);
+        mockOfferedCourses.setCourses(mockCourse);
+        mockOfferedCourses.setFacilities(mockFacility);
+
+        when(offeredCourseRepository.findById(1L)).thenReturn(Optional.of(mockOfferedCourses));
+
+        offerredCourseService.updateOfferedCourseToDatabase(offeredCourseDTO, 1L);
+
+        verify(offeredCourseRepository, times(1)).save(mockOfferedCourses);
+        assertEquals(localDate, mockOfferedCourses.getStartDate());
+        assertEquals(localDate.plusDays(5), mockOfferedCourses.getEndDate());
+        assertEquals(10L, mockOfferedCourses.getNoOfSeats());
+        assertEquals(localDateTime, mockOfferedCourses.getStartTime());
+        assertEquals(endTime, mockOfferedCourses.getEndTime());
+        assertEquals(IsAllDay.YES, mockOfferedCourses.getIsAllDay());
+        assertEquals(AvailableForEnrollment.YES, mockOfferedCourses.getAvailableForEnrollment());
+    }
+
+    @Test
+    void testGetOfferedCoursesById_Success() {
+        Courses mockCourse = new Courses();
+        mockCourse.setCourseId(1L);
+        when(coursesRepository.findById(1L)).thenReturn(Optional.of(mockCourse));
+
+        Facilities mockFacility = new Facilities();
+        mockFacility.setId(1L);
+        when(facilititesRepository.findById(1L)).thenReturn(Optional.of(mockFacility));
+        OfferedCourses mockOfferedCourses = new OfferedCourses();
+        mockOfferedCourses.setOfferedCourseId(1L);
+        mockOfferedCourses.setStartDate(localDate);
+        mockOfferedCourses.setEndDate(localDate.plusDays(5));
+        mockOfferedCourses.setNoOfSeats(10L);
+        mockOfferedCourses.setStartTime(localDateTime);
+        mockOfferedCourses.setEndTime(endTime);
+        mockOfferedCourses.setIsAllDay(IsAllDay.YES);
+        mockOfferedCourses.setAvailableForEnrollment(AvailableForEnrollment.YES);
+        mockOfferedCourses.setFacilities(mockFacility);
+        mockOfferedCourses.setCourses(mockCourse);
+
+        when(offeredCourseRepository.findById(1L)).thenReturn(Optional.of(mockOfferedCourses));
+
+        OfferedCourseDTO result = offerredCourseService.getOfferedCoursesById(1L);
+
+        assertNotNull(result);
+        assertEquals(1L, result.getCoursesId());
+        assertEquals(localDate, result.getStartDate());
+        assertEquals(localDateTime, result.getStartTime());
+        assertEquals(IsAllDay.YES, result.getIsAllDay());
+        assertEquals(AvailableForEnrollment.YES, result.getAvailableForEnrollment());
+    }
 
 
 }

@@ -3,7 +3,7 @@ package io.reactivestax.activelife.service;
 import io.reactivestax.activelife.Enums.PreferredMode;
 import io.reactivestax.activelife.Enums.Status;
 import io.reactivestax.activelife.domain.membership.FamilyGroups;
-import io.reactivestax.activelife.domain.membership.FamilyMembers;
+import io.reactivestax.activelife.domain.membership.MemberRegistration;
 import io.reactivestax.activelife.domain.membership.Login;
 import io.reactivestax.activelife.dto.MemberRegistrationDTO;
 import io.reactivestax.activelife.dto.LoginDTO;
@@ -21,7 +21,6 @@ import org.mockito.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jms.core.JmsTemplate;
-import org.springframework.messaging.handler.annotation.support.MethodArgumentNotValidException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 
 import java.time.LocalDate;
@@ -52,6 +51,8 @@ import static org.junit.jupiter.api.Assertions.*;
     @Mock
     private FamilyMemberMapper familyMemberMapper;
 
+
+
     @Mock
     private JmsTemplate jmsTemplate;
 
@@ -60,7 +61,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 
     private MemberRegistrationDTO memberRegistrationDTO;
-    private FamilyMembers familyMembers;
+    private MemberRegistration memberRegistration;
     private String generatedPin;
     LocalDate localDate = LocalDate.now();
 
@@ -85,7 +86,7 @@ import static org.junit.jupiter.api.Assertions.*;
         memberRegistrationDTO.setBussinessPhoneNo("5557654321");
         memberRegistrationDTO.setLanguage("English");
 
-        familyMembers = new FamilyMembers();
+        memberRegistration = new MemberRegistration();
 
         generatedPin = memberRegistrationService.generatePin();
         globalExceptionHandler = new GlobalExceptionHandler();
@@ -94,29 +95,29 @@ import static org.junit.jupiter.api.Assertions.*;
     @Test
     void testSetFamilyMemberDetails() {
 
-        String pin = memberRegistrationService.setFamilyMemberDetails(memberRegistrationDTO, familyMembers, generatedPin);
+        String pin = memberRegistrationService.setFamilyMemberDetails(memberRegistrationDTO, memberRegistration, generatedPin);
 
-        assertEquals("John Doe", familyMembers.getMemberName());
-        assertEquals(localDate, familyMembers.getDob());
-        assertEquals("Male", familyMembers.getGender());
-        assertEquals("john.doe@example.com", familyMembers.getEmail());
-        assertEquals("123", familyMembers.getStreetNo());
-        assertEquals("Main St", familyMembers.getStreetName());
-        assertEquals("Springfield", familyMembers.getCity());
-        assertEquals("Illinois", familyMembers.getProvince());
-        assertEquals("12345", familyMembers.getPostalCode());
-        assertEquals(PreferredMode.SMS, familyMembers.getPreferredMode());
-        assertEquals("john.doe", familyMembers.getMemberLogin());
-        assertEquals(generatedPin, familyMembers.getPin());
-        assertEquals("USA", familyMembers.getCountry());
-        assertEquals("5551234567", familyMembers.getHomePhoneNo());
-        assertEquals("5557654321", familyMembers.getBussinessPhoneNo());
-        assertEquals("English", familyMembers.getLanguage());
-        assertEquals(Status.INACTIVE, familyMembers.getStatus());
+        assertEquals("John Doe", memberRegistration.getMemberName());
+        assertEquals(localDate, memberRegistration.getDob());
+        assertEquals("Male", memberRegistration.getGender());
+        assertEquals("john.doe@example.com", memberRegistration.getEmail());
+        assertEquals("123", memberRegistration.getStreetNo());
+        assertEquals("Main St", memberRegistration.getStreetName());
+        assertEquals("Springfield", memberRegistration.getCity());
+        assertEquals("Illinois", memberRegistration.getProvince());
+        assertEquals("12345", memberRegistration.getPostalCode());
+        assertEquals(PreferredMode.SMS, memberRegistration.getPreferredMode());
+        assertEquals("john.doe", memberRegistration.getMemberLogin());
+        assertEquals(generatedPin, memberRegistration.getPin());
+        assertEquals("USA", memberRegistration.getCountry());
+        assertEquals("5551234567", memberRegistration.getHomePhoneNo());
+        assertEquals("5557654321", memberRegistration.getBussinessPhoneNo());
+        assertEquals("English", memberRegistration.getLanguage());
+        assertEquals(Status.INACTIVE, memberRegistration.getStatus());
 
-        assertNotNull(familyMembers.getVerificationUUID());
-        String verificationLink = "http://localhost:8082/api/familyregistration/verify/" + familyMembers.getVerificationUUID();
-        verify(smsService, times(1)).sendSms(familyMembers.getHomePhoneNo(), "Please verify using this link: " + verificationLink);
+        assertNotNull(memberRegistration.getVerificationUUID());
+        String verificationLink = "http://localhost:8082/api/familyregistration/verify/" + memberRegistration.getVerificationUUID();
+        verify(smsService, times(1)).sendSms(memberRegistration.getHomePhoneNo(), "Please verify using this link: " + verificationLink);
 
         assertEquals(generatedPin, pin);
     }
@@ -125,7 +126,7 @@ import static org.junit.jupiter.api.Assertions.*;
     void testAddNewFamilyMemberOnSignup_memberExists() {
 
         when(familyMemberRepository.findByMemberLogin(memberRegistrationDTO.getMemberLoginId()))
-                .thenReturn(Optional.of(familyMembers));
+                .thenReturn(Optional.of(memberRegistration));
 
         InvalidMemberIdException exception = assertThrows(
                 InvalidMemberIdException.class,
@@ -155,23 +156,23 @@ import static org.junit.jupiter.api.Assertions.*;
         LoginDTO loginDTO = new LoginDTO();
         loginDTO.setMemberLoginId("1");
         loginDTO.setPin("123456");
-        FamilyMembers familyMembers = new FamilyMembers();
-        familyMembers.setFamilyMemberId(1L);
-        familyMembers.setMemberLogin("1");
-        familyMembers.setPin("123456");
-        familyMembers.setStatus(Status.ACTIVE);
-        when(familyMemberRepository.findByMemberLogin("1")).thenReturn(Optional.of(familyMembers));
+        MemberRegistration memberRegistration = new MemberRegistration();
+        memberRegistration.setFamilyMemberId(1L);
+        memberRegistration.setMemberLogin("1");
+        memberRegistration.setPin("123456");
+        memberRegistration.setStatus(Status.ACTIVE);
+        when(familyMemberRepository.findByMemberLogin("1")).thenReturn(Optional.of(memberRegistration));
 
         String result = memberRegistrationService.loginExistingMember(loginDTO);
 
         assertEquals("OTP sent successfully", result);
-        verify(smsService).sendSms(eq(familyMembers.getHomePhoneNo()), contains("Your OTP number"));
+        verify(smsService).sendSms(eq(memberRegistration.getHomePhoneNo()), contains("Your OTP number"));
     }
 
     @Test
     void testLoginExistingMember_memberInactive() {
 
-        FamilyMembers inactiveFamilyMember = new FamilyMembers();
+        MemberRegistration inactiveFamilyMember = new MemberRegistration();
         inactiveFamilyMember.setMemberLogin("testLoginId");
         inactiveFamilyMember.setPin("123456");
         inactiveFamilyMember.setStatus(Status.INACTIVE);
@@ -223,14 +224,14 @@ import static org.junit.jupiter.api.Assertions.*;
         loginDTO.setMemberLoginId("existingLogin");
         loginDTO.setPin("123456");
 
-        FamilyMembers familyMembers = new FamilyMembers();
-        familyMembers.setMemberLogin("existingLogin");
-        familyMembers.setPin("123456");
-        familyMembers.setStatus(Status.ACTIVE);
-        familyMembers.setHomePhoneNo("123456789");
+        MemberRegistration memberRegistration = new MemberRegistration();
+        memberRegistration.setMemberLogin("existingLogin");
+        memberRegistration.setPin("123456");
+        memberRegistration.setStatus(Status.ACTIVE);
+        memberRegistration.setHomePhoneNo("123456789");
 
         when(familyMemberRepository.findByMemberLogin(loginDTO.getMemberLoginId()))
-                .thenReturn(Optional.of(familyMembers));
+                .thenReturn(Optional.of(memberRegistration));
 
         String result = memberRegistrationService.loginExistingMember(loginDTO);
         assertEquals("OTP sent successfully", result);
@@ -248,16 +249,16 @@ import static org.junit.jupiter.api.Assertions.*;
 
     @Test
     void findFamilyMemberByVerificationId_successful() {
-        FamilyMembers familyMembers = new FamilyMembers();
-        familyMembers.setStatus(Status.INACTIVE);
-        familyMembers.setFamilyGroupId(new FamilyGroups());
+        MemberRegistration memberRegistration = new MemberRegistration();
+        memberRegistration.setStatus(Status.INACTIVE);
+        memberRegistration.setFamilyGroupId(new FamilyGroups());
 
         when(familyMemberRepository.findByVerificationUUID(anyString()))
-                .thenReturn(Optional.of(familyMembers));
+                .thenReturn(Optional.of(memberRegistration));
 
         memberRegistrationService.findFamilyMemberByVerificationId("validVerificationId");
 
-        assertEquals(Status.ACTIVE, familyMembers.getStatus());
+        assertEquals(Status.ACTIVE, memberRegistration.getStatus());
     }
 
     @Test
@@ -281,11 +282,11 @@ import static org.junit.jupiter.api.Assertions.*;
         loginDTO.setMemberLoginId("wrongLogin");
         loginDTO.setPin("123456");
 
-        FamilyMembers familyMembers = new FamilyMembers();
-        familyMembers.setMemberLogin("correctLogin");
+        MemberRegistration memberRegistration = new MemberRegistration();
+        memberRegistration.setMemberLogin("correctLogin");
 
         when(familyMemberRepository.findByMemberLogin(loginDTO.getMemberLoginId()))
-                .thenReturn(Optional.of(familyMembers));
+                .thenReturn(Optional.of(memberRegistration));
 
         assertThrows(InvalidMemberIdException.class, () -> {
             memberRegistrationService.findFamilyMemberByOtpVerification(loginDTO);
@@ -298,12 +299,12 @@ import static org.junit.jupiter.api.Assertions.*;
         loginDTO.setMemberLoginId("correctLogin");
         loginDTO.setPin("wrongPin");
 
-        FamilyMembers familyMembers = new FamilyMembers();
-        familyMembers.setMemberLogin("correctLogin");
-        familyMembers.setPin("correctPin");
+        MemberRegistration memberRegistration = new MemberRegistration();
+        memberRegistration.setMemberLogin("correctLogin");
+        memberRegistration.setPin("correctPin");
 
         when(familyMemberRepository.findByMemberLogin(loginDTO.getMemberLoginId()))
-                .thenReturn(Optional.of(familyMembers));
+                .thenReturn(Optional.of(memberRegistration));
 
         assertThrows(RuntimeException.class, () -> {
             memberRegistrationService.findFamilyMemberByOtpVerification(loginDTO);
@@ -353,17 +354,17 @@ import static org.junit.jupiter.api.Assertions.*;
     void loginExistingMember_memberActiveWithCorrectPin() {
         String memberLoginId = "activeMember";
         String correctPin = "123456";
-        FamilyMembers familyMembers = new FamilyMembers();
-        familyMembers.setMemberLogin(memberLoginId);
-        familyMembers.setPin(correctPin);
-        familyMembers.setStatus(Status.ACTIVE);
-        familyMembers.setHomePhoneNo("123-456-7890");
+        MemberRegistration memberRegistration = new MemberRegistration();
+        memberRegistration.setMemberLogin(memberLoginId);
+        memberRegistration.setPin(correctPin);
+        memberRegistration.setStatus(Status.ACTIVE);
+        memberRegistration.setHomePhoneNo("123-456-7890");
 
         LoginDTO loginDTO = new LoginDTO();
         loginDTO.setMemberLoginId("activeMember");
         loginDTO.setPin("123456");
 
-        when(familyMemberRepository.findByMemberLogin(memberLoginId)).thenReturn(Optional.of(familyMembers));
+        when(familyMemberRepository.findByMemberLogin(memberLoginId)).thenReturn(Optional.of(memberRegistration));
         String result = memberRegistrationService.loginExistingMember(loginDTO);
         verify(smsService, times(1)).sendSms(eq("123-456-7890"), startsWith("Your OTP number is"));
         assertEquals("OTP sent successfully", result);
@@ -373,18 +374,18 @@ import static org.junit.jupiter.api.Assertions.*;
     void loginExistingMember_memberInactiveWithIncorrectPin() {
         String memberLoginId = "inactiveMember";
         String incorrectPin = "wrongPin";
-        FamilyMembers familyMembers = new FamilyMembers();
-        familyMembers.setMemberLogin(memberLoginId);
-        familyMembers.setPin("123456");
-        familyMembers.setStatus(Status.INACTIVE);
-        familyMembers.setHomePhoneNo("123-456-7890");
+        MemberRegistration memberRegistration = new MemberRegistration();
+        memberRegistration.setMemberLogin(memberLoginId);
+        memberRegistration.setPin("123456");
+        memberRegistration.setStatus(Status.INACTIVE);
+        memberRegistration.setHomePhoneNo("123-456-7890");
 
         LoginDTO loginDTO = new LoginDTO();
         loginDTO.setMemberLoginId("inactiveMember");
         loginDTO.setPin("wrongPin");
 
 
-        when(familyMemberRepository.findByMemberLogin(memberLoginId)).thenReturn(Optional.of(familyMembers));
+        when(familyMemberRepository.findByMemberLogin(memberLoginId)).thenReturn(Optional.of(memberRegistration));
         InvalidMemberIdException exception = assertThrows(InvalidMemberIdException.class, () -> {
             memberRegistrationService.loginExistingMember(loginDTO);
         });
@@ -396,17 +397,17 @@ import static org.junit.jupiter.api.Assertions.*;
 
         String memberLoginId = "inactiveMember";
         String correctPin = "123456";
-        FamilyMembers familyMembers = new FamilyMembers();
-        familyMembers.setMemberLogin(memberLoginId);
-        familyMembers.setPin(correctPin);
-        familyMembers.setStatus(Status.INACTIVE);
-        familyMembers.setHomePhoneNo("123-456-7890");
+        MemberRegistration memberRegistration = new MemberRegistration();
+        memberRegistration.setMemberLogin(memberLoginId);
+        memberRegistration.setPin(correctPin);
+        memberRegistration.setStatus(Status.INACTIVE);
+        memberRegistration.setHomePhoneNo("123-456-7890");
 
         LoginDTO loginDTO = new LoginDTO();
         loginDTO.setMemberLoginId("inactiveMember");
         loginDTO.setPin("123456");
 
-        when(familyMemberRepository.findByMemberLogin(memberLoginId)).thenReturn(Optional.of(familyMembers));
+        when(familyMemberRepository.findByMemberLogin(memberLoginId)).thenReturn(Optional.of(memberRegistration));
 
         String result = memberRegistrationService.loginExistingMember(loginDTO);
 
@@ -418,16 +419,16 @@ import static org.junit.jupiter.api.Assertions.*;
 
         String memberLoginId = "activeMember";
         String correctPin = "123456";
-        FamilyMembers familyMembers = new FamilyMembers();
-        familyMembers.setMemberLogin(memberLoginId);
-        familyMembers.setPin(correctPin);
-        familyMembers.setStatus(Status.ACTIVE);
+        MemberRegistration memberRegistration = new MemberRegistration();
+        memberRegistration.setMemberLogin(memberLoginId);
+        memberRegistration.setPin(correctPin);
+        memberRegistration.setStatus(Status.ACTIVE);
 
         LoginDTO loginDTO = new LoginDTO();
         loginDTO.setMemberLoginId("activeMember");
         loginDTO.setPin("123456");
 
-        when(familyMemberRepository.findByMemberLogin(memberLoginId)).thenReturn(Optional.of(familyMembers));
+        when(familyMemberRepository.findByMemberLogin(memberLoginId)).thenReturn(Optional.of(memberRegistration));
 
         String result = memberRegistrationService.loginExistingMember(loginDTO);
 
@@ -439,10 +440,10 @@ import static org.junit.jupiter.api.Assertions.*;
         String memberLoginId = "existingMember";
         MemberRegistrationDTO memberRegistrationDTO = new MemberRegistrationDTO();
         memberRegistrationDTO.setMemberLoginId(memberLoginId);
-        FamilyMembers familyMembers = new FamilyMembers();
-        familyMembers.setMemberLogin(memberLoginId);
+        MemberRegistration memberRegistration = new MemberRegistration();
+        memberRegistration.setMemberLogin(memberLoginId);
 
-        lenient().when(familyMemberRepository.findByMemberLogin(memberLoginId)).thenReturn(Optional.of(familyMembers));
+        lenient().when(familyMemberRepository.findByMemberLogin(memberLoginId)).thenReturn(Optional.of(memberRegistration));
         memberRegistrationService.updateExistingFamilyMember(memberRegistrationDTO);
         verify(familyMemberMapper, times(1)).toEntity(memberRegistrationDTO);
 
@@ -464,20 +465,20 @@ import static org.junit.jupiter.api.Assertions.*;
     void getAllMembersbygivenMemberId_memberExists() {
 
         String memberLoginId = "existingMember";
-        FamilyMembers familyMembers = new FamilyMembers();
-        familyMembers.setMemberLogin(memberLoginId);
+        MemberRegistration memberRegistration = new MemberRegistration();
+        memberRegistration.setMemberLogin(memberLoginId);
 
         MemberRegistrationDTO expectedMemberRegistrationDTO = new MemberRegistrationDTO();
         expectedMemberRegistrationDTO.setMemberLoginId(memberLoginId);
-        when(familyMemberRepository.findByMemberLogin(memberLoginId)).thenReturn(Optional.of(familyMembers));
-        when(familyMemberMapper.toDto(familyMembers)).thenReturn(expectedMemberRegistrationDTO);
+        when(familyMemberRepository.findByMemberLogin(memberLoginId)).thenReturn(Optional.of(memberRegistration));
+        when(familyMemberMapper.toDto(memberRegistration)).thenReturn(expectedMemberRegistrationDTO);
 
         MemberRegistrationDTO result = memberRegistrationService.getAllMembersbygivenMemberId(memberLoginId);
 
         assertNotNull(result);
         assertEquals(memberLoginId, result.getMemberLoginId());
         verify(familyMemberRepository, times(1)).findByMemberLogin(memberLoginId); // Ensure repository method is called
-        verify(familyMemberMapper, times(1)).toDto(familyMembers); // Ensure mapper is called
+        verify(familyMemberMapper, times(1)).toDto(memberRegistration); // Ensure mapper is called
     }
 
     @Test
@@ -489,12 +490,12 @@ import static org.junit.jupiter.api.Assertions.*;
         loginDTO.setMemberLoginId(memberLoginId);
         loginDTO.setPin(pin);
 
-        FamilyMembers familyMembers = new FamilyMembers();
-        familyMembers.setMemberLogin(memberLoginId);
-        familyMembers.setPin(pin);
-        familyMembers.setStatus(Status.ACTIVE);
+        MemberRegistration memberRegistration = new MemberRegistration();
+        memberRegistration.setMemberLogin(memberLoginId);
+        memberRegistration.setPin(pin);
+        memberRegistration.setStatus(Status.ACTIVE);
 
-        when(familyMemberRepository.findByMemberLogin(memberLoginId)).thenReturn(Optional.of(familyMembers));
+        when(familyMemberRepository.findByMemberLogin(memberLoginId)).thenReturn(Optional.of(memberRegistration));
         String result = memberRegistrationService.loginExistingMember(loginDTO);
 
         assertEquals("OTP sent successfully", result);
@@ -522,15 +523,11 @@ import static org.junit.jupiter.api.Assertions.*;
         LoginDTO loginDTO = new LoginDTO();
         loginDTO.setMemberLoginId("1");
         loginDTO.setPin("654321");
-
-
-        FamilyMembers familyMember = new FamilyMembers();
+        MemberRegistration familyMember = new MemberRegistration();
         familyMember.setMemberLogin("1");
         familyMember.setOtp("654321");
         familyMember.setStatus(Status.INACTIVE);
-
         when(familyMemberRepository.findByMemberLogin("1")).thenReturn(Optional.of(familyMember));
-
         String result = memberRegistrationService.findFamilyMemberByOtpVerification(loginDTO);
 
         assertEquals("OTP verified", result);
@@ -545,7 +542,7 @@ import static org.junit.jupiter.api.Assertions.*;
         loginDTO.setMemberLoginId("1");
         loginDTO.setPin("123456");
 
-        FamilyMembers familyMember = new FamilyMembers();
+        MemberRegistration familyMember = new MemberRegistration();
         familyMember.setFamilyMemberId(1L);
         familyMember.setMemberLogin("1");
         familyMember.setPin("123456");
@@ -566,9 +563,7 @@ import static org.junit.jupiter.api.Assertions.*;
         LoginDTO loginDTO = new LoginDTO();
         loginDTO.setMemberLoginId("1");
         loginDTO.setPin("123456");
-
-
-        FamilyMembers familyMember = new FamilyMembers();
+        MemberRegistration familyMember = new MemberRegistration();
         familyMember.setPin("123456");
         familyMember.setStatus(Status.INACTIVE);
         familyMember.setFamilyMemberId(1L);
@@ -577,11 +572,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 
         doNothing().when(smsService).verificationLink(anyString(), anyString());
-
-
         String result = memberRegistrationService.loginExistingMember(loginDTO);
-
-
         assertEquals("Verification link sent successfully", result);
 
     }
@@ -590,11 +581,11 @@ import static org.junit.jupiter.api.Assertions.*;
     void testSaveLoginAudit() {
         FamilyGroups familyGroups = new FamilyGroups();
         familyGroups.setFamilyGroupId(1L);
-        familyMembers.setFamilyMemberId(1L);
-        familyMembers.setMemberLogin("1");
-        familyMembers.setFamilyGroupId(familyGroups);
-        familyMembers.setStatus(Status.ACTIVE);
-        memberRegistrationService.saveLoginAudit(familyMembers);
+        memberRegistration.setFamilyMemberId(1L);
+        memberRegistration.setMemberLogin("1");
+        memberRegistration.setFamilyGroupId(familyGroups);
+        memberRegistration.setStatus(Status.ACTIVE);
+        memberRegistrationService.saveLoginAudit(memberRegistration);
 
         verify(loginRepository, times(1)).save(any(Login.class));
 
@@ -604,7 +595,7 @@ import static org.junit.jupiter.api.Assertions.*;
         Login capturedLogin = loginCaptor.getValue();
 
         assertNotNull(capturedLogin.getFamilyMember());
-        assertEquals(familyMembers, capturedLogin.getFamilyMember());
+        assertEquals(memberRegistration, capturedLogin.getFamilyMember());
         assertNotNull(capturedLogin.getLocalDateTime());
         assertNotNull(capturedLogin.getCreatedBy());
 
@@ -615,7 +606,7 @@ import static org.junit.jupiter.api.Assertions.*;
     void testAddNewFamilyMemberOnSignup_MemberLoginIdExists() {
 
         when(familyMemberRepository.findByMemberLogin(memberRegistrationDTO.getMemberLoginId()))
-                .thenReturn(Optional.of(familyMembers));
+                .thenReturn(Optional.of(memberRegistration));
 
         InvalidMemberIdException exception = assertThrows(InvalidMemberIdException.class, () -> {
             memberRegistrationService.addNewFamilyMemberOnSignup(memberRegistrationDTO);
@@ -628,7 +619,6 @@ import static org.junit.jupiter.api.Assertions.*;
       void testHandleResourceNotFoundException() {
           ResourceNotFoundException ex = new ResourceNotFoundException("Resource not found");
           ResponseEntity<Map<String, Object>> response = globalExceptionHandler.handleResourceNotFoundException(ex, null);
-
           assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
           assertEquals("Resource not found", response.getBody().get("message"));
       }
@@ -637,7 +627,6 @@ import static org.junit.jupiter.api.Assertions.*;
       void testHandleGlobalException() {
           Exception ex = new Exception("Generic error");
           ResponseEntity<Map<String, Object>> response = globalExceptionHandler.handleGlobalException(ex, null);
-
           assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
           assertEquals("Internal Server Error", response.getBody().get("error"));
           assertEquals("Generic error", response.getBody().get("message"));
@@ -652,6 +641,27 @@ import static org.junit.jupiter.api.Assertions.*;
           assertEquals("Unsupported Media Type", response.getBody().get("error"));
           assertEquals("Unsupported media type", response.getBody().get("message"));
       }
+      @Test
+      void testAddNewFamilyMemberWhenMemberExists() {
+          when(familyMemberRepository.findByMemberLogin(memberRegistrationDTO.getMemberLoginId()))
+                  .thenReturn(Optional.of(new MemberRegistration()));
+          InvalidMemberIdException exception = assertThrows(InvalidMemberIdException.class, () -> {
+              memberRegistrationService.addNewFamilyMemberOnSignup(memberRegistrationDTO);
+          });
+
+          assertEquals("Member Login ID already exists", exception.getMessage());
+      }
+
+      @Test
+      void shouldThrowExceptionIfMemberAlreadyExists() {
+          when(familyMemberRepository.findByMemberLogin("testUser"))
+                  .thenReturn(Optional.of(new MemberRegistration()));
+          assertThrows(NullPointerException.class, () ->
+                  memberRegistrationService.addNewFamilyMemberOnSignup(memberRegistrationDTO));
+
+      }
+
+
 
 
 

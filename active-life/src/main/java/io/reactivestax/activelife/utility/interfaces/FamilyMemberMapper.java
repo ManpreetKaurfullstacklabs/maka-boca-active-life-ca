@@ -1,6 +1,6 @@
 package io.reactivestax.activelife.utility.interfaces;
 
-import io.reactivestax.activelife.domain.membership.FamilyMembers;
+import io.reactivestax.activelife.domain.membership.MemberRegistration;
 import io.reactivestax.activelife.dto.MemberRegistrationDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -11,8 +11,8 @@ public interface FamilyMemberMapper {
 
     FamilyMemberMapper INSTANCE = Mappers.getMapper(FamilyMemberMapper.class);
     @Mapping(source = "familyGroupId.familyGroupId", target = "familyGroupId")
-    MemberRegistrationDTO toDto(FamilyMembers familyMembers);
+    MemberRegistrationDTO toDto(MemberRegistration memberRegistration);
 
     @Mapping(source = "familyGroupId", target = "familyGroupId.familyGroupId")
-    FamilyMembers toEntity(MemberRegistrationDTO memberRegistrationDTO);
+    MemberRegistration toEntity(MemberRegistrationDTO memberRegistrationDTO);
 }

@@ -10,7 +10,7 @@ import io.reactivestax.activelife.domain.course.Courses;
 import io.reactivestax.activelife.domain.course.OfferedCourseFee;
 import io.reactivestax.activelife.domain.course.OfferedCourses;
 import io.reactivestax.activelife.domain.membership.FamilyCourseRegistrations;
-import io.reactivestax.activelife.domain.membership.FamilyMembers;
+import io.reactivestax.activelife.domain.membership.MemberRegistration;
 import io.reactivestax.activelife.domain.course.WaitList;
 import io.reactivestax.activelife.dto.FamilyCourseRegistrationDTO;
 import io.reactivestax.activelife.exception.InvalidCourseIdException;
@@ -55,7 +55,7 @@ public class FamilyCourseRegistrationService {
         OfferedCourses offeredCourse = getOfferedCourse(familyCourseRegistrationDTO.getOfferedCourseId());
         Long availableSeats = offeredCourse.getNoOfSeats();
         Long enrolledCount = familyCourseRegistrationRepository.countByOfferedCourseIdAndIsWithdrawn(offeredCourse, IsWithdrawn.NO);
-        FamilyMembers familyMember = getFamilyMember(familyCourseRegistrationDTO.getFamilyMemberId());
+        MemberRegistration familyMember = getFamilyMember(familyCourseRegistrationDTO.getFamilyMemberId());
         Optional<FamilyCourseRegistrations> existingRegistration = familyCourseRegistrationRepository
                 .findByFamilyMemberIdAndOfferedCourseId(familyMember, offeredCourse);
 
@@ -73,6 +73,7 @@ public class FamilyCourseRegistrationService {
 
     private void handleWaitlist(Long familyMemberId, Long offeredCourseId) {
         Long waitlistCount = waitlistRepository.countByOfferedCourses_OfferedCourseIdAndIsWaitListed(offeredCourseId, IsWaitListed.YES);
+
         if (waitlistCount < MAX_WAITLIST_SIZE) {
             addToWaitlist(familyMemberId, offeredCourseId);
         } else {
@@ -82,8 +83,9 @@ public class FamilyCourseRegistrationService {
     }
 
     public String addToWaitlist(Long familyMemberId, Long offeredCourseId) {
-        FamilyMembers familyMember = getFamilyMember(familyMemberId);
+        MemberRegistration familyMember = getFamilyMember(familyMemberId);
         OfferedCourses offeredCourse = getOfferedCourse(offeredCourseId);
+
         WaitList waitList = new WaitList();
         waitList.setFamilyMember(familyMember);
         waitList.setOfferedCourses(offeredCourse);
@@ -128,16 +130,16 @@ public class FamilyCourseRegistrationService {
         return offeredCourse;
     }
 
-    public FamilyMembers getFamilyMember(Long familyMemberId) {
-        Optional<FamilyMembers> byId = memberRegistrationRepository.findById(familyMemberId);
+    public MemberRegistration getFamilyMember(Long familyMemberId) {
+        Optional<MemberRegistration> byId = memberRegistrationRepository.findById(familyMemberId);
         if (byId.isEmpty()) {
             throw new InvalidMemberIdException("Family member does not exist.");
         }
-        FamilyMembers familyMembers = byId.get();
-        if (familyMembers.getStatus().equals(Status.INACTIVE)) {
+        MemberRegistration memberRegistration = byId.get();
+        if (memberRegistration.getStatus().equals(Status.INACTIVE)) {
             throw new RuntimeException("Enrollment is not available for this member because it's inactive.");
         }
-        return familyMembers;
+        return memberRegistration;
     }
 
 
@@ -165,13 +167,13 @@ public class FamilyCourseRegistrationService {
         return byId.get();
     }
 
-    public FamilyMembers memberIsActiveOrNot(Long id) {
-        Optional<FamilyMembers> byId = memberRegistrationRepository.findById(id);
-        FamilyMembers familyMembers = byId.orElseThrow(() -> new InvalidMemberIdException("Member not found."));
-        if (familyMembers.getStatus().equals(Status.INACTIVE)) {
+    public MemberRegistration memberIsActiveOrNot(Long id) {
+        Optional<MemberRegistration> byId = memberRegistrationRepository.findById(id);
+        MemberRegistration memberRegistration = byId.orElseThrow(() -> new InvalidMemberIdException("Member not found."));
+        if (memberRegistration.getStatus().equals(Status.INACTIVE)) {
             throw new InvalidMemberIdException("Member is inactive.");
         }
-        return familyMembers;
+        return memberRegistration;
     }
 
     public FamilyCourseRegistrationDTO getAllFamilyMemberRegistration(Long id) {
@@ -181,7 +183,7 @@ public class FamilyCourseRegistrationService {
         }
         FamilyCourseRegistrations familyCourseRegistrations = byId.get();
         FamilyCourseRegistrationDTO familyCourseRegistrationDTO = new FamilyCourseRegistrationDTO();
-        FamilyMembers member = memberIsEnrolledOrNot(familyCourseRegistrations.getFamilyMemberId().getFamilyMemberId());
+        MemberRegistration member = memberIsEnrolledOrNot(familyCourseRegistrations.getFamilyMemberId().getFamilyMemberId());
         familyCourseRegistrationDTO.setFamilyMemberId(member.getFamilyMemberId());
         familyCourseRegistrationDTO.setEnrollmentDate(familyCourseRegistrations.getEnrollmentDate());
         familyCourseRegistrationDTO.setWithdrawnCredits(familyCourseRegistrations.getWithdrawnCredits());
@@ -196,13 +198,13 @@ public class FamilyCourseRegistrationService {
         return familyCourseRegistrationDTO;
     }
 
-    public FamilyMembers memberIsEnrolledOrNot(Long id) {
-        Optional<FamilyMembers> byId = memberRegistrationRepository.findById(id);
-        FamilyMembers familyMembers = byId.orElseThrow(() -> new InvalidMemberIdException("Member not found."));
-        if (familyMembers.getStatus().equals(Status.INACTIVE)) {
+    public MemberRegistration memberIsEnrolledOrNot(Long id) {
+        Optional<MemberRegistration> byId = memberRegistrationRepository.findById(id);
+        MemberRegistration memberRegistration = byId.orElseThrow(() -> new InvalidMemberIdException("Member not found."));
+        if (memberRegistration.getStatus().equals(Status.INACTIVE)) {
             throw new InvalidMemberIdException("Member is inactive.");
         }
-        return familyMembers;
+        return memberRegistration;
     }
 
     public void deleteFamilyMemberFromRegisteredCourse(Long id) {
@@ -234,7 +236,7 @@ public class FamilyCourseRegistrationService {
 
         if (!waitlistedMembers.isEmpty()) {
             for (WaitList waitList : waitlistedMembers) {
-                FamilyMembers waitlistedFamilyMember = waitList.getFamilyMember();
+                MemberRegistration waitlistedFamilyMember = waitList.getFamilyMember();
                 waitList.setIsWaitListed(IsWaitListed.NO);
                 waitlistRepository.save(waitList);
                 String memberName = waitlistedFamilyMember.getMemberName();

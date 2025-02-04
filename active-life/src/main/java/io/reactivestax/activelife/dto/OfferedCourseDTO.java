@@ -14,8 +14,7 @@ import java.time.LocalDateTime;
 @Data
 public class OfferedCourseDTO {
 
-    @JsonIgnore
-    private String barcode;
+
 
     @NotNull(message = "Start date is required")
     private LocalDate startDate;
@@ -42,8 +41,6 @@ public class OfferedCourseDTO {
     @NotNull(message = "Available for enrollment status is required")
     private AvailableForEnrollment availableForEnrollment;
 
-    @NotNull(message = "Updated timestamp is required")
-    private LocalDateTime updatedAt;
 
     @NotNull(message = "Course ID is required")
     private Long coursesId;

@@ -10,14 +10,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.util.UUID;
 
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity(name = "family_registration")
-public class FamilyMembers {
+public class MemberRegistration {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "family_member_id")

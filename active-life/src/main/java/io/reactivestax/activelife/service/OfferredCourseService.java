@@ -89,7 +89,6 @@ public class OfferredCourseService {
         offeredCourseDTO.setCoursesId(offeredCourses.getOfferedCourseId());
         offeredCourseDTO.setOfferedCourseFee(offeredCourses.getOfferedCourseFee());
         offeredCourseDTO.setNoOfSeats(offeredCourses.getNoOfClasses());
-        offeredCourseDTO.setBarcode(offeredCourses.getBarcode());
         offeredCourseDTO.setOfferedCourseFee(offeredCourses.getOfferedCourseFee());
         offeredCourseDTO.setStartDate(offeredCourses.getStartDate());
         offeredCourseDTO.setStartTime(offeredCourses.getStartTime());
@@ -141,21 +140,6 @@ public class OfferredCourseService {
     }
 
 
-    public List<OfferedCourseDTO> searchOfferedCourse(OfferedCouseSearchRequestDTO offeredCouseSearchRequestDTO) {
-        Specification<OfferedCourses> offeredCoursesSpecification =
-                Specification.where(OfferedCourseSpecification.withCourseName(offeredCouseSearchRequestDTO.getCourseName()))
-                        .and(OfferedCourseSpecification.withStartDate(offeredCouseSearchRequestDTO.getStartDate()))
-                        .and(offeredCourseSpecification.withEndDate(offeredCouseSearchRequestDTO.getEndDate()))
-                        .and(offeredCourseSpecification.withCity(offeredCouseSearchRequestDTO.getCity()))
-                        .and(offeredCourseSpecification.withProvince(offeredCouseSearchRequestDTO.getProvince()))
-                        .and(offeredCourseSpecification.hasCategory(offeredCouseSearchRequestDTO.getCategoryName()))
-                        .and(offeredCourseSpecification.hasSubCategory(offeredCouseSearchRequestDTO.getSubCategory()))
-                        .and(offeredCourseSpecification.withAgeGroup(offeredCouseSearchRequestDTO.getAgeGroup()));
 
-        List<OfferedCourses> offeredCoursesList = offeredCourseRepository.findAll(offeredCoursesSpecification);
-        return offeredCoursesList.stream()
-                .map(OfferedCourseMapper.INSTANCE::offeredCourseToOfferedCourseDTO)
-                .collect(Collectors.toList());
-    }
 
 }

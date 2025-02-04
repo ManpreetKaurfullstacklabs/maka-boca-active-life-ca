@@ -10,7 +10,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -57,7 +56,7 @@ public class FamilyCourseRegistrations {
     @ToString.Exclude
     @ManyToOne
     @JoinColumn(name="family_member_id" )
-    private FamilyMembers familyMemberId;
+    private MemberRegistration familyMemberId;
 
     @Column(name="last_updated_time")
     private LocalDateTime lastUpdatedTime;

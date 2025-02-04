@@ -6,6 +6,7 @@ import io.reactivestax.activelife.dto.OfferedCourseDTO;
 import io.reactivestax.activelife.dto.OfferedCouseSearchRequestDTO;
 import io.reactivestax.activelife.service.FamilyCourseRegistrationService;
 import io.reactivestax.activelife.service.OfferredCourseService;
+import io.reactivestax.activelife.service.SearchQueryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +23,9 @@ public class Dashboard {
     @Autowired
     private OfferredCourseService offerredCourseService;
 
+    @Autowired
+    private SearchQueryService searchQueryService;
+
     @GetMapping("/{id}/waitlisted-courses")
     public ResponseEntity<List<Courses>> getCoursesForWaitlistedMembers(@PathVariable Long id, String isWaitListed) {
         List<Courses> coursesForWaitlistedMembers = familyCourseRegistrationService.getCoursesForWaitlistedMembers();
@@ -30,6 +34,6 @@ public class Dashboard {
 
     @PostMapping("/search")
     public List<OfferedCourseDTO> searchOfferedCourses(@RequestBody OfferedCouseSearchRequestDTO offeredCouseSearchRequestDTO) {
-        return offerredCourseService.searchOfferedCourse(offeredCouseSearchRequestDTO);
+        return searchQueryService.searchOfferedCourse(offeredCouseSearchRequestDTO);
     }
 }

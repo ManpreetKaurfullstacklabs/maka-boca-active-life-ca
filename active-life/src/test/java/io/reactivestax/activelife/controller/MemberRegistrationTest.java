@@ -5,7 +5,7 @@ import io.reactivestax.activelife.Enums.GroupOwner;
 import io.reactivestax.activelife.Enums.PreferredMode;
 import io.reactivestax.activelife.Enums.Status;
 import io.reactivestax.activelife.domain.membership.FamilyGroups;
-import io.reactivestax.activelife.domain.membership.FamilyMembers;
+import io.reactivestax.activelife.domain.membership.MemberRegistration;
 import io.reactivestax.activelife.dto.MemberRegistrationDTO;
 import io.reactivestax.activelife.dto.LoginDTO;
 import io.reactivestax.activelife.repository.memberregistration.FamilyGroupRepository;
@@ -30,7 +30,7 @@ import java.util.Optional;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
-@WebMvcTest(MemberRegistration.class)
+@WebMvcTest(io.reactivestax.activelife.controller.MemberRegistration.class)
 class MemberRegistrationTest {
 
     @Autowired
@@ -49,7 +49,7 @@ class MemberRegistrationTest {
     private FamilyGroupRepository familyGroupRepository;
 
     private MemberRegistrationDTO testFamilyMemberDTO;
-    private FamilyMembers testFamilyMember;
+    private MemberRegistration testFamilyMember;
 
     @BeforeEach
     void setUp() {
@@ -65,7 +65,7 @@ class MemberRegistrationTest {
 
         when(familyGroupRepository.save(any(FamilyGroups.class))).thenReturn(familyGroups);
 
-        testFamilyMember = new FamilyMembers();
+        testFamilyMember = new MemberRegistration();
         testFamilyMember.setMemberName("akshi");
         testFamilyMember.setDob(LocalDate.of(1995, 3, 30));
         testFamilyMember.setGender("MALE");

@@ -19,7 +19,7 @@ public class Login {
 
     @ManyToOne
     @JoinColumn(name = "family_member_id", referencedColumnName = "family_member_id")
-    private FamilyMembers familyMember;
+    private MemberRegistration familyMember;
 
     @Column(name = "created_by")
     private String createdBy;

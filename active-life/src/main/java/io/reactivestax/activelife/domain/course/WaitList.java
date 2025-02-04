@@ -1,6 +1,6 @@
 package io.reactivestax.activelife.domain.course;
 import io.reactivestax.activelife.Enums.IsWaitListed;
-import io.reactivestax.activelife.domain.membership.FamilyMembers;
+import io.reactivestax.activelife.domain.membership.MemberRegistration;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -23,7 +23,7 @@ public class WaitList {
 
     @ManyToOne
     @JoinColumn(name = "family_member_id")
-    private FamilyMembers familyMember;
+    private MemberRegistration familyMember;
 
     @Column(name = "no_of_seats")
     private Long noOfSeats;
