@@ -1,144 +1,142 @@
-package io.reactivestax.activelife.controller;
+package io.reactivestax.activelife.service;
 
-import io.reactivestax.activelife.Enums.AvailableForEnrollment;
-import io.reactivestax.activelife.Enums.FeeType;
-import io.reactivestax.activelife.Enums.IsAllDay;
 import io.reactivestax.activelife.domain.course.OfferedCourseFee;
 import io.reactivestax.activelife.dto.OfferedCourseDTO;
-import io.reactivestax.activelife.service.OfferredCourseService;
+import io.reactivestax.activelife.domain.course.Courses;
+import io.reactivestax.activelife.domain.course.OfferedCourses;
+import io.reactivestax.activelife.domain.facility.Facilities;
+import io.reactivestax.activelife.exception.InvalidCourseIdException;
+import io.reactivestax.activelife.repository.courses.CoursesRepository;
+import io.reactivestax.activelife.repository.courses.OfferedCourseRepository;
+import io.reactivestax.activelife.repository.facilities.FacilititesRepository;
+import io.reactivestax.activelife.utility.criteriabuilder.OfferedCourseSpecification;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.http.MediaType;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.mockito.Mockito.*;
 
-@WebMvcTest(OfferedCourses.class)
-class OfferedCoursesTest {
+@SpringBootTest
+class OfferredCourseServiceTest {
 
-    @Autowired
-    MockMvc mockMvc;
+    @Mock
+    private OfferedCourseRepository offeredCourseRepository;
 
-    @MockitoBean
+    @Mock
+    private CoursesRepository coursesRepository;
+
+    @Mock
+    private FacilititesRepository facilititesRepository;
+
+    @Mock
+    private OfferedCourseSpecification offeredCourseSpecification;
+
+    @InjectMocks
     private OfferredCourseService offerredCourseService;
-
-    OfferedCourseDTO offeredCourseDTO = new OfferedCourseDTO();
 
     @BeforeEach
     void setUp() {
+        MockitoAnnotations.openMocks(this);
+    }
+
+    @Test
+    void testAddOfferedCourseToDatabase() {
+        // Arrange
+        OfferedCourseDTO offeredCourseDTO = new OfferedCourseDTO();
+        offeredCourseDTO.setCoursesId(1L);
+        offeredCourseDTO.setStartDate(LocalDate.now());
+        offeredCourseDTO.setEndDate(LocalDate.now().plusMonths(1));
+        offeredCourseDTO.setNoOfSeats(30L);
 
         OfferedCourseFee offeredCourseFee = new OfferedCourseFee();
-        offeredCourseFee.setFeeId(1L);
-        offeredCourseFee.setFeeType(FeeType.RESIDENT);
-        offeredCourseFee.setCourseFee(20L);
+
+        // Mock dependencies
+        Courses mockCourse = new Courses();
+        mockCourse.setCourseId(1L);
+
+        Facilities mockFacility = new Facilities();
+        mockFacility.setId(1L);
+
+        OfferedCourses mockOfferedCourse = new OfferedCourses();
+        mockOfferedCourse.setOfferedCourseId(1L);
+        mockOfferedCourse.setCourses(mockCourse);
+        mockOfferedCourse.setFacilities(mockFacility);
 
 
-        offeredCourseDTO.setBarcode("COURSE123");
-        offeredCourseDTO.setStartDate(LocalDate.of(2025, 2, 2));
-        offeredCourseDTO.setEndDate(LocalDate.of(2025, 2, 5));
-        offeredCourseDTO.setNoOfSeats(50L);
-        offeredCourseDTO.setStartTime(LocalDateTime.of(2025, 2, 2, 9, 0));
-        offeredCourseDTO.setEndTime(LocalDateTime.of(2025, 2, 2, 17, 0));
-        offeredCourseDTO.setIsAllDay(IsAllDay.NO);
-        offeredCourseDTO.setRegistrationStartDate(LocalDate.of(2025, 1, 1));
-        offeredCourseDTO.setAvailableForEnrollment(AvailableForEnrollment.YES);
-        offeredCourseDTO.setUpdatedAt(LocalDateTime.of(2025, 1, 15, 12, 0));
-        offeredCourseDTO.setCoursesId(1L);
-        offeredCourseDTO.setFacilities(1L);
-        offeredCourseDTO.setOfferedCourseFee(offeredCourseFee);
-    }
+        when(coursesRepository.findById(1L)).thenReturn(java.util.Optional.of(mockCourse));
+        when(facilititesRepository.findById(1L)).thenReturn(java.util.Optional.of(mockFacility));
+        when(offeredCourseRepository.save(any(OfferedCourses.class))).thenReturn(mockOfferedCourse);
 
+        // Act
+        offerredCourseService.addOfferedCourseToDatabase(offeredCourseDTO);
 
-    @Test
-    void addNewCourseToOfferedCourse() throws Exception {
-        doNothing().when(offerredCourseService).addOfferedCourseToDatabase(any(OfferedCourseDTO.class));
-
-        String courseJson = "{\n" +
-                "  \"barcode\": \"COURSE123\",\n" +
-                "  \"startDate\": \"2025-02-02\",\n" +
-                "  \"endDate\": \"2025-02-05\",\n" +
-                "  \"noOfSeats\": 50,\n" +
-                "  \"startTime\": \"2025-02-02T09:00:00\",\n" +
-                "  \"endTime\": \"2025-02-02T17:00:00\",\n" +
-                "  \"isAllDay\": \"NO\",\n" +
-                "  \"registrationStartDate\": \"2025-01-01\",\n" +
-                "  \"availableForEnrollment\": \"YES\",\n" +
-                "  \"updatedAt\": \"2025-01-15T12:00:00\",\n" +
-                "  \"coursesId\": 1,\n" +
-                "  \"facilities\": 1,\n" +
-                "  \"offeredCourseFee\": {\n" +
-                "    \"feeId\": 1,\n" +
-                "    \"feeType\": \"RESIDENT\",\n" +
-                "    \"courseFee\": 20\n" +
-                "  }\n" +
-                "}";
-
-        mockMvc.perform(post("/api/v1/offeredcourse")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(courseJson))
-                .andExpect(status().isOk())
-                .andExpect(content().string("Courses added sucessfully : "));
+        // Assert
+        verify(offeredCourseRepository, times(1)).save(any(OfferedCourses.class));
     }
 
     @Test
-    void getOfferedCourse() throws Exception {
+    void testGetOfferedCoursesById() {
+        // Arrange
+        Long courseId = 1L;
+        OfferedCourses mockOfferedCourse = new OfferedCourses();
+        mockOfferedCourse.setOfferedCourseId(courseId);
+        mockOfferedCourse.setStartDate(LocalDate.now());
+        mockOfferedCourse.setEndDate(LocalDate.now().plusMonths(1));
+        mockOfferedCourse.setNoOfClasses(30L);
 
-        when(offerredCourseService.getOfferedCoursesById(1L)).thenReturn(offeredCourseDTO);
+        when(offeredCourseRepository.findById(courseId)).thenReturn(java.util.Optional.of(mockOfferedCourse));
 
-        mockMvc.perform(get("/api/v1/offeredcourse/{id}", 1L)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())  // Expect status OK (200)
-                .andExpect(content().json("{\n" +
-                        "  \"barcode\": \"COURSE123\",\n" +
-                        "  \"startDate\": \"2025-02-02\",\n" +
-                        "  \"endDate\": \"2025-02-05\",\n" +
-                        "  \"noOfSeats\": 50,\n" +
-                        "  \"startTime\": \"2025-02-02T09:00:00\",\n" +
-                        "  \"endTime\": \"2025-02-02T17:00:00\",\n" +
-                        "  \"isAllDay\": \"NO\",\n" +
-                        "  \"registrationStartDate\": \"2025-01-01\",\n" +
-                        "  \"availableForEnrollment\": \"YES\",\n" +
-                        "  \"updatedAt\": \"2025-01-15T12:00:00\",\n" +
-                        "  \"coursesId\": 1,\n" +
-                        "  \"facilities\": 1\n" +
-                        "}"));
+        // Act
+        OfferedCourseDTO result = offerredCourseService.getOfferedCoursesById(courseId);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(courseId, result.getCoursesId());
+        assertEquals(30L, result.getNoOfSeats());
     }
+
     @Test
-    void updateCourseToOfferedCourse() throws Exception {
+    void testUpdateOfferedCourseToDatabase() {
+        // Arrange
+        Long courseId = 1L;
+        OfferedCourseDTO offeredCourseDTO = new OfferedCourseDTO();
+        offeredCourseDTO.setStartDate(LocalDate.now());
+        offeredCourseDTO.setEndDate(LocalDate.now().plusMonths(1));
+        offeredCourseDTO.setNoOfSeats(30L);
 
-        doNothing().when(offerredCourseService).updateOfferedCourseToDatabase(any(OfferedCourseDTO.class), any(Long.class));
+        OfferedCourses existingCourse = new OfferedCourses();
+        existingCourse.setOfferedCourseId(courseId);
+        existingCourse.setCourses(new Courses());
+        existingCourse.setFacilities(new Facilities());
 
-        String updatedCourseJson = "{\n" +
-                "  \"barcode\": \"COURSE123\",\n" +
-                "  \"startDate\": \"2025-02-02\",\n" +
-                "  \"endDate\": \"2025-02-05\",\n" +
-                "  \"noOfSeats\": 60,\n" +
-                "  \"startTime\": \"2025-02-02T09:00:00\",\n" +
-                "  \"endTime\": \"2025-02-02T17:00:00\",\n" +
-                "  \"isAllDay\": \"NO\",\n" +
-                "  \"registrationStartDate\": \"2025-01-01\",\n" +
-                "  \"availableForEnrollment\": \"YES\",\n" +
-                "  \"updatedAt\": \"2025-01-15T12:00:00\",\n" +
-                "  \"coursesId\": 1,\n" +
-                "  \"facilities\": 1\n" +
-                "}";
+        when(offeredCourseRepository.findById(courseId)).thenReturn(java.util.Optional.of(existingCourse));
+        when(offeredCourseRepository.save(any(OfferedCourses.class))).thenReturn(existingCourse);
 
-        mockMvc.perform(patch("/api/v1/offeredcourse/{id}", 1L)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(updatedCourseJson))
-                .andExpect(status().isOk())
-                .andExpect(content().string("Courses updated sucessfully : "));
-}}
+        // Act
+        offerredCourseService.updateOfferedCourseToDatabase(offeredCourseDTO, courseId);
+
+        // Assert
+        verify(offeredCourseRepository, times(1)).save(any(OfferedCourses.class));
+    }
+
+    @Test
+    void testUpdateOfferedCourseToDatabase_shouldThrowExceptionIfCourseNotFound() {
+        // Arrange
+        Long courseId = 1L;
+        OfferedCourseDTO offeredCourseDTO = new OfferedCourseDTO();
+        when(offeredCourseRepository.findById(courseId)).thenReturn(java.util.Optional.empty());
+
+        // Act & Assert
+        assertThrows(InvalidCourseIdException.class, () -> {
+            offerredCourseService.updateOfferedCourseToDatabase(offeredCourseDTO, courseId);
+        });
+    }
+
+
+}

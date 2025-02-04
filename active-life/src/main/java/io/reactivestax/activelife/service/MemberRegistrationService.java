@@ -94,7 +94,7 @@ public class MemberRegistrationService {
         familyMemberRepository.save(familyMembers);
     }
 
-    private void saveLoginAudit(FamilyMembers familyMembers) {
+    public void saveLoginAudit(FamilyMembers familyMembers) {
         Login login = new Login();
         login.setFamilyMember(familyMembers);
         login.setLocalDateTime(LocalDateTime.now());
@@ -155,7 +155,7 @@ public class MemberRegistrationService {
         return otp.toString();
     }
 
-    private String setFamilyMemberDetails(MemberRegistrationDTO memberRegistrationDTO, FamilyMembers familyMembers, String pin) {
+   public String setFamilyMemberDetails(MemberRegistrationDTO memberRegistrationDTO, FamilyMembers familyMembers, String pin) {
         familyMembers.setMemberName(memberRegistrationDTO.getMemberName());
         familyMembers.setDob(memberRegistrationDTO.getDob());
         familyMembers.setGender(memberRegistrationDTO.getGender());

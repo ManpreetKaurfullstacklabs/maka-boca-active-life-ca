@@ -16,8 +16,6 @@ import java.time.LocalDateTime;
 import java.util.Date;
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
 public class FamilyCourseRegistrationDTO {
 
     private Long familyCourseRegistrationId;
