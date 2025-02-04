@@ -84,15 +84,6 @@ class FamilyCourseRegistrationServiceTest {
         dto.setLastUpdateBy(1L);
         dto.setOfferedCourseId(offeredCourse.getOfferedCourseId());
         dto.setIsWithdrawn(IsWithdrawn.NO);
-
-
-
-
-
-
-
-
-
         MemberRegistration familyMember = new MemberRegistration();
         familyMember.setFamilyMemberId(1L);
         familyMember.setStatus(Status.ACTIVE);

@@ -1,15 +1,14 @@
 package io.reactivestax.activelife.controller;
-import io.reactivestax.activelife.domain.course.Courses;
+
 import io.reactivestax.activelife.dto.FamilyCourseRegistrationDTO;
 import io.reactivestax.activelife.service.FamilyCourseRegistrationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/courseregistration")
+@RequestMapping("/api/courseregistration")
 public class FamilyMemberCourseRegistration {
 
     @Autowired
@@ -27,8 +26,6 @@ public class FamilyMemberCourseRegistration {
         FamilyCourseRegistrationDTO allFamilyMemberRegistration = familyCourseRegistrationService.getAllFamilyMemberRegistration(id);
         return ResponseEntity.ok(allFamilyMemberRegistration);
     }
-
-
 
     @PatchMapping("/member/{id}")
     public ResponseEntity<FamilyCourseRegistrationDTO> updateMemberInformation(@PathVariable Long id, @RequestBody FamilyCourseRegistrationDTO  familyCourseRegistrationDTO) {

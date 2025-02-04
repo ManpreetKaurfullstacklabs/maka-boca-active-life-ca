@@ -46,27 +46,27 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(body, HttpStatus.UNSUPPORTED_MEDIA_TYPE);
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new HashMap<>();
+//    @ExceptionHandler(MethodArgumentNotValidException.class)
+//    public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
+//        Map<String, String> errors = new HashMap<>();
+//
+//        for (FieldError error : ex.getBindingResult().getFieldErrors()) {
+//            errors.put(error.getField(), error.getDefaultMessage());
+//        }
+//        ex.getBindingResult().getGlobalErrors().forEach(error -> {
+//            errors.put(error.getObjectName(), error.getDefaultMessage());
+//        });
+//
+//        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+//    }
 
-        for (FieldError error : ex.getBindingResult().getFieldErrors()) {
-            errors.put(error.getField(), error.getDefaultMessage());
-        }
-        ex.getBindingResult().getGlobalErrors().forEach(error -> {
-            errors.put(error.getObjectName(), error.getDefaultMessage());
-        });
-
-        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(jakarta.validation.ConstraintViolationException.class)
-    public ResponseEntity<Map<String, String>> handleValidationErrors(
-            jakarta.validation.ConstraintViolationException ex) {
-        Map<String, String> errors = new HashMap<>();
-        ex.getConstraintViolations().forEach(violation->{
-            errors.put(violation.getMessage(), violation.getMessage());
-        });
-        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
-    }
+//    @ExceptionHandler(jakarta.validation.ConstraintViolationException.class)
+//    public ResponseEntity<Map<String, String>> handleValidationErrors(
+//            jakarta.validation.ConstraintViolationException ex) {
+//        Map<String, String> errors = new HashMap<>();
+//        ex.getConstraintViolations().forEach(violation->{
+//            errors.put(violation.getMessage(), violation.getMessage());
+//        });
+//        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+//    }
 }

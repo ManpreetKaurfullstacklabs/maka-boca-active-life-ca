@@ -3,6 +3,7 @@ package io.reactivestax.activelife.controller;
 
 import io.reactivestax.activelife.dto.OfferedCouseSearchRequestDTO;
 import io.reactivestax.activelife.dto.OfferedCourseDTO;
+import io.reactivestax.activelife.dto.UpdateCourseDTO;
 import io.reactivestax.activelife.service.OfferredCourseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -18,9 +19,9 @@ public class OfferedCourses {
     private OfferredCourseService offerredCourseService;
 
     @PostMapping
-    public ResponseEntity<OfferedCourseDTO> addOfferedCourse(@RequestBody OfferedCourseDTO offeredCourseDTO) {
+    public ResponseEntity<String> addOfferedCourse(@RequestBody OfferedCourseDTO offeredCourseDTO) {
         offerredCourseService.addOfferedCourseToDatabase(offeredCourseDTO);
-        return ResponseEntity.ok(offeredCourseDTO);
+        return ResponseEntity.ok("Course saved succesffuly");
     }
 
     @GetMapping("/{id}")
@@ -30,7 +31,7 @@ public class OfferedCourses {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<String> updateCourseToOfferedCourse(@PathVariable Long id,  @RequestBody  OfferedCourseDTO offeredCourseDTO) {
+    public ResponseEntity<String> updateCourseToOfferedCourse(@PathVariable Long id,  @RequestBody UpdateCourseDTO offeredCourseDTO) {
         offerredCourseService.updateOfferedCourseToDatabase(offeredCourseDTO,id);
         return ResponseEntity.ok("Courses updated sucessfully : " );
     }

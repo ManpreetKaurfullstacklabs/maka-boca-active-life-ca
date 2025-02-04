@@ -1,6 +1,5 @@
 package io.reactivestax.activelife.dto;
 
-
 import io.reactivestax.activelife.Enums.AvailableForEnrollment;
 import io.reactivestax.activelife.Enums.IsAllDay;
 import jakarta.validation.constraints.Min;
@@ -11,8 +10,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
-public class OfferedCourseDTO {
-
+public class UpdateCourseDTO {
 
 
     @NotNull(message = "Start date is required")
@@ -39,14 +37,4 @@ public class OfferedCourseDTO {
 
     @NotNull(message = "Available for enrollment status is required")
     private AvailableForEnrollment availableForEnrollment;
-
-    @NotNull(message = "Course ID is required")
-    private Long coursesId;
-
-    @NotNull(message = "Facility ID is required")
-    private Long facilities;
-
-    @NotNull(message = "Offered course fee is required")
-    private OfferedCourseFeeDTO offeredCourseFeeDTO;
-
 }
