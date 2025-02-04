@@ -1,7 +1,7 @@
 package io.reactivestax.activelife.service;
 
 import io.reactivestax.activelife.Enums.*;
-import io.reactivestax.activelife.distribution.SmsService;
+import io.reactivestax.activelife.utility.distribution.SmsService;
 import io.reactivestax.activelife.domain.course.OfferedCourseFee;
 import io.reactivestax.activelife.domain.course.OfferedCourses;
 import io.reactivestax.activelife.domain.course.WaitList;

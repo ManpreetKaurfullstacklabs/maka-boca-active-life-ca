@@ -28,12 +28,7 @@ public class FamilyMemberCourseRegistration {
         return ResponseEntity.ok(allFamilyMemberRegistration);
     }
 
-    //get all the course with wailist
-    @GetMapping("/member/{id}/waitlisted-courses")
-    public ResponseEntity<List<Courses>> getCoursesForWaitlistedMembers(@PathVariable Long id, String isWaitListed) {
-        List<Courses> coursesForWaitlistedMembers = familyCourseRegistrationService.getCoursesForWaitlistedMembers();
-        return ResponseEntity.ok(coursesForWaitlistedMembers);
-    }
+
 
     @PatchMapping("/member/{id}")
     public ResponseEntity<FamilyCourseRegistrationDTO> updateMemberInformation(@PathVariable Long id, @RequestBody FamilyCourseRegistrationDTO  familyCourseRegistrationDTO) {

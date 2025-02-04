@@ -1,12 +1,11 @@
 package io.reactivestax.activelife.distribution;
 
+import io.reactivestax.activelife.utility.distribution.SmsService;
 import org.junit.jupiter.api.BeforeEach;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.jms.core.JmsTemplate;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class SmsServiceTest {
     @Mock

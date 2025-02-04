@@ -83,6 +83,9 @@ public class FamilyMembers {
     @Column(name="uuid", unique = true)
     private String verificationUUID;
 
+    @Column(name = "otp")
+    private String otp;
+
     @JsonBackReference
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "family_group_id")

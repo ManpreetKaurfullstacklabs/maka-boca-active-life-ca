@@ -1,7 +1,7 @@
 package io.reactivestax.activelife.controller;
 
 
-import io.reactivestax.activelife.criteriabuilder.OfferedCouseSearchRequest;
+import io.reactivestax.activelife.dto.OfferedCouseSearchRequestDTO;
 import io.reactivestax.activelife.dto.OfferedCourseDTO;
 import io.reactivestax.activelife.service.OfferredCourseService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +23,6 @@ public class OfferedCourses {
         return ResponseEntity.ok(offeredCourseDTO);
     }
 
-
     @GetMapping("/{id}")
     public ResponseEntity<OfferedCourseDTO> getOfferedCourse( @PathVariable Long id) {
         OfferedCourseDTO offeredCoursesDTO = offerredCourseService.getOfferedCoursesById(id);
@@ -37,8 +36,8 @@ public class OfferedCourses {
     }
 
     @PostMapping("/search")
-    public List<OfferedCourseDTO> searchOfferedCourses(@RequestBody OfferedCouseSearchRequest offeredCouseSearchRequest) {
-        return offerredCourseService.searchOfferedCourse(offeredCouseSearchRequest);
+    public List<OfferedCourseDTO> searchOfferedCourses(@RequestBody OfferedCouseSearchRequestDTO offeredCouseSearchRequestDTO) {
+        return offerredCourseService.searchOfferedCourse(offeredCouseSearchRequestDTO);
     }
 
 

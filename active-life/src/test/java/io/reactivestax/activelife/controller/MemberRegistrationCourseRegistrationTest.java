@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @WebMvcTest(FamilyMemberCourseRegistration.class)
-class FamilyMemberCourseRegistrationTest {
+class MemberRegistrationCourseRegistrationTest {
 
     @Autowired
     private MockMvc mockMvc;

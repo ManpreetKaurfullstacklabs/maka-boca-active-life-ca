@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import io.reactivestax.activelife.Enums.GroupOwner;
 import io.reactivestax.activelife.Enums.PreferredMode;
-import io.reactivestax.activelife.Enums.Status;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,7 +14,7 @@ import java.time.LocalDate;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class FamilyMemberDTO {
+public class MemberRegistrationDTO {
 
     private String memberName;
     @JsonSerialize(using = LocalDateSerializer.class)
@@ -34,9 +33,7 @@ public class FamilyMemberDTO {
     private String bussinessPhoneNo;
     private String language;
     private String memberLoginId;
-    private String pin;
     private GroupOwner groupOwner;
-    private Status status;
     private Long familyGroupId;
 
 }

@@ -3,14 +3,14 @@ package io.reactivestax.activelife.service;
 import io.reactivestax.activelife.Enums.Status;
 import io.reactivestax.activelife.domain.membership.FamilyGroups;
 import io.reactivestax.activelife.domain.membership.FamilyMembers;
-import io.reactivestax.activelife.dto.FamilyMemberDTO;
+import io.reactivestax.activelife.dto.MemberRegistrationDTO;
 import io.reactivestax.activelife.dto.LoginDTO;
 import io.reactivestax.activelife.exception.InvalidMemberIdException;
-import io.reactivestax.activelife.interfaces.FamilyMemberMapper;
+import io.reactivestax.activelife.utility.interfaces.FamilyMemberMapper;
 import io.reactivestax.activelife.repository.familymember.FamilMemberRepository;
 import io.reactivestax.activelife.repository.familymember.FamilyGroupRepository;
 import io.reactivestax.activelife.repository.login.LoginRepository;
-import io.reactivestax.activelife.distribution.SmsService;
+import io.reactivestax.activelife.utility.distribution.SmsService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
@@ -22,10 +22,10 @@ import java.util.Optional;
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class FamilyMemberServiceTest {
+public class MemberRegistrationServiceTest {
 
     @InjectMocks
-    private FamilyMemberService familyMemberService;
+    private MemberRegistrationService memberRegistrationService;
 
     @Mock
     private FamilMemberRepository familyMemberRepository;
@@ -45,16 +45,16 @@ public class FamilyMemberServiceTest {
     @Mock
     private JmsTemplate jmsTemplate;
 
-    private FamilyMemberDTO familyMemberDTO;
+    private MemberRegistrationDTO memberRegistrationDTO;
     private FamilyMembers familyMembers;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
-        familyMemberDTO = new FamilyMemberDTO();
-        familyMemberDTO.setMemberLoginId("testLoginId");
-        familyMemberDTO.setMemberName("John Doe");
+        memberRegistrationDTO = new MemberRegistrationDTO();
+        memberRegistrationDTO.setMemberLoginId("testLoginId");
+        memberRegistrationDTO.setMemberName("John Doe");
 
         familyMembers = new FamilyMembers();
         familyMembers.setMemberLogin("testLoginId");
@@ -65,12 +65,12 @@ public class FamilyMemberServiceTest {
     @Test
     void testAddNewFamilyMemberOnSignup_memberExists() {
 
-        when(familyMemberRepository.findByMemberLogin(familyMemberDTO.getMemberLoginId()))
+        when(familyMemberRepository.findByMemberLogin(memberRegistrationDTO.getMemberLoginId()))
                 .thenReturn(Optional.of(familyMembers));
 
         InvalidMemberIdException exception = assertThrows(
                 InvalidMemberIdException.class,
-                () -> familyMemberService.addNewFamilyMemberOnSignup(familyMemberDTO)
+                () -> memberRegistrationService.addNewFamilyMemberOnSignup(memberRegistrationDTO)
         );
 
         assertEquals("Member Login ID already exists", exception.getMessage());
@@ -79,13 +79,13 @@ public class FamilyMemberServiceTest {
     @Test
     void testAddNewFamilyMemberOnSignup_success() {
 
-        when(familyMemberRepository.findByMemberLogin(familyMemberDTO.getMemberLoginId()))
+        when(familyMemberRepository.findByMemberLogin(memberRegistrationDTO.getMemberLoginId()))
                 .thenReturn(Optional.empty());
 
         FamilyGroups familyGroup = new FamilyGroups();
         when(familyGroupRepository.findById(anyLong())).thenReturn(Optional.of(familyGroup));
 
-        String pin = familyMemberService.addNewFamilyMemberOnSignup(familyMemberDTO);
+        String pin = memberRegistrationService.addNewFamilyMemberOnSignup(memberRegistrationDTO);
 
         assertNotNull(pin);
         assertEquals(6, pin.length());
@@ -99,7 +99,7 @@ public class FamilyMemberServiceTest {
         when(familyMemberRepository.findByMemberLogin("invalidId")).thenReturn(Optional.empty());
         InvalidMemberIdException exception = assertThrows(
                 InvalidMemberIdException.class,
-                () -> familyMemberService.getAllMembersbygivenMemberId("invalidId")
+                () -> memberRegistrationService.getAllMembersbygivenMemberId("invalidId")
         );
 
         assertEquals("This member is not registered", exception.getMessage());
@@ -114,7 +114,7 @@ public class FamilyMemberServiceTest {
 
         when(familyMemberRepository.findByMemberLogin("testLoginId")).thenReturn(Optional.of(familyMembers));
 
-        String result = familyMemberService.loginExistingMember(loginDTO);
+        String result = memberRegistrationService.loginExistingMember(loginDTO);
 
         assertEquals("OTP sent successfully", result);
         verify(smsService).sendSms(eq(familyMembers.getHomePhoneNo()), contains("Your OTP number"));
@@ -133,7 +133,7 @@ public class FamilyMemberServiceTest {
         loginDTO.setPin("123456");
 
         when(familyMemberRepository.findByMemberLogin("testLoginId")).thenReturn(Optional.of(inactiveFamilyMember));
-        String result = familyMemberService.loginExistingMember(loginDTO);
+        String result = memberRegistrationService.loginExistingMember(loginDTO);
 
         assertEquals("Verification link sent successfully", result);
         verify(smsService).verificationLink(eq(inactiveFamilyMember.getHomePhoneNo()), contains("http://localhost:8082/api/v1/familymember/verify/"));
@@ -143,7 +143,7 @@ public class FamilyMemberServiceTest {
     void testDeleteFamilyMemberById_success() {
 
         when(familyMemberRepository.findById(anyLong())).thenReturn(Optional.of(familyMembers));
-        familyMemberService.deleteFamilyMemberById(1L);
+        memberRegistrationService.deleteFamilyMemberById("1");
         assertEquals(Status.INACTIVE, familyMembers.getStatus());
         verify(familyMemberRepository).save(familyMembers);
     }
@@ -153,7 +153,7 @@ public class FamilyMemberServiceTest {
         when(familyMemberRepository.findById(anyLong())).thenReturn(Optional.empty());
         InvalidMemberIdException exception = assertThrows(
                 InvalidMemberIdException.class,
-                () -> familyMemberService.deleteFamilyMemberById(1L)
+                () -> memberRegistrationService.deleteFamilyMemberById("1")
         );
         assertEquals("Family member not found", exception.getMessage());
     }
@@ -167,7 +167,7 @@ public class FamilyMemberServiceTest {
         when(familyMemberRepository.findByMemberLogin(loginDTO.getMemberLoginId()))
                 .thenReturn(Optional.empty());
 
-        String result = familyMemberService.loginExistingMember(loginDTO);
+        String result = memberRegistrationService.loginExistingMember(loginDTO);
         assertTrue(result.contains("does not exist"));
     }
 
@@ -186,7 +186,7 @@ public class FamilyMemberServiceTest {
         when(familyMemberRepository.findByMemberLogin(loginDTO.getMemberLoginId()))
                 .thenReturn(Optional.of(familyMembers));
 
-        String result = familyMemberService.loginExistingMember(loginDTO);
+        String result = memberRegistrationService.loginExistingMember(loginDTO);
         assertEquals("OTP sent successfully", result);
     }
 
@@ -196,7 +196,7 @@ public class FamilyMemberServiceTest {
                 .thenReturn(Optional.empty());
 
         assertThrows(NoSuchElementException.class, () -> {
-            familyMemberService.findFamilyMemberByVerificationId("nonExistingVerificationId");
+            memberRegistrationService.findFamilyMemberByVerificationId("nonExistingVerificationId");
         });
     }
 
@@ -209,7 +209,7 @@ public class FamilyMemberServiceTest {
         when(familyMemberRepository.findByVerificationUUID(anyString()))
                 .thenReturn(Optional.of(familyMembers));
 
-        familyMemberService.findFamilyMemberByVerificationId("validVerificationId");
+        memberRegistrationService.findFamilyMemberByVerificationId("validVerificationId");
 
         assertEquals(Status.ACTIVE, familyMembers.getStatus());
     }
@@ -225,7 +225,7 @@ public class FamilyMemberServiceTest {
                 .thenReturn(Optional.empty());
 
         assertThrows(InvalidMemberIdException.class, () -> {
-            familyMemberService.findFamilyMemberByOtpVerification(loginDTO);
+            memberRegistrationService.findFamilyMemberByOtpVerification(loginDTO);
         });
     }
 
@@ -242,7 +242,7 @@ public class FamilyMemberServiceTest {
                 .thenReturn(Optional.of(familyMembers));
 
         assertThrows(InvalidMemberIdException.class, () -> {
-            familyMemberService.findFamilyMemberByOtpVerification(loginDTO);
+            memberRegistrationService.findFamilyMemberByOtpVerification(loginDTO);
         });
     }
 
@@ -260,7 +260,7 @@ public class FamilyMemberServiceTest {
                 .thenReturn(Optional.of(familyMembers));
 
         assertThrows(RuntimeException.class, () -> {
-            familyMemberService.findFamilyMemberByOtpVerification(loginDTO);
+            memberRegistrationService.findFamilyMemberByOtpVerification(loginDTO);
         });
     }
 
@@ -278,7 +278,7 @@ public class FamilyMemberServiceTest {
         when(familyMemberRepository.findByMemberLogin(loginDTO.getMemberLoginId()))
                 .thenReturn(Optional.of(familyMembers));
 
-        String result = familyMemberService.findFamilyMemberByOtpVerification(loginDTO);
+        String result = memberRegistrationService.findFamilyMemberByOtpVerification(loginDTO);
         assertEquals(Status.ACTIVE, familyMembers.getStatus());
         assertEquals("OTP verified", result);
         verify(familyMemberRepository, times(1)).save(familyMembers);
@@ -297,7 +297,7 @@ public class FamilyMemberServiceTest {
 
         when(familyGroupRepository.save(any(FamilyGroups.class))).thenReturn(expectedFamilyGroup);
 
-        FamilyGroups result = familyMemberService.createNewFamilyGroup(pin);
+        FamilyGroups result = memberRegistrationService.createNewFamilyGroup("111", memberRegistrationDTO);
 
         verify(familyGroupRepository, times(1)).save(any(FamilyGroups.class));
         assertNotNull(result);
@@ -318,7 +318,7 @@ public class FamilyMemberServiceTest {
         loginDTO.setPin("123456");
 
         when(familyMemberRepository.findByMemberLogin(loginDTO.getMemberLoginId())).thenReturn(Optional.empty());
-        String result = familyMemberService.loginExistingMember(loginDTO);
+        String result = memberRegistrationService.loginExistingMember(loginDTO);
         assertEquals("Member Login Id does not exist: inactiveMember", result);
     }
 
@@ -337,7 +337,7 @@ public class FamilyMemberServiceTest {
         loginDTO.setPin("123456");
 
         when(familyMemberRepository.findByMemberLogin(memberLoginId)).thenReturn(Optional.of(familyMembers));
-        String result = familyMemberService.loginExistingMember(loginDTO);
+        String result = memberRegistrationService.loginExistingMember(loginDTO);
         verify(smsService, times(1)).sendSms(eq("123-456-7890"), startsWith("Your OTP number is"));
         assertEquals("OTP sent successfully", result);
     }
@@ -359,7 +359,7 @@ public class FamilyMemberServiceTest {
 
         when(familyMemberRepository.findByMemberLogin(memberLoginId)).thenReturn(Optional.of(familyMembers));
         InvalidMemberIdException exception = assertThrows(InvalidMemberIdException.class, () -> {
-            familyMemberService.loginExistingMember(loginDTO);
+            memberRegistrationService.loginExistingMember(loginDTO);
         });
         assertEquals("Password does not match with Member login Id: inactiveMember", exception.getMessage());
     }
@@ -381,7 +381,7 @@ public class FamilyMemberServiceTest {
 
         when(familyMemberRepository.findByMemberLogin(memberLoginId)).thenReturn(Optional.of(familyMembers));
 
-        String result = familyMemberService.loginExistingMember(loginDTO);
+        String result = memberRegistrationService.loginExistingMember(loginDTO);
 
         assertEquals("Verification link sent successfully", result);
     }
@@ -402,7 +402,7 @@ public class FamilyMemberServiceTest {
 
         when(familyMemberRepository.findByMemberLogin(memberLoginId)).thenReturn(Optional.of(familyMembers));
 
-        String result = familyMemberService.loginExistingMember(loginDTO);
+        String result = memberRegistrationService.loginExistingMember(loginDTO);
 
         assertEquals("OTP sent successfully", result);
     }
@@ -410,14 +410,14 @@ public class FamilyMemberServiceTest {
     @Test
     void updateExistingFamilyMember_memberExists() {
         String memberLoginId = "existingMember";
-        FamilyMemberDTO familyMemberDTO = new FamilyMemberDTO();
-        familyMemberDTO.setMemberLoginId(memberLoginId);
+        MemberRegistrationDTO memberRegistrationDTO = new MemberRegistrationDTO();
+        memberRegistrationDTO.setMemberLoginId(memberLoginId);
         FamilyMembers familyMembers = new FamilyMembers();
         familyMembers.setMemberLogin(memberLoginId);
 
         lenient().when(familyMemberRepository.findByMemberLogin(memberLoginId)).thenReturn(Optional.of(familyMembers));
-        familyMemberService.updateExistingFamilyMember(familyMemberDTO);
-        verify(familyMemberMapper, times(1)).toEntity(familyMemberDTO);
+        memberRegistrationService.updateExistingFamilyMember(memberRegistrationDTO);
+        verify(familyMemberMapper, times(1)).toEntity(memberRegistrationDTO);
 
     }
     @Test
@@ -426,7 +426,7 @@ public class FamilyMemberServiceTest {
         String memberLoginId = "nonExistentMember";
         when(familyMemberRepository.findByMemberLogin(memberLoginId)).thenReturn(Optional.empty());
         InvalidMemberIdException exception = assertThrows(InvalidMemberIdException.class, () -> {
-            familyMemberService.getAllMembersbygivenMemberId(memberLoginId);
+            memberRegistrationService.getAllMembersbygivenMemberId(memberLoginId);
         });
 
         assertEquals("This member is not registered", exception.getMessage());
@@ -440,12 +440,12 @@ public class FamilyMemberServiceTest {
         FamilyMembers familyMembers = new FamilyMembers();
         familyMembers.setMemberLogin(memberLoginId);
 
-        FamilyMemberDTO expectedFamilyMemberDTO = new FamilyMemberDTO();
-        expectedFamilyMemberDTO.setMemberLoginId(memberLoginId);
+        MemberRegistrationDTO expectedMemberRegistrationDTO = new MemberRegistrationDTO();
+        expectedMemberRegistrationDTO.setMemberLoginId(memberLoginId);
         when(familyMemberRepository.findByMemberLogin(memberLoginId)).thenReturn(Optional.of(familyMembers));
-        when(familyMemberMapper.toDto(familyMembers)).thenReturn(expectedFamilyMemberDTO);
+        when(familyMemberMapper.toDto(familyMembers)).thenReturn(expectedMemberRegistrationDTO);
 
-        FamilyMemberDTO result = familyMemberService.getAllMembersbygivenMemberId(memberLoginId);
+        MemberRegistrationDTO result = memberRegistrationService.getAllMembersbygivenMemberId(memberLoginId);
 
         assertNotNull(result);
         assertEquals(memberLoginId, result.getMemberLoginId());
@@ -458,16 +458,16 @@ public class FamilyMemberServiceTest {
 
         String loginId = "newLoginId";
         Long familyGroupId = 1L;
-        FamilyMemberDTO familyMemberDTO = new FamilyMemberDTO();
-        familyMemberDTO.setMemberLoginId(loginId);
-        familyMemberDTO.setFamilyGroupId(familyGroupId);
+        MemberRegistrationDTO memberRegistrationDTO = new MemberRegistrationDTO();
+        memberRegistrationDTO.setMemberLoginId(loginId);
+        memberRegistrationDTO.setFamilyGroupId(familyGroupId);
 
         FamilyMembers newFamilyMember = new FamilyMembers();
 
         when(familyMemberRepository.findByMemberLogin(loginId)).thenReturn(Optional.empty());
         when(familyGroupRepository.findById(familyGroupId)).thenReturn(Optional.empty());
 
-        String result = familyMemberService.addNewFamilyMemberOnSignup(familyMemberDTO);
+        String result = memberRegistrationService.addNewFamilyMemberOnSignup(memberRegistrationDTO);
 
 
         assertNotNull(result);
@@ -491,7 +491,7 @@ public class FamilyMemberServiceTest {
         familyMembers.setStatus(Status.ACTIVE);
 
         when(familyMemberRepository.findByMemberLogin(memberLoginId)).thenReturn(Optional.of(familyMembers));
-        String result = familyMemberService.loginExistingMember(loginDTO);
+        String result = memberRegistrationService.loginExistingMember(loginDTO);
 
         assertEquals("OTP sent successfully", result);
         verify(familyMemberRepository, times(1)).findByMemberLogin(memberLoginId);

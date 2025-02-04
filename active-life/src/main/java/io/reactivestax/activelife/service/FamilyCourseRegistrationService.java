@@ -4,7 +4,7 @@ import io.reactivestax.activelife.Enums.AvailableForEnrollment;
 import io.reactivestax.activelife.Enums.IsWaitListed;
 import io.reactivestax.activelife.Enums.IsWithdrawn;
 import io.reactivestax.activelife.Enums.Status;
-import io.reactivestax.activelife.distribution.SmsService;
+import io.reactivestax.activelife.utility.distribution.SmsService;
 import io.reactivestax.activelife.domain.course.Courses;
 import io.reactivestax.activelife.domain.course.OfferedCourseFee;
 import io.reactivestax.activelife.domain.course.OfferedCourses;
@@ -81,7 +81,7 @@ public class FamilyCourseRegistrationService {
 
     }
 
-    public void addToWaitlist(Long familyMemberId, Long offeredCourseId) {
+    public String addToWaitlist(Long familyMemberId, Long offeredCourseId) {
         FamilyMembers familyMember = getFamilyMember(familyMemberId);
         OfferedCourses offeredCourse = getOfferedCourse(offeredCourseId);
         WaitList waitList = new WaitList();
@@ -90,6 +90,7 @@ public class FamilyCourseRegistrationService {
         waitList.setNoOfSeats(1L);
         waitList.setIsWaitListed(IsWaitListed.YES);
         waitlistRepository.save(waitList);
+        return "Course Seats full adding to waitlist";
     }
 
 

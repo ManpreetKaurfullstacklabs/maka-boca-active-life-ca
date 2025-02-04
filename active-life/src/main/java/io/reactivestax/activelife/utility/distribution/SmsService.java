@@ -1,4 +1,4 @@
-package io.reactivestax.activelife.distribution;
+package io.reactivestax.activelife.utility.distribution;
 
 import com.twilio.Twilio;
 import com.twilio.rest.api.v2010.account.Message;

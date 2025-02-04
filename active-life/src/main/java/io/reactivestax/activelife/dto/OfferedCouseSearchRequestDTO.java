@@ -1,11 +1,11 @@
-package io.reactivestax.activelife.criteriabuilder;
+package io.reactivestax.activelife.dto;
 
 import lombok.Data;
 
 import java.time.LocalDate;
 
 @Data
-public class OfferedCouseSearchRequest {
+public class OfferedCouseSearchRequestDTO {
     String courseName;
     LocalDate startDate;
     LocalDate endDate;

@@ -1,9 +1,9 @@
 package io.reactivestax.activelife.service;
 
 import io.reactivestax.activelife.Enums.IsWaitListed;
-import io.reactivestax.activelife.criteriabuilder.OfferedCourseMapper;
+import io.reactivestax.activelife.utility.interfaces.OfferedCourseMapper;
 import io.reactivestax.activelife.criteriabuilder.OfferedCourseSpecification;
-import io.reactivestax.activelife.criteriabuilder.OfferedCouseSearchRequest;
+import io.reactivestax.activelife.dto.OfferedCouseSearchRequestDTO;
 import io.reactivestax.activelife.domain.course.Courses;
 import io.reactivestax.activelife.domain.course.OfferedCourseFee;
 import io.reactivestax.activelife.domain.course.OfferedCourses;
@@ -15,7 +15,6 @@ import io.reactivestax.activelife.repository.courses.OfferedCourseFeeRepository;
 import io.reactivestax.activelife.repository.facilities.FacilititesRepository;
 import io.reactivestax.activelife.repository.courses.OfferedCourseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -142,16 +141,16 @@ public class OfferredCourseService {
     }
 
 
-    public List<OfferedCourseDTO> searchOfferedCourse(OfferedCouseSearchRequest offeredCouseSearchRequest) {
+    public List<OfferedCourseDTO> searchOfferedCourse(OfferedCouseSearchRequestDTO offeredCouseSearchRequestDTO) {
         Specification<OfferedCourses> offeredCoursesSpecification =
-                Specification.where(OfferedCourseSpecification.withCourseName(offeredCouseSearchRequest.getCourseName()))
-                        .and(OfferedCourseSpecification.withStartDate(offeredCouseSearchRequest.getStartDate()))
-                        .and(offeredCourseSpecification.withEndDate(offeredCouseSearchRequest.getEndDate()))
-                        .and(offeredCourseSpecification.withCity(offeredCouseSearchRequest.getCity()))
-                        .and(offeredCourseSpecification.withProvince(offeredCouseSearchRequest.getProvince()))
-                        .and(offeredCourseSpecification.hasCategory(offeredCouseSearchRequest.getCategoryName()))
-                        .and(offeredCourseSpecification.hasSubCategory(offeredCouseSearchRequest.getSubCategory()))
-                        .and(offeredCourseSpecification.withAgeGroup(offeredCouseSearchRequest.getAgeGroup()));
+                Specification.where(OfferedCourseSpecification.withCourseName(offeredCouseSearchRequestDTO.getCourseName()))
+                        .and(OfferedCourseSpecification.withStartDate(offeredCouseSearchRequestDTO.getStartDate()))
+                        .and(offeredCourseSpecification.withEndDate(offeredCouseSearchRequestDTO.getEndDate()))
+                        .and(offeredCourseSpecification.withCity(offeredCouseSearchRequestDTO.getCity()))
+                        .and(offeredCourseSpecification.withProvince(offeredCouseSearchRequestDTO.getProvince()))
+                        .and(offeredCourseSpecification.hasCategory(offeredCouseSearchRequestDTO.getCategoryName()))
+                        .and(offeredCourseSpecification.hasSubCategory(offeredCouseSearchRequestDTO.getSubCategory()))
+                        .and(offeredCourseSpecification.withAgeGroup(offeredCouseSearchRequestDTO.getAgeGroup()));
 
         List<OfferedCourses> offeredCoursesList = offeredCourseRepository.findAll(offeredCoursesSpecification);
         return offeredCoursesList.stream()
