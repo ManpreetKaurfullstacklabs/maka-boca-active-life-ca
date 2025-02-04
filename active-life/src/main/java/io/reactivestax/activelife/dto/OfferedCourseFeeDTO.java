@@ -9,8 +9,6 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
 public class OfferedCourseFeeDTO {
 
     @Null(message = "Fee ID should be null for new entries")

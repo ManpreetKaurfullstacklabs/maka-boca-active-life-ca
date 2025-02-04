@@ -102,7 +102,6 @@ class OfferedCourseServiceTest {
 
         when(coursesRepository.findById(1L)).thenReturn(Optional.of(mockCourse));
         when(facilititesRepository.findById(1L)).thenReturn(Optional.of(mockFacility));
-   //     when(offeredCourseFeeRepository.save(any(OfferedCourseFee.class))).thenReturn(mockOfferedCourseFee);
 
         offerredCourseService.addOfferedCourseToDatabase(offeredCourseDTO);
 

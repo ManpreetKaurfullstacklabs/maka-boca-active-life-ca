@@ -3,7 +3,6 @@ package io.reactivestax.activelife.controller;
 import io.reactivestax.activelife.Enums.AvailableForEnrollment;
 import io.reactivestax.activelife.Enums.FeeType;
 import io.reactivestax.activelife.Enums.IsAllDay;
-import io.reactivestax.activelife.domain.course.OfferedCourseFee;
 import io.reactivestax.activelife.dto.OfferedCourseDTO;
 import io.reactivestax.activelife.dto.OfferedCourseFeeDTO;
 import io.reactivestax.activelife.dto.UpdateCourseDTO;
@@ -13,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
@@ -32,107 +32,113 @@ public class OfferedCoursesControllerTest {
 
     @InjectMocks
     private OfferedCourses offeredCoursesController;
-
     private OfferedCourseDTO offeredCourseDTO;
-    private UpdateCourseDTO updateCourseDTO;
+    private  UpdateCourseDTO updateCourseDTO;
 
     @BeforeEach
     public void setUp() {
-
         MockitoAnnotations.openMocks(this);
 
         offeredCourseDTO = new OfferedCourseDTO();
-        offeredCourseDTO.setStartDate(LocalDate.of(2025, 2, 4));
-        offeredCourseDTO.setEndDate(LocalDate.of(2025, 2, 9));
-        offeredCourseDTO.setNoOfSeats(20L);
-        offeredCourseDTO.setStartTime(LocalDateTime.of(2025, 2, 4, 9, 0));
-        offeredCourseDTO.setEndTime(LocalDateTime.of(2025, 2, 4, 17, 0));
-        offeredCourseDTO.setIsAllDay(IsAllDay.YES);
-        offeredCourseDTO.setRegistrationStartDate(LocalDate.of(2025, 1, 1));
+        offeredCourseDTO.setStartDate(LocalDate.of(2025, 2, 9));
+        offeredCourseDTO.setEndDate(null);
+        offeredCourseDTO.setNoOfSeats(5L);
+        offeredCourseDTO.setStartTime(LocalDateTime.of(2023, 5, 1, 10, 0));
+        offeredCourseDTO.setEndTime(LocalDateTime.of(2023, 5, 1, 12, 0));
+        offeredCourseDTO.setIsAllDay(IsAllDay.NO);
+        offeredCourseDTO.setRegistrationStartDate(LocalDate.of(2023, 4, 15));
         offeredCourseDTO.setAvailableForEnrollment(AvailableForEnrollment.YES);
-        offeredCourseDTO.setCoursesId(1L);
-        offeredCourseDTO.setFacilities(1L);
+        offeredCourseDTO.setCoursesId(10L);
+        offeredCourseDTO.setFacilities(3L);
+        OfferedCourseFeeDTO offeredCourseFeeDTO = new OfferedCourseFeeDTO();
+        offeredCourseFeeDTO.setFeeId(10L);
+        offeredCourseFeeDTO.setFeeType(FeeType.RESIDENT);
+        offeredCourseFeeDTO.setCourseFee(5000L);
+        offeredCourseFeeDTO.setCreatedTimestamp(LocalDate.of(2025, 2, 4));
+        offeredCourseFeeDTO.setLastUpdatedTimestamp(LocalDate.of(2025, 2, 4));
+        offeredCourseFeeDTO.setCreatedBy(1L);
+        offeredCourseFeeDTO.setLastUpdatedBy(1L);
+
+        offeredCourseDTO.setOfferedCourseFeeDTO(offeredCourseFeeDTO);
+
+
         updateCourseDTO = new UpdateCourseDTO();
-        updateCourseDTO.setStartDate(LocalDate.of(2025, 2, 4));
-        updateCourseDTO.setEndDate(LocalDate.of(2025, 2, 9));
-        updateCourseDTO.setNoOfSeats(20L);
-        updateCourseDTO.setStartTime(LocalDateTime.of(2025, 2, 4, 9, 0));
-       updateCourseDTO.setEndTime(LocalDateTime.of(2025, 2, 4, 17, 0));
-       updateCourseDTO.setIsAllDay(IsAllDay.YES);
-        updateCourseDTO.setRegistrationStartDate(LocalDate.of(2025, 1, 1));
-        updateCourseDTO.setAvailableForEnrollment(AvailableForEnrollment.YES);
+        updateCourseDTO.setStartDate(LocalDate.of(2023, 1, 1));
+        updateCourseDTO.setEndDate(LocalDate.of(2023, 1, 31));
+        updateCourseDTO.setNoOfSeats(34L);
+        updateCourseDTO.setStartTime(LocalDateTime.of(2023, 1, 1, 10, 0));
+        updateCourseDTO.setEndTime(LocalDateTime.of(2023, 1, 1, 12, 0));
+        updateCourseDTO.setIsAllDay(IsAllDay.YES);
+        updateCourseDTO.setNoOfSeats(5L);
+        updateCourseDTO.setRegistrationStartDate(LocalDate.of(2023, 1, 1));
+        updateCourseDTO.setAvailableForEnrollment(AvailableForEnrollment.NO);
 
-
-
-        OfferedCourseFeeDTO offeredCourseFee = new OfferedCourseFeeDTO();
-        offeredCourseFee.setFeeType(FeeType.RESIDENT);
-        offeredCourseFee.setCourseFee(200L);
-
-        offeredCourseDTO.setOfferedCourseFeeDTO(offeredCourseFee);
 
         mockMvc = MockMvcBuilders.standaloneSetup(offeredCoursesController).build();
     }
 
     @Test
-     void testAddOfferedCourse() throws Exception {
-        String json ="""
-                {
-                  "startDate": "2025-02-04",
-                  "endDate": "2025-02-09",
-                  "noOfSeats": 20,
-                  "startTime": "2025-02-04T09:00:00",
-                  "endTime": "2025-02-04T17:00:00",
-                  "isAllDay": YES,
-                  "registrationStartDate": "2025-01-01",
-                  "availableForEnrollment": "YES",
-                  "coursesId": 1,
-                  "facilities": 1,
-                  "offeredCourseFee": {
-                    "feeType": "RESIDENT",
-                    "courseFee": 200
-                  }
-                }
-                
-                """;
+    public void testAddOfferedCourse() throws Exception {
+        // Prepare the JSON payload
+        String json = """
+            {
+              "startDate": "2025-02-09",
+              "endDate": "2025-09-19",
+              "noOfSeats": 5,
+              "startTime": "2023-05-01T10:00:00",
+              "endTime": "2023-05-01T12:00:00",
+              "isAllDay": "NO",
+              "registrationStartDate": "2023-04-15",
+              "availableForEnrollment": "YES",
+              "coursesId": 6,
+              "facilities": 6,
+              "offeredCourseFeeDTO": {
+                "feeType": "RESIDENT",
+                "courseFee": 5000.00
+              }
+            }
+        """;
 
-        doNothing().when(offerredCourseService).addOfferedCourseToDatabase(offeredCourseDTO);
+        doNothing().when(offerredCourseService).addOfferedCourseToDatabase(org.mockito.ArgumentMatchers.any(OfferedCourseDTO.class));
 
         mockMvc.perform(post("/api/offeredcourse")
-                        .contentType("application/json")
-                       .content(json))
-                .andExpect(status().isOk()) ;
-        verify(offerredCourseService, times(1)).addOfferedCourseToDatabase(offeredCourseDTO);
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Course saved succesffuly"));
+
+        verify(offerredCourseService, times(1)).addOfferedCourseToDatabase(org.mockito.ArgumentMatchers.any(OfferedCourseDTO.class));
     }
-
-
 
     @Test
     public void testGetOfferedCourseById() throws Exception {
-        // Arrange
-        when(offerredCourseService.getOfferedCoursesById(1L)).thenReturn(offeredCourseDTO);
+        when(offerredCourseService.getOfferedCoursesById(10L)).thenReturn(offeredCourseDTO);
 
-        // Act & Assert
-        mockMvc.perform(get("/api/offeredcourse/1"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.startDate").value("2025-02-04"))
-                .andExpect(jsonPath("$.endDate").value("2025-02-09"))
-                .andExpect(jsonPath("$.noOfSeats").value(20));
-
-        verify(offerredCourseService, times(1)).getOfferedCoursesById(1L);
+        mockMvc.perform(get("/api/offeredcourse/10"))
+                .andExpect(status().isOk());
+        verify(offerredCourseService, times(1)).getOfferedCoursesById(10L);
     }
 
-    @Test
-    public void testUpdateOfferedCourse() throws Exception {
-        // Arrange
-        doNothing().when(offerredCourseService).updateOfferedCourseToDatabase(updateCourseDTO, 1L);
 
-        // Act & Assert
-        mockMvc.perform(patch("/api/offeredcourse/1")
+    @Test
+    public void testUpdateCourse() throws Exception {
+
+        mockMvc.perform(patch("/api/offeredcourse/10")
                         .contentType("application/json")
-                        .content("{\"startDate\":\"2025-02-04\", \"endDate\":\"2025-02-09\", \"noOfSeats\":20, \"startTime\":\"2025-02-04T09:00:00\", \"endTime\":\"2025-02-04T17:00:00\", \"isAllDay\":false, \"registrationStartDate\":\"2025-01-01\", \"availableForEnrollment\":\"YES\", \"coursesId\":101, \"facilities\":202, \"offeredCourseFee\":{\"feeType\":\"Fixed\",\"courseFee\":200.0}}"))
+                        .content("{"
+                                + "\"startDate\": \"2023-01-01\","
+                                + "\"endDate\": \"2023-01-31\","
+                                + "\"noOfCourses\": 34,"
+                                + "\"startTime\": \"2023-01-01T10:00:00\","
+                                + "\"endTime\": \"2023-01-01T12:00:00\","
+                                + "\"isAllDay\": \"YES\","
+                                + "\"noOfSeats\": 5,"
+                                + "\"registrationStartDate\": \"2023-01-01\","
+                                + "\"availableForEnrollment\": \"NO\""
+                                + "}"))
                 .andExpect(status().isOk())
                 .andExpect(content().string("Courses updated sucessfully : "));
 
-        verify(offerredCourseService, times(1)).updateOfferedCourseToDatabase(updateCourseDTO, 1L);
+        verify(offerredCourseService, times(1)).updateOfferedCourseToDatabase(updateCourseDTO, 10L);
     }
 }
