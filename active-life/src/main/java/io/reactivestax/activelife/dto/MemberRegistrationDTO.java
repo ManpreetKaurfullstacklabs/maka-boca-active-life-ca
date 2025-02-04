@@ -5,6 +5,9 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import io.reactivestax.activelife.Enums.GroupOwner;
 import io.reactivestax.activelife.Enums.PreferredMode;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,24 +19,63 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class MemberRegistrationDTO {
 
+    @NotNull(message = "Member name is required")
+    @NotEmpty(message = "Member name cannot be empty")
     private String memberName;
+
+    @NotNull(message = "Date of birth is required")
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonFormat(pattern="yyyy-MM-dd")
     private LocalDate dob;
-    private String gender;
-    private String email;
-    private String streetNo;
-    private String streetName;
-    private PreferredMode preferredMode;
-    private String city;
-    private String province;
-    private String country;
-    private String postalCode;
-    private String homePhoneNo;
-    private String bussinessPhoneNo;
-    private String language;
-    private String memberLoginId;
-    private GroupOwner groupOwner;
-    private Long familyGroupId;
 
+    @NotNull(message = "Gender is required")
+    private String gender;
+
+    @Email(message = "Email should be valid")
+    @NotNull(message = "Email is required")
+    private String email;
+
+    @NotNull(message = "Street number is required")
+    @NotEmpty(message = "Street number cannot be empty")
+    private String streetNo;
+
+    @NotNull(message = "Street name is required")
+    @NotEmpty(message = "Street name cannot be empty")
+    private String streetName;
+
+    @NotNull(message = "Preferred mode is required")
+    private PreferredMode preferredMode;
+
+    @NotNull(message = "City is required")
+    @NotEmpty(message = "City cannot be empty")
+    private String city;
+
+    @NotNull(message = "Province is required")
+    @NotEmpty(message = "Province cannot be empty")
+    private String province;
+
+    @NotNull(message = "Country is required")
+    @NotEmpty(message = "Country cannot be empty")
+    private String country;
+
+    @NotNull(message = "Postal code is required")
+    @NotEmpty(message = "Postal code cannot be empty")
+    private String postalCode;
+
+    @NotNull(message = "Home phone number is required")
+    @NotEmpty(message = "Home phone number cannot be empty")
+    private String homePhoneNo;
+
+    @NotNull(message = "Bussiness phone number is required")
+    private String bussinessPhoneNo;
+
+    @NotNull(message = "Language is required")
+    private String language;
+
+    @NotNull(message = "Member login ID is required")
+    @NotEmpty(message = "Member login ID cannot be empty")
+    private String memberLoginId;
+
+    @NotNull(message = "Family group ID is required")
+    private Long familyGroupId;
 }

@@ -1,6 +1,7 @@
 package io.reactivestax.activelife.service;
 
 import io.reactivestax.activelife.Enums.*;
+import io.reactivestax.activelife.repository.memberregistration.MemberRegistrationRepository;
 import io.reactivestax.activelife.utility.distribution.SmsService;
 import io.reactivestax.activelife.domain.course.OfferedCourseFee;
 import io.reactivestax.activelife.domain.course.OfferedCourses;
@@ -12,9 +13,8 @@ import io.reactivestax.activelife.exception.InvalidCourseIdException;
 import io.reactivestax.activelife.exception.InvalidMemberIdException;
 import io.reactivestax.activelife.repository.courses.OfferedCourseFeeRepository;
 import io.reactivestax.activelife.repository.courses.OfferedCourseRepository;
-import io.reactivestax.activelife.repository.familymember.FamilMemberRepository;
-import io.reactivestax.activelife.repository.familymember.FamilyCourseRegistrationRepository;
-import io.reactivestax.activelife.repository.familymember.WaitlistRepository;
+import io.reactivestax.activelife.repository.memberregistration.FamilyCourseRegistrationRepository;
+import io.reactivestax.activelife.repository.memberregistration.WaitlistRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
@@ -35,7 +35,7 @@ class FamilyCourseRegistrationServiceTest {
     private OfferedCourseRepository offeredCourseRepository;
 
     @Mock
-    private FamilMemberRepository familMemberRepository;
+    private MemberRegistrationRepository memberRegistrationRepository;
 
     @Mock
     private OfferedCourseFeeRepository offeredCourseFeeRepository;
@@ -98,7 +98,7 @@ class FamilyCourseRegistrationServiceTest {
         familyMember.setStatus(Status.ACTIVE);
 
         when(offeredCourseRepository.findById(1L)).thenReturn(Optional.of(offeredCourse));
-        when(familMemberRepository.findById(1L)).thenReturn(Optional.of(familyMember));
+        when(memberRegistrationRepository.findById(1L)).thenReturn(Optional.of(familyMember));
         when(familyCourseRegistrationRepository.countByOfferedCourseIdAndIsWithdrawn(any(), any())).thenReturn(1L);
 
         familyCourseRegistrationService.enrollFamilyMemberInCourse(dto);
@@ -128,7 +128,7 @@ class FamilyCourseRegistrationServiceTest {
         existingRegistration.setFamilyMemberId(familyMember);
         existingRegistration.setOfferedCourseId(offeredCourse);
 
-        when(familMemberRepository.findById(familyMemberId)).thenReturn(Optional.of(familyMember));
+        when(memberRegistrationRepository.findById(familyMemberId)).thenReturn(Optional.of(familyMember));
         when(offeredCourseRepository.findById(offeredCourseId)).thenReturn(Optional.of(offeredCourse));
         when(familyCourseRegistrationRepository.findByFamilyMemberIdAndOfferedCourseId(familyMember, offeredCourse)).thenReturn(Optional.of(existingRegistration));
 
@@ -159,7 +159,7 @@ class FamilyCourseRegistrationServiceTest {
         offeredCourse.setNoOfSeats(5L);
         offeredCourse.setAvailableForEnrollment(AvailableForEnrollment.YES);
 
-        when(familMemberRepository.findById(familyMemberId)).thenReturn(Optional.of(familyMember));
+        when(memberRegistrationRepository.findById(familyMemberId)).thenReturn(Optional.of(familyMember));
         when(offeredCourseRepository.findById(offeredCourseId)).thenReturn(Optional.of(offeredCourse));
         when(familyCourseRegistrationRepository.countByOfferedCourseIdAndIsWithdrawn(offeredCourse, IsWithdrawn.NO)).thenReturn(5L);
         when(waitlistRepository.countByOfferedCourses_OfferedCourseIdAndIsWaitListed(offeredCourseId, IsWaitListed.YES)).thenReturn(5L);
@@ -222,7 +222,7 @@ class FamilyCourseRegistrationServiceTest {
         existingRegistration.setOfferedCourseId(offeredCourse);
 
         when(offeredCourseRepository.findById(1L)).thenReturn(Optional.of(offeredCourse));
-        when(familMemberRepository.findById(101L)).thenReturn(Optional.of(familyMember));
+        when(memberRegistrationRepository.findById(101L)).thenReturn(Optional.of(familyMember));
         when(familyCourseRegistrationRepository.findByFamilyMemberIdAndOfferedCourseId(familyMember, offeredCourse)).thenReturn(Optional.of(existingRegistration));
 
         Exception exception = assertThrows(RuntimeException.class, () -> {
@@ -245,7 +245,7 @@ class FamilyCourseRegistrationServiceTest {
         offeredCourse.setOfferedCourseId(offeredCourseId);
         offeredCourse.setAvailableForEnrollment(AvailableForEnrollment.YES);
 
-        when(familMemberRepository.findById(familyMemberId)).thenReturn(Optional.of(familyMember));
+        when(memberRegistrationRepository.findById(familyMemberId)).thenReturn(Optional.of(familyMember));
         when(offeredCourseRepository.findById(offeredCourseId)).thenReturn(Optional.of(offeredCourse));
 
         WaitList waitList = new WaitList();
@@ -336,7 +336,7 @@ class FamilyCourseRegistrationServiceTest {
         FamilyMembers familyMember = new FamilyMembers();
         familyMember.setFamilyMemberId(1L);
         familyMember.setStatus(Status.ACTIVE);
-        when(familMemberRepository.findById(familyMemberId)).thenReturn(Optional.of(familyMember));
+        when(memberRegistrationRepository.findById(familyMemberId)).thenReturn(Optional.of(familyMember));
 
         FamilyMembers result = familyCourseRegistrationService.getFamilyMember(familyMemberId);
 
@@ -349,7 +349,7 @@ class FamilyCourseRegistrationServiceTest {
         Long familyMemberId = 1L;
         FamilyMembers familyMember = new FamilyMembers();
         familyMember.setFamilyMemberId(1L);
-        when(familMemberRepository.findById(familyMemberId)).thenReturn(Optional.empty());
+        when(memberRegistrationRepository.findById(familyMemberId)).thenReturn(Optional.empty());
 
         assertThrows(InvalidMemberIdException.class, () -> {
             familyCourseRegistrationService.getFamilyMember(familyMemberId);

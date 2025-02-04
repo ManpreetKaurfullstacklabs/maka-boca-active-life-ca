@@ -1,4 +1,4 @@
-package io.reactivestax.activelife.repository.familymember;
+package io.reactivestax.activelife.repository.memberregistration;
 
 import io.reactivestax.activelife.Enums.IsWaitListed;
 import io.reactivestax.activelife.Enums.IsWithdrawn;

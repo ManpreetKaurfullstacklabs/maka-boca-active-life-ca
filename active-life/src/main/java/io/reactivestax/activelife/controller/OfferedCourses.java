@@ -34,11 +34,4 @@ public class OfferedCourses {
         offerredCourseService.updateOfferedCourseToDatabase(offeredCourseDTO,id);
         return ResponseEntity.ok("Courses updated sucessfully : " );
     }
-
-    @PostMapping("/search")
-    public List<OfferedCourseDTO> searchOfferedCourses(@RequestBody OfferedCouseSearchRequestDTO offeredCouseSearchRequestDTO) {
-        return offerredCourseService.searchOfferedCourse(offeredCouseSearchRequestDTO);
-    }
-
-
 }

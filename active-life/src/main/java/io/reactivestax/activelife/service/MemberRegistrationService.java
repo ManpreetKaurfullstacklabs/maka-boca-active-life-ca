@@ -2,17 +2,19 @@ package io.reactivestax.activelife.service;
 
 import io.reactivestax.activelife.Enums.GroupOwner;
 import io.reactivestax.activelife.Enums.Status;
-import io.reactivestax.activelife.utility.distribution.SmsService;
+
 import io.reactivestax.activelife.domain.membership.Login;
 import io.reactivestax.activelife.domain.membership.FamilyGroups;
 import io.reactivestax.activelife.domain.membership.FamilyMembers;
 import io.reactivestax.activelife.dto.MemberRegistrationDTO;
 import io.reactivestax.activelife.dto.LoginDTO;
 import io.reactivestax.activelife.exception.InvalidMemberIdException;
-import io.reactivestax.activelife.utility.interfaces.FamilyMemberMapper;
-import io.reactivestax.activelife.repository.familymember.FamilMemberRepository;
-import io.reactivestax.activelife.repository.familymember.FamilyGroupRepository;
+
+import io.reactivestax.activelife.repository.memberregistration.MemberRegistrationRepository;
+import io.reactivestax.activelife.repository.memberregistration.FamilyGroupRepository;
 import io.reactivestax.activelife.repository.login.LoginRepository;
+import io.reactivestax.activelife.utility.distribution.SmsService;
+import io.reactivestax.activelife.utility.interfaces.FamilyMemberMapper;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,7 +28,7 @@ import java.util.UUID;
 public class MemberRegistrationService {
 
     @Autowired
-    private FamilMemberRepository familyMemberRepository;
+    private MemberRegistrationRepository familyMemberRepository;
 
     @Autowired
     private FamilyGroupRepository familyGroupRepository;
@@ -134,7 +136,7 @@ public class MemberRegistrationService {
                 String verificationId = UUID.randomUUID().toString();
                 familyMembers.setVerificationUUID(verificationId);
                 String verificationLink = "http://localhost:8082/api/v1/familymember/verify/" + verificationId;
-                   smsService.verificationLink(familyMembers.getHomePhoneNo(), verificationLink);
+                smsService.verificationLink(familyMembers.getHomePhoneNo(), verificationLink);
                 return "Verification link sent successfully";
             }
         }
@@ -193,14 +195,6 @@ public class MemberRegistrationService {
         return familyGroups;
     }
 
-    public String generatePin() {
-        Random random = new Random();
-        StringBuilder pin = new StringBuilder();
-        for (int i = 0; i < 6; i++) {
-            pin.append(random.nextInt(10));
-        }
-        return pin.toString();
-    }
 
     public String findFamilyMemberByOtpVerification(LoginDTO loginDTO) {
         Optional<FamilyMembers> familyMemberOpt = familyMemberRepository.findByMemberLogin(loginDTO.getMemberLoginId());
@@ -218,5 +212,14 @@ public class MemberRegistrationService {
         familyMembers.setStatus(Status.ACTIVE);
         familyMemberRepository.save(familyMembers);
         return "OTP verified";
+    }
+
+    public String generatePin() {
+        Random random = new Random();
+        StringBuilder pin = new StringBuilder();
+        for (int i = 0; i < 6; i++) {
+            pin.append(random.nextInt(10));
+        }
+        return pin.toString();
     }
 }

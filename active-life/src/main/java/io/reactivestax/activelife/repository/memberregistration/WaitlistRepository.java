@@ -1,8 +1,7 @@
-package io.reactivestax.activelife.repository.familymember;
+package io.reactivestax.activelife.repository.memberregistration;
 
 import io.reactivestax.activelife.Enums.IsWaitListed;
 import io.reactivestax.activelife.domain.course.WaitList;
-import io.reactivestax.activelife.domain.membership.FamilyCourseRegistrations;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

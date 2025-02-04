@@ -7,8 +7,8 @@ import io.reactivestax.activelife.dto.MemberRegistrationDTO;
 import io.reactivestax.activelife.dto.LoginDTO;
 import io.reactivestax.activelife.exception.InvalidMemberIdException;
 import io.reactivestax.activelife.utility.interfaces.FamilyMemberMapper;
-import io.reactivestax.activelife.repository.familymember.FamilMemberRepository;
-import io.reactivestax.activelife.repository.familymember.FamilyGroupRepository;
+import io.reactivestax.activelife.repository.memberregistration.MemberRegistrationRepository;
+import io.reactivestax.activelife.repository.memberregistration.FamilyGroupRepository;
 import io.reactivestax.activelife.repository.login.LoginRepository;
 import io.reactivestax.activelife.utility.distribution.SmsService;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,7 +28,7 @@ public class MemberRegistrationServiceTest {
     private MemberRegistrationService memberRegistrationService;
 
     @Mock
-    private FamilMemberRepository familyMemberRepository;
+    private MemberRegistrationRepository familyMemberRepository;
 
     @Mock
     private FamilyGroupRepository familyGroupRepository;

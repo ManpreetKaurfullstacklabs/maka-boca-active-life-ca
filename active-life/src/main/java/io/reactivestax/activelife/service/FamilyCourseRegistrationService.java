@@ -4,6 +4,7 @@ import io.reactivestax.activelife.Enums.AvailableForEnrollment;
 import io.reactivestax.activelife.Enums.IsWaitListed;
 import io.reactivestax.activelife.Enums.IsWithdrawn;
 import io.reactivestax.activelife.Enums.Status;
+import io.reactivestax.activelife.repository.memberregistration.MemberRegistrationRepository;
 import io.reactivestax.activelife.utility.distribution.SmsService;
 import io.reactivestax.activelife.domain.course.Courses;
 import io.reactivestax.activelife.domain.course.OfferedCourseFee;
@@ -16,9 +17,8 @@ import io.reactivestax.activelife.exception.InvalidCourseIdException;
 import io.reactivestax.activelife.exception.InvalidMemberIdException;
 import io.reactivestax.activelife.repository.courses.OfferedCourseFeeRepository;
 import io.reactivestax.activelife.repository.courses.OfferedCourseRepository;
-import io.reactivestax.activelife.repository.familymember.FamilMemberRepository;
-import io.reactivestax.activelife.repository.familymember.FamilyCourseRegistrationRepository;
-import io.reactivestax.activelife.repository.familymember.WaitlistRepository;
+import io.reactivestax.activelife.repository.memberregistration.FamilyCourseRegistrationRepository;
+import io.reactivestax.activelife.repository.memberregistration.WaitlistRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,7 +37,7 @@ public class FamilyCourseRegistrationService {
     private OfferedCourseRepository offeredCourseRepository;
 
     @Autowired
-    private FamilMemberRepository familMemberRepository;
+    private MemberRegistrationRepository memberRegistrationRepository;
 
     @Autowired
     private OfferedCourseFeeRepository offeredCourseFeeRepository;
@@ -129,7 +129,7 @@ public class FamilyCourseRegistrationService {
     }
 
     public FamilyMembers getFamilyMember(Long familyMemberId) {
-        Optional<FamilyMembers> byId = familMemberRepository.findById(familyMemberId);
+        Optional<FamilyMembers> byId = memberRegistrationRepository.findById(familyMemberId);
         if (byId.isEmpty()) {
             throw new InvalidMemberIdException("Family member does not exist.");
         }
@@ -166,7 +166,7 @@ public class FamilyCourseRegistrationService {
     }
 
     public FamilyMembers memberIsActiveOrNot(Long id) {
-        Optional<FamilyMembers> byId = familMemberRepository.findById(id);
+        Optional<FamilyMembers> byId = memberRegistrationRepository.findById(id);
         FamilyMembers familyMembers = byId.orElseThrow(() -> new InvalidMemberIdException("Member not found."));
         if (familyMembers.getStatus().equals(Status.INACTIVE)) {
             throw new InvalidMemberIdException("Member is inactive.");
@@ -197,7 +197,7 @@ public class FamilyCourseRegistrationService {
     }
 
     public FamilyMembers memberIsEnrolledOrNot(Long id) {
-        Optional<FamilyMembers> byId = familMemberRepository.findById(id);
+        Optional<FamilyMembers> byId = memberRegistrationRepository.findById(id);
         FamilyMembers familyMembers = byId.orElseThrow(() -> new InvalidMemberIdException("Member not found."));
         if (familyMembers.getStatus().equals(Status.INACTIVE)) {
             throw new InvalidMemberIdException("Member is inactive.");

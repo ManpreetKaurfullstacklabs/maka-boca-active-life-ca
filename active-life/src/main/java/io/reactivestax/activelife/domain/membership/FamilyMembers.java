@@ -16,7 +16,7 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity(name = "family_member")
+@Entity(name = "family_registration")
 public class FamilyMembers {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -66,7 +66,7 @@ public class FamilyMembers {
     @Column(name = "language")
     private String language;
 
-    @Column(name = "pin")
+    @Column(name = "password")
     private String pin;
 
     @Column(name = "member_login_id",unique = true)

@@ -45,4 +45,6 @@ public class FamilyGroups {
     @JsonManagedReference
     @OneToMany(mappedBy = "familyGroupId" )
     private List<FamilyMembers> familyMembers;
+
+
 }
