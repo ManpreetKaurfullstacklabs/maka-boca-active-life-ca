@@ -41,7 +41,6 @@ public class CoursesShoppingCart {
         if (cart.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No cart found for this family member.");
         }
-
         String cartItem = cart.get(offeredCourseId);
         if (cartItem != null) {
             return ResponseEntity.ok(cartItem);
@@ -53,7 +52,6 @@ public class CoursesShoppingCart {
     @GetMapping("/getcache/{familyMemberId}")
     public ResponseEntity<Map<Long, String>> getCache(@PathVariable Long familyMemberId) {
         Map<Long, String> cart = shoppingCartService.getCartOfMembers(familyMemberId);
-
         if (cart.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of());
         }
@@ -61,12 +59,13 @@ public class CoursesShoppingCart {
         return ResponseEntity.ok(cart);
     }
 
-
-
-
-
-
-
-
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Map<Long,String>> deleteFromCache(@PathVariable Long familyMemberId){
+        Map<Long,String> cart = shoppingCartService.deleteFromUser(familyMemberId);
+        if (cart.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of());
+        }
+        return ResponseEntity.ok(cart);
+    }
 
 }

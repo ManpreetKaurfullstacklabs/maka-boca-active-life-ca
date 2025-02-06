@@ -31,10 +31,11 @@ public class ShoppingCartService {
         Long offeredCourseId = shoppingCartDTO.getOfferedCourseId();
 
         String cartItemDetails = "Course ID: " + offeredCourseId + ", Quantity: " + shoppingCartDTO.getNoOfItems() + ", Price: " + cost;
-
         userCarts.computeIfAbsent(familyMemberId, k -> new HashMap<>()).put(offeredCourseId, cartItemDetails);
         return userCarts.get(familyMemberId);
     }
+
+
     @CachePut(value = "cartItems", key = "#familyMemberId")
     public Map<Long, String> getCart(Long familyMemberId) {
         System.out.println("Fetching cart for user: " + familyMemberId);
@@ -47,10 +48,10 @@ public class ShoppingCartService {
         return userCarts.getOrDefault(familyMemberId, new HashMap<>());
     }
 
-
-
-
-
-
+    @CachePut(value = "cartItems", key = "#familyMemberId")
+    public Map<Long, String> deleteFromUser(Long familyMemberId) {
+        System.out.println("deleting cart for user: " + familyMemberId);
+        return  userCarts.remove(familyMemberId);
+    }
 
 }
