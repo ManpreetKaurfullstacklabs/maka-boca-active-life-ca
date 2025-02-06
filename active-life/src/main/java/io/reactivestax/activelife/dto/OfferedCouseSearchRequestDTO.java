@@ -16,7 +16,6 @@ public class OfferedCouseSearchRequestDTO {
     @FutureOrPresent(message = "End date must be in the future or present")
     private LocalDate endDate;
     private String city;
-
     private String province;
     private String categoryName;
     private String subCategory;

@@ -37,4 +37,5 @@ public class OfferedCourses {
         return ResponseEntity.ok("Courses updated sucessfully : " );
     }
 
+
 }
