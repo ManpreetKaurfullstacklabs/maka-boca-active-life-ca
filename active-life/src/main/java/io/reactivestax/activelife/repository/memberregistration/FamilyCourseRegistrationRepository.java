@@ -9,8 +9,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
 public interface FamilyCourseRegistrationRepository extends JpaRepository<FamilyCourseRegistrations, Long> {
-
-
     Long countByOfferedCourseIdAndIsWithdrawn(OfferedCourses offeredCourse, IsWithdrawn isWithdrawn);
     Optional<FamilyCourseRegistrations> findByFamilyMemberIdAndOfferedCourseId(MemberRegistration familyMember, OfferedCourses offeredCourse);
+    Optional<FamilyCourseRegistrations> findByFamilyMemberIdAndOfferedCourseIdAndIsWithdrawn(
+            MemberRegistration familyMember,
+            OfferedCourses offeredCourse,
+            IsWithdrawn isWithdrawn
+    );
+
 }

@@ -2,6 +2,7 @@ package io.reactivestax.activelife.service;
 
 import io.reactivestax.activelife.Enums.IsWaitListed;
 import io.reactivestax.activelife.dto.OfferedCourseFeeDTO;
+import io.reactivestax.activelife.dto.OfferedCouseSearchRequestDTO;
 import io.reactivestax.activelife.dto.UpdateCourseDTO;
 import io.reactivestax.activelife.exception.InvalidFacilityIdException;
 import io.reactivestax.activelife.utility.criteriabuilder.OfferedCourseSpecification;
@@ -16,14 +17,18 @@ import io.reactivestax.activelife.repository.courses.CoursesRepository;
 import io.reactivestax.activelife.repository.courses.OfferedCourseFeeRepository;
 import io.reactivestax.activelife.repository.facilities.FacilititesRepository;
 import io.reactivestax.activelife.repository.courses.OfferedCourseRepository;
+import io.reactivestax.activelife.utility.interfaces.OfferedCourseMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -150,6 +155,7 @@ public class OfferredCourseService {
         }
         return pin.toString();
     }
+
 
 
 

@@ -57,6 +57,7 @@ public class Facilities {
     @Column(name = "LAST_UPDATED_BY")
     private Long lastUpdatedBy;
 
+
     @OneToMany(mappedBy = "facility")
     private List<FacilityFunctions> facilityFunctions;
 }

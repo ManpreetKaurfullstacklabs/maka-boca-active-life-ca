@@ -1,12 +1,9 @@
 package io.reactivestax.activelife.dto;
-
-
 import io.reactivestax.activelife.Enums.AvailableForEnrollment;
 import io.reactivestax.activelife.Enums.IsAllDay;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 

@@ -5,6 +5,7 @@ import io.reactivestax.activelife.dto.OfferedCouseSearchRequestDTO;
 import io.reactivestax.activelife.dto.OfferedCourseDTO;
 import io.reactivestax.activelife.dto.UpdateCourseDTO;
 import io.reactivestax.activelife.service.OfferredCourseService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,20 +20,21 @@ public class OfferedCourses {
     private OfferredCourseService offerredCourseService;
 
     @PostMapping
-    public ResponseEntity<String> addOfferedCourse(@RequestBody OfferedCourseDTO offeredCourseDTO) {
+    public ResponseEntity<String> addOfferedCourse( @Valid  @RequestBody OfferedCourseDTO offeredCourseDTO) {
         offerredCourseService.addOfferedCourseToDatabase(offeredCourseDTO);
         return ResponseEntity.ok("Course saved succesffuly");
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<OfferedCourseDTO> getOfferedCourse( @PathVariable Long id) {
+    public ResponseEntity<OfferedCourseDTO> getOfferedCourse(@Valid @PathVariable Long id) {
         OfferedCourseDTO offeredCoursesDTO = offerredCourseService.getOfferedCoursesById(id);
         return ResponseEntity.ok(offeredCoursesDTO);
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<String> updateCourseToOfferedCourse(@PathVariable Long id,  @RequestBody UpdateCourseDTO offeredCourseDTO) {
+    public ResponseEntity<String> updateCourseToOfferedCourse( @Valid @PathVariable Long id,  @RequestBody UpdateCourseDTO offeredCourseDTO) {
         offerredCourseService.updateOfferedCourseToDatabase(offeredCourseDTO,id);
         return ResponseEntity.ok("Courses updated sucessfully : " );
     }
+
 }

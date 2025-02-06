@@ -68,7 +68,7 @@ public class OfferedCourses {
     @JoinColumn(name = "course_id")
     private  Courses  courses;
 
-
+    @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "facility_id")
     private Facilities facilities;

@@ -6,7 +6,7 @@ import io.reactivestax.activelife.dto.OfferedCouseSearchRequestDTO;
 import io.reactivestax.activelife.repository.courses.OfferedCourseRepository;
 import io.reactivestax.activelife.utility.criteriabuilder.OfferedCourseSpecification;
 import io.reactivestax.activelife.utility.interfaces.OfferedCourseMapper;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -14,29 +14,27 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class SearchQueryService {
 
-    @Autowired
-    OfferedCourseRepository offeredCourseRepository;
-
-    @Autowired
-    OfferedCourseSpecification offeredCourseSpecification;
-
+    private final OfferedCourseRepository offeredCourseRepository;
 
     public List<OfferedCourseDTO> searchOfferedCourse(OfferedCouseSearchRequestDTO offeredCouseSearchRequestDTO) {
         Specification<OfferedCourses> offeredCoursesSpecification =
-                Specification.where(OfferedCourseSpecification.withCourseName(offeredCouseSearchRequestDTO.getCourseName()))
+                Specification.where(OfferedCourseSpecification.withCourseName(offeredCouseSearchRequestDTO.getCourseName())
                         .and(OfferedCourseSpecification.withStartDate(offeredCouseSearchRequestDTO.getStartDate()))
-                        .and(offeredCourseSpecification.withEndDate(offeredCouseSearchRequestDTO.getEndDate()))
-                        .and(offeredCourseSpecification.withCity(offeredCouseSearchRequestDTO.getCity()))
-                        .and(offeredCourseSpecification.withProvince(offeredCouseSearchRequestDTO.getProvince()))
-                        .and(offeredCourseSpecification.hasCategory(offeredCouseSearchRequestDTO.getCategoryName()))
-                        .and(offeredCourseSpecification.hasSubCategory(offeredCouseSearchRequestDTO.getSubCategory()))
-                        .and(offeredCourseSpecification.withAgeGroup(offeredCouseSearchRequestDTO.getAgeGroup()));
+                        .and(OfferedCourseSpecification.withEndDate(offeredCouseSearchRequestDTO.getEndDate()))
+                        .and(OfferedCourseSpecification.withCity(offeredCouseSearchRequestDTO.getCity()))
+                        .and(OfferedCourseSpecification.withProvince(offeredCouseSearchRequestDTO.getProvince()))
+                        .and(OfferedCourseSpecification.hasCategory(offeredCouseSearchRequestDTO.getCategoryName()))
+                        .and(OfferedCourseSpecification.hasSubCategory(offeredCouseSearchRequestDTO.getSubCategory())));
+
 
         List<OfferedCourses> offeredCoursesList = offeredCourseRepository.findAll(offeredCoursesSpecification);
-        return offeredCoursesList.stream()
+        List<OfferedCourseDTO> collect = offeredCoursesList.stream()
                 .map(OfferedCourseMapper.INSTANCE::offeredCourseToOfferedCourseDTO)
                 .collect(Collectors.toList());
+        return collect;
     }
+
 }

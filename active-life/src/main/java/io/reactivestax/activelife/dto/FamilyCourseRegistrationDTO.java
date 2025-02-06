@@ -26,8 +26,6 @@ public class FamilyCourseRegistrationDTO {
 
     private IsWithdrawn isWithdrawn;
 
-    private Long withdrawnCredits;
-
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime createdAt;

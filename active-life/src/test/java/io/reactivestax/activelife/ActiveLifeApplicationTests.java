@@ -8,6 +8,7 @@ class ActiveLifeApplicationTests {
 
 	@Test
 	void contextLoads() {
+		ActiveLifeApplication.main(new String[]{});
 	}
 
 }

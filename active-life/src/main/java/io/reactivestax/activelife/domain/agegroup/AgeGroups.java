@@ -9,8 +9,6 @@ import java.time.LocalDateTime;
 
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 @Entity
 @Table(name = "age")
 public class AgeGroups {

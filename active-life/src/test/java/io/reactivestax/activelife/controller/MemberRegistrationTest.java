@@ -11,10 +11,12 @@ import io.reactivestax.activelife.dto.LoginDTO;
 import io.reactivestax.activelife.repository.memberregistration.FamilyGroupRepository;
 import io.reactivestax.activelife.repository.memberregistration.MemberRegistrationRepository;
 import io.reactivestax.activelife.service.MemberRegistrationService;
+import io.reactivestax.activelife.utility.distribution.SmsService;
 import io.reactivestax.activelife.utility.interfaces.FamilyMemberMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
@@ -48,11 +50,17 @@ class MemberRegistrationTest {
     @Mock
     private FamilyGroupRepository familyGroupRepository;
 
+    @Mock
+    private SmsService smsService;
+
     private MemberRegistrationDTO testFamilyMemberDTO;
     private MemberRegistration testFamilyMember;
+    private String jsonRequest;
+    private String memberId = "4";
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws Exception {
+
         String pin = "790059";
         FamilyGroups familyGroups = new FamilyGroups();
         familyGroups.setFamilyPin(pin);
@@ -100,32 +108,15 @@ class MemberRegistrationTest {
         testFamilyMemberDTO.setBussinessPhoneNo("604-876-5432");
         testFamilyMemberDTO.setLanguage("English");
         testFamilyMemberDTO.setFamilyGroupId(2L);
+
+
+        jsonRequest = new ObjectMapper().writeValueAsString(testFamilyMemberDTO);
     }
 
     @Test
     void testAddFamilyMemberWithOkResponse() throws Exception {
-        MemberRegistrationDTO familyMemberDTO = new MemberRegistrationDTO();
-        familyMemberDTO.setMemberName("akshi");
-        familyMemberDTO.setDob(LocalDate.of(1995, 3, 30));
-        familyMemberDTO.setGender("MALE");
-        familyMemberDTO.setEmail("sukh@example.com");
-        familyMemberDTO.setStreetNo("789");
-        familyMemberDTO.setStreetName("Oak Avenue");
-        familyMemberDTO.setPreferredMode(PreferredMode.SMS);
-        familyMemberDTO.setCity("Toronto");
-        familyMemberDTO.setProvince("ON");
-        familyMemberDTO.setCountry("usa");
-        familyMemberDTO.setPostalCode("V6B 3K9");
-        familyMemberDTO.setHomePhoneNo("+13657781555");
-        familyMemberDTO.setBussinessPhoneNo("604-876-5432");
-        familyMemberDTO.setLanguage("English");
-        familyMemberDTO.setMemberLoginId("4");
-        familyMemberDTO.setFamilyGroupId(2L);
-
         String generatedPin = "790059";
-        when(familyRegistrationService.addNewFamilyMemberOnSignup(familyMemberDTO)).thenReturn(generatedPin);
-
-        String jsonRequest = new ObjectMapper().writeValueAsString(familyMemberDTO);
+        when(familyRegistrationService.addNewFamilyMemberOnSignup(testFamilyMemberDTO)).thenReturn(generatedPin);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/familyregistration/signup")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -137,27 +128,23 @@ class MemberRegistrationTest {
 
     @Test
     void testGetFamilyMemberById() throws Exception {
-        String memberId = "4";
         when(familyMemberRepository.findByMemberLogin(memberId)).thenReturn(Optional.of(testFamilyMember));
         when(familyMemberMapper.toDto(testFamilyMember)).thenReturn(testFamilyMemberDTO);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/api/familyregistration/{id}", memberId))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().isOk());
-
     }
 
     @Test
     void testUpdateMemberInformation() throws Exception {
-        MemberRegistrationDTO familyMemberDTO = new MemberRegistrationDTO();
-        familyMemberDTO.setMemberLoginId("4");
-        familyMemberDTO.setMemberName("akshi_updated");
+        testFamilyMemberDTO.setMemberName("akshi_updated");
 
-        String jsonRequest = new ObjectMapper().writeValueAsString(familyMemberDTO);
+        String updatedJsonRequest = new ObjectMapper().writeValueAsString(testFamilyMemberDTO);
 
         mockMvc.perform(MockMvcRequestBuilders.patch("/api/familyregistration")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonRequest))
+                        .content(updatedJsonRequest))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.memberName").value("akshi_updated"));
@@ -165,7 +152,6 @@ class MemberRegistrationTest {
 
     @Test
     void testDeactivateMember() throws Exception {
-        String memberId = "4";
         doNothing().when(familyRegistrationService).deleteFamilyMemberById(memberId);
 
         mockMvc.perform(MockMvcRequestBuilders.delete("/api/familyregistration/{id}", memberId))
@@ -188,32 +174,59 @@ class MemberRegistrationTest {
     @Test
     void testVerifyLogin() throws Exception {
         LoginDTO loginDTO = new LoginDTO();
-        loginDTO.setMemberLoginId("4");
-        loginDTO.setPin("password123");
+        loginDTO.setMemberLoginId("user123");
+        loginDTO.setPin("790059");
 
-        String jsonRequest = new ObjectMapper().writeValueAsString(loginDTO);
+        String loginJsonRequest = new ObjectMapper().writeValueAsString(loginDTO);
+
+        MemberRegistration mockMember = new MemberRegistration();
+        mockMember.setMemberLogin("user123");
+        mockMember.setOtp("790059");
+        mockMember.setStatus(Status.INACTIVE);
+
+        when(familyMemberRepository.findByMemberLogin(anyString()))
+                .thenReturn(Optional.of(mockMember));
+        when(familyRegistrationService.findFamilyMemberByOtpVerification(any(LoginDTO.class)))
+                .thenReturn("OTP verified");
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/familyregistration/login/verify")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonRequest))
+                        .content(loginJsonRequest))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().string("verified"));
     }
 
     @Test
-    void testPostLoginWithOkResponse() throws Exception {
+    void testVerifyLogin1() throws Exception {
         LoginDTO loginDTO = new LoginDTO();
-        loginDTO.setMemberLoginId("4");
-        loginDTO.setPin("password123");
+        loginDTO.setMemberLoginId("user123");
+        loginDTO.setPin("correctPIN");
 
-        String jsonRequest = new ObjectMapper().writeValueAsString(loginDTO);
+        String loginJsonRequest = new ObjectMapper().writeValueAsString(loginDTO);
+
+        MemberRegistration mockMember = new MemberRegistration();
+        mockMember.setMemberLogin("user123");
+        mockMember.setPin("correctPIN");
+        mockMember.setOtp("123456");
+        mockMember.setStatus(Status.ACTIVE);
+
+        when(familyMemberRepository.findByMemberLogin(anyString()))
+                .thenReturn(Optional.of(mockMember));
+
+        when(familyRegistrationService.loginExistingMember(any(LoginDTO.class)))
+                .thenReturn("OTP sent successfully");
+
+          doNothing().when(smsService).sendSms(anyString(), anyString());
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/familyregistration/login")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonRequest))
+                        .content(loginJsonRequest))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().string(""));
+                .andExpect(MockMvcResultMatchers.content().string("OTP sent successfully"));
     }
+
+
+
 }

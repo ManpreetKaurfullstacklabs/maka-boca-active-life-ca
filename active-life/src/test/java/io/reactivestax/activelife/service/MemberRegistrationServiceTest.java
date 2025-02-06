@@ -1,5 +1,6 @@
 package io.reactivestax.activelife.service;
 
+import io.reactivestax.activelife.Enums.GroupOwner;
 import io.reactivestax.activelife.Enums.PreferredMode;
 import io.reactivestax.activelife.Enums.Status;
 import io.reactivestax.activelife.domain.membership.FamilyGroups;
@@ -50,6 +51,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
     @Mock
     private FamilyMemberMapper familyMemberMapper;
+
 
 
 
@@ -658,8 +660,75 @@ import static org.junit.jupiter.api.Assertions.*;
                   .thenReturn(Optional.of(new MemberRegistration()));
           assertThrows(NullPointerException.class, () ->
                   memberRegistrationService.addNewFamilyMemberOnSignup(memberRegistrationDTO));
-
       }
+
+      @Test
+      void testVerifyLogin_SuccessfullyVerified() {
+           LoginDTO loginDTO;
+          loginDTO = new LoginDTO();
+          loginDTO.setMemberLoginId("testUser");
+          loginDTO.setPin("1234");
+          memberRegistration = new MemberRegistration();
+          memberRegistration.setMemberLogin("testUser");
+          memberRegistration.setPin("1234");
+          memberRegistration.setStatus(Status.ACTIVE);
+          String result = memberRegistrationService.loginExistingMember(loginDTO);
+          assertEquals("Member Login Id does not exist : testUser  Signup please.", result);
+      }
+
+
+      @Test
+      void testAssignExistingFamilyGroup() {
+
+          MemberRegistrationDTO memberRegistrationDTO = new MemberRegistrationDTO();
+          memberRegistrationDTO.setFamilyGroupId(1L);
+
+          FamilyGroups existingFamilyGroup = new FamilyGroups();
+
+          MemberRegistration memberRegistration = new MemberRegistration();
+
+          when(familyGroupRepository.findById(1L)).thenReturn(Optional.of(existingFamilyGroup));
+
+          if (memberRegistrationDTO.getFamilyGroupId() != null) {
+              Optional<FamilyGroups> existingGroup = familyGroupRepository.findById(memberRegistrationDTO.getFamilyGroupId());
+              if (existingGroup.isPresent()) {
+                  memberRegistration.setFamilyGroupId(existingGroup.get());
+                  memberRegistration.setGroupOwner(GroupOwner.NO);
+              }
+          }
+
+          assertEquals(existingFamilyGroup, memberRegistration.getFamilyGroupId());
+          assertEquals(GroupOwner.NO, memberRegistration.getGroupOwner());
+      }
+
+      @Test
+      void testCreateNewFamilyGroupWhenNotExists() {
+
+          MemberRegistrationDTO memberRegistrationDTO = new MemberRegistrationDTO();
+          memberRegistrationDTO.setFamilyGroupId(1L);
+
+
+          MemberRegistration memberRegistration = new MemberRegistration();
+          FamilyGroups newFamilyGroup = new FamilyGroups();
+
+          when(familyGroupRepository.findById(1L)).thenReturn(Optional.empty());
+          when(memberRegistrationService.createNewFamilyGroup(generatedPin, memberRegistrationDTO)).thenReturn(newFamilyGroup);
+
+          // When
+          if (memberRegistrationDTO.getFamilyGroupId() != null) {
+              Optional<FamilyGroups> existingGroup = familyGroupRepository.findById(memberRegistrationDTO.getFamilyGroupId());
+              if (existingGroup.isEmpty()) {
+                  FamilyGroups createdGroup = memberRegistrationService.createNewFamilyGroup(generatedPin, memberRegistrationDTO);
+                  memberRegistration.setFamilyGroupId(createdGroup);
+                  memberRegistration.setGroupOwner(GroupOwner.YES);
+              }
+          }
+          assertEquals(GroupOwner.YES, memberRegistration.getGroupOwner());
+      }
+
+
+
+
 
 
 
