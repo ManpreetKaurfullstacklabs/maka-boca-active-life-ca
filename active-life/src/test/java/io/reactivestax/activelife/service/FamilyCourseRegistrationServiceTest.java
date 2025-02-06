@@ -2,7 +2,9 @@ package io.reactivestax.activelife.service;
 
 import io.reactivestax.activelife.Enums.*;
 import io.reactivestax.activelife.domain.course.Courses;
+import io.reactivestax.activelife.domain.membership.FamilyGroups;
 import io.reactivestax.activelife.domain.membership.MemberRegistration;
+import io.reactivestax.activelife.repository.memberregistration.FamilyGroupRepository;
 import io.reactivestax.activelife.repository.memberregistration.MemberRegistrationRepository;
 import io.reactivestax.activelife.utility.distribution.SmsService;
 import io.reactivestax.activelife.domain.course.OfferedCourseFee;
@@ -19,6 +21,7 @@ import io.reactivestax.activelife.repository.memberregistration.WaitlistReposito
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -35,6 +38,12 @@ class FamilyCourseRegistrationServiceTest {
     private FamilyCourseRegistrationRepository familyCourseRegistrationRepository;
 
     @Mock
+    private FamilyGroupRepository familyGroupRepository;
+
+    @Mock
+    private FamilyGroups familyGroups;
+
+    @Mock
     private OfferedCourseRepository offeredCourseRepository;
 
     @Mock
@@ -48,6 +57,8 @@ class FamilyCourseRegistrationServiceTest {
 
     @Mock
     private SmsService smsService;
+
+    private  FamilyCourseRegistrations familyCourseRegistrations;
 
     @InjectMocks
     private FamilyCourseRegistrationService familyCourseRegistrationService;
@@ -70,6 +81,8 @@ class FamilyCourseRegistrationServiceTest {
         existingRegistration.setWithdrawnCredits(5L);
         existingRegistration.setLastUpdatedTime(LocalDateTime.of(2024, 1, 10, 12, 0));
         existingRegistration.setLastUpdateBy(101L);
+
+
 
     }
 
@@ -363,53 +376,17 @@ class FamilyCourseRegistrationServiceTest {
         assertEquals("Offered course does not exist.", exception.getMessage());
     }
 
-//    @Test
-//    void shouldThrowExceptionIfCourseIsFull() {
-//        offeredCourse = new OfferedCourses();
-//        offeredCourse.setOfferedCourseId(1L);
-//        offeredCourse.setNoOfSeats(2L);
-//        offeredCourse.setAvailableForEnrollment(AvailableForEnrollment.YES);
-//
-//        MemberRegistration familyMember = new MemberRegistration();
-//        familyMember.setFamilyMemberId(1L);
-//        familyMember.setStatus(Status.ACTIVE);
-//
-//        FamilyCourseRegistrations registration = new FamilyCourseRegistrations();
-//        registration.setFamilyMemberId(familyMember);
-//        registration.setOfferedCourseId(offeredCourse);
-//        registration.setIsWithdrawn(IsWithdrawn.NO);
-//
-//
-//        when(memberRegistrationRepository.findById(1L)).thenReturn(Optional.of(familyMember));
-//        when(offeredCourseRepository.findById(1L)).thenReturn(Optional.of(offeredCourse));
-//        when(familyCourseRegistrationRepository.countByOfferedCourseIdAndIsWithdrawn(offeredCourse, IsWithdrawn.NO)).thenReturn(2L);
-//
-//        String response = familyCourseRegistrationService.handleWaitlist(1L, 1L);
-//
-//        assertEquals("Course seats are full now adding to waitlist", response);
-//    }
+    @Test
+    void testReEnrollMember() {
 
+        String expectedMessage = "Previously withdrawn member successfully reenrolled ";
 
-//    @Test
-//    void shouldSendSmsWhenSeatBecomesAvailable() {
-//        MemberRegistration familyMember = new MemberRegistration();
-//        familyMember.setFamilyMemberId(1L);
-//        familyMember.setStatus(Status.ACTIVE);
-//        OfferedCourses offeredCourses = new OfferedCourses();
-//        offeredCourses.setOfferedCourseId(1L);
-//
-//        FamilyCourseRegistrations registration = new FamilyCourseRegistrations();
-//        registration.setFamilyMemberId(familyMember);
-//        registration.setOfferedCourseId(offeredCourse);
-//        registration.setIsWithdrawn(IsWithdrawn.NO);
-//        registration.setOfferedCourseId(offeredCourses);
-//
-//        when(familyCourseRegistrationRepository.findById(1L)).thenReturn(Optional.of(registration));
-//        when(waitlistRepository.countByOfferedCourses_OfferedCourseIdAndIsWaitListed(1L, IsWaitListed.YES)).thenReturn(1L);
-//
-//        familyCourseRegistrationService.deleteFamilyMemberFromRegisteredCourse(1L);
-//
-//    }
+        String result = familyCourseRegistrationService.reEnrollMember(existingRegistration);
+
+        assertEquals(expectedMessage, result);
+        assertEquals(IsWithdrawn.NO, existingRegistration.getIsWithdrawn());
+        verify(familyCourseRegistrationRepository, times(1)).save(existingRegistration);
+    }
 
     @Test
     void testNotifyAllWaitlistedMembers() {
@@ -670,6 +647,34 @@ class FamilyCourseRegistrationServiceTest {
         assertEquals(LocalDate.of(2025, 3, 10), updatedRegistration.getEnrollmentDate(), "Enrollment date should be updated.");
         assertEquals(5, updatedRegistration.getWithdrawnCredits(), "Withdrawn credits should remain unchanged.");
         assertEquals(LocalDateTime.of(2025, 3, 11, 14, 0), updatedRegistration.getLastUpdatedTime(), "Last updated time should be updated.");
+    }
+
+
+
+    @Test
+    void testDeleteFamilyMemberFromRegisteredCourse_NoWaitlistedMembers() {
+        // Given
+        Long memberId = 1L;
+        Long courseFee = 500L;
+        Long withdrawnCredits = 200L;
+        Long balance = 300L;
+//      //  when(familyCourseRegistrationRepository.findById(memberId)).thenReturn(Optional.of(familyCourseRegistrations));
+//        when(familyCourseRegistrations.getIsWithdrawn()).thenReturn(IsWithdrawn.NO);
+//        when(familyCourseRegistrations.getCost()).thenReturn(courseFee);
+//        when(familyCourseRegistrations.getWithdrawnCredits()).thenReturn(withdrawnCredits);
+
+        when(familyGroupRepository.findById(anyLong())).thenReturn(Optional.of(familyGroups));
+        when(familyGroups.getCredits()).thenReturn(100L);
+        when(waitlistRepository.findByOfferedCourses_OfferedCourseIdAndIsWaitListed(anyLong(), eq(IsWaitListed.YES)))
+                .thenReturn(List.of());
+
+        // When
+        familyCourseRegistrationService.deleteFamilyMemberFromRegisteredCourse(memberId);
+
+        // Then
+        verify(familyCourseRegistrationRepository, times(1)).save(familyCourseRegistrations);
+        verify(familyGroupRepository, times(1)).save(familyGroups);
+        verify(waitlistRepository, never()).save(any());
     }
 
 

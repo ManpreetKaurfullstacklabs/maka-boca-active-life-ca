@@ -49,15 +49,14 @@ class MemberRegistrationCourseRegistrationTest {
         jsonRequest = new ObjectMapper().writeValueAsString(familyCourseRegistrationDTO);
     }
 
-//    @Test
-//    void testAddNewMemberToOfferedCourse() throws Exception {
-//        doNothing().when(familyCourseRegistrationService).enrollFamilyMemberInCourse(any(FamilyCourseRegistrationDTO.class));
-//
-//        mockMvc.perform(MockMvcRequestBuilders.post("/api/courseregistration/member")
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content(jsonRequest))
-//                .andExpect(MockMvcResultMatchers.content().string("family member added successfully to a course : "));
-//    }
+    @Test
+    void testAddNewMemberToOfferedCourse() throws Exception {
+        when(familyCourseRegistrationService.enrollFamilyMemberInCourse(familyCourseRegistrationDTO)).thenReturn("");
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/courseregistration/member")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonRequest))
+                .andExpect(MockMvcResultMatchers.content().string(""));
+    }
 
     @Test
     void testGetMemberDetailsWithId() throws Exception {

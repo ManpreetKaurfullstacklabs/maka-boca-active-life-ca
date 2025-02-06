@@ -162,9 +162,7 @@ public class FamilyCourseRegistrationService {
     public String addToWaitlist(Long familyMemberId, Long offeredCourseId) {
         MemberRegistration familyMember = getFamilyMember(familyMemberId);
         OfferedCourses offeredCourse = getOfferedCourse(offeredCourseId);
-
         Optional<WaitList> existingWaitlistOpt = waitlistRepository.findByFamilyMemberAndOfferedCourses(familyMember, offeredCourse);
-
         if (existingWaitlistOpt.isPresent()) {
             WaitList existingWaitlist = existingWaitlistOpt.get();
             if (existingWaitlist.getIsWaitListed().equals(IsWaitListed.YES)) {
@@ -188,8 +186,6 @@ public class FamilyCourseRegistrationService {
             return "Waitlist is full for this course.";
         }
     }
-
-
 
 
     @Transactional
@@ -377,7 +373,7 @@ public class FamilyCourseRegistrationService {
     }
 
     @Transactional
-    private String reEnrollMember(FamilyCourseRegistrations existingRegistration) {
+   public String reEnrollMember(FamilyCourseRegistrations existingRegistration) {
             existingRegistration.setIsWithdrawn(IsWithdrawn.NO);
             existingRegistration.setWithdrawnCredits(existingRegistration.getWithdrawnCredits());
             familyCourseRegistrationRepository.save(existingRegistration);
