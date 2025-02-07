@@ -11,5 +11,5 @@ public class ShoppingCartDTO {
     private Long familyCourseRegistrationId;
     private Long offeredCourseId;
     private Long noOfItems;
-    private BigDecimal price;
+    private Long price;
 }

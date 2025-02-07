@@ -1,6 +1,5 @@
 package io.reactivestax.activelife.controller;
 
-import io.reactivestax.activelife.dto.OfferedCourseDTO;
 import io.reactivestax.activelife.dto.OfferedCoursesShoppingCartDTO;
 import io.reactivestax.activelife.dto.ShoppingCartDTO;
 import io.reactivestax.activelife.service.FamilyCourseRegistrationService;
@@ -11,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -35,37 +35,31 @@ public class CoursesShoppingCart {
         return ResponseEntity.ok("course are added to cart..");
     }
 
-    @GetMapping("/getcache/{familyMemberId}/{offeredCourseId}")
-    public ResponseEntity<String> getCache(@PathVariable Long familyMemberId, @PathVariable Long offeredCourseId) {
-        Map<Long, String> cart = shoppingCartService.getCart(familyMemberId);
-        if (cart.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No cart found for this family member.");
+    // ✅ Get List of Courses for a Member
+    @GetMapping("/getcourses/{familyMemberId}")
+    public ResponseEntity<List<ShoppingCartDTO>> getCourses(@PathVariable Long familyMemberId) {
+        List<ShoppingCartDTO> courses = shoppingCartService.getCoursesForMember(familyMemberId);
+        if (courses.isEmpty()) {
+            return ResponseEntity.notFound().build();
         }
-        String cartItem = cart.get(offeredCourseId);
-        if (cartItem != null) {
-            return ResponseEntity.ok(cartItem);
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cart item not found for this course.");
-        }
+        return ResponseEntity.ok(courses);
     }
 
-    @GetMapping("/getcache/{familyMemberId}")
-    public ResponseEntity<Map<Long, String>> getCache(@PathVariable Long familyMemberId) {
-        Map<Long, String> cart = shoppingCartService.getCartOfMembers(familyMemberId);
-        if (cart.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of());
-        }
+//    @GetMapping("/getcache/{familyMemberId}")
+//    public ResponseEntity<Map<Long, String>> getCache(@PathVariable Long familyMemberId) {
+//        Map<Long, String> cart = shoppingCartService.getCart(familyMemberId);
+//        if (cart.isEmpty()) {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of());
+//        }
+//
+//        return ResponseEntity.ok(cart);
+//    }
 
-        return ResponseEntity.ok(cart);
-    }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteFromCache(@PathVariable Long familyMemberId){
+        shoppingCartService.deleteFromUser(familyMemberId);
 
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Map<Long,String>> deleteFromCache(@PathVariable Long familyMemberId){
-        Map<Long,String> cart = shoppingCartService.deleteFromUser(familyMemberId);
-        if (cart.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of());
-        }
-        return ResponseEntity.ok(cart);
+        return ResponseEntity.ok("deleted");
     }
 
 }

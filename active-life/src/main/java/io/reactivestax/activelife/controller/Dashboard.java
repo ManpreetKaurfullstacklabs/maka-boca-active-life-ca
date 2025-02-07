@@ -5,7 +5,6 @@ import io.reactivestax.activelife.domain.course.Courses;
 import io.reactivestax.activelife.dto.OfferedCourseDTO;
 import io.reactivestax.activelife.dto.OfferedCouseSearchRequestDTO;
 import io.reactivestax.activelife.service.FamilyCourseRegistrationService;
-import io.reactivestax.activelife.service.OfferredCourseService;
 import io.reactivestax.activelife.service.SearchQueryService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
