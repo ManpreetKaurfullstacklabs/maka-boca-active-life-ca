@@ -1,4 +1,4 @@
-package io.reactivestax.activelife.controller;
+package io.reactivestax.activelife.appconfig;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.springframework.cache.CacheManager;
