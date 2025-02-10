@@ -61,7 +61,6 @@ public class FamilyCourseRegistrationService {
         Long availableSeats = offeredCourse.getNoOfSeats();
         Long enrolledCount = familyCourseRegistrationRepository.countByOfferedCourseIdAndIsWithdrawn(offeredCourse, IsWithdrawn.NO);
         MemberRegistration familyMember = getFamilyMember(familyCourseRegistrationDTO.getFamilyMemberId());
-
         Optional<FamilyCourseRegistrations> existingRegistration = familyCourseRegistrationRepository
                 .findByFamilyMemberIdAndOfferedCourseId(familyMember, offeredCourse);
 

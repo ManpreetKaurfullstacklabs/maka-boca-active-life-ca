@@ -658,7 +658,7 @@ class FamilyCourseRegistrationServiceTest {
         Long courseFee = 500L;
         Long withdrawnCredits = 200L;
         Long balance = 300L;
-//      //  when(familyCourseRegistrationRepository.findById(memberId)).thenReturn(Optional.of(familyCourseRegistrations));
+ //  when(familyCourseRegistrationRepository.findById(memberId)).thenReturn(Optional.of(familyCourseRegistrations));
 //        when(familyCourseRegistrations.getIsWithdrawn()).thenReturn(IsWithdrawn.NO);
 //        when(familyCourseRegistrations.getCost()).thenReturn(courseFee);
 //        when(familyCourseRegistrations.getWithdrawnCredits()).thenReturn(withdrawnCredits);

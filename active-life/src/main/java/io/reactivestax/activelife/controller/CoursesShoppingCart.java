@@ -35,6 +35,7 @@ public class CoursesShoppingCart {
     @PostMapping("/process")
     public ResponseEntity<PaymentResponseDTO> processPayment(@RequestBody PaymentRequestDTO paymentRequest) {
         PaymentResponseDTO response = mockPaymentService.processPayment(paymentRequest);
+        mockPaymentService.addedToRegistration(paymentRequest);
         return ResponseEntity.ok(response);
     }
 
