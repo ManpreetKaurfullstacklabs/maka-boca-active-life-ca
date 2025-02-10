@@ -134,11 +134,8 @@ import static org.junit.jupiter.api.Assertions.*;
                 InvalidMemberIdException.class,
                 () -> memberRegistrationService.addNewFamilyMemberOnSignup(memberRegistrationDTO)
         );
-
         assertEquals("Member Login ID already exists", exception.getMessage());
     }
-
-
 
     @Test
     void testGetAllMembersbygivenMemberId_memberNotFound() {

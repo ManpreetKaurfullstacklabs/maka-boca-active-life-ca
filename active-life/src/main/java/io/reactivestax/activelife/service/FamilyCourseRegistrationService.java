@@ -96,7 +96,6 @@ public class FamilyCourseRegistrationService {
         if (familyCourseRegistrations.getIsWithdrawn().equals(IsWithdrawn.YES)) {
             throw new RuntimeException("Member already withdrawn from the course.");
         }
-
         Long courseFee = familyCourseRegistrations.getCost();
         Long withdrawalCredits = familyCourseRegistrations.getWithdrawnCredits();
 

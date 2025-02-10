@@ -46,9 +46,7 @@ public class MockPaymentService {
         if (cartItems.isEmpty()) {
             return createFailedResponse("Payment Failed: No courses in cart.", familyMemberId, 0.0);
         }
-
         double totalAmount = 0.0;
-
         for (Long courseId : cartItems.keySet()) {
             Optional<OfferedCourses> offeredCourseOpt = offeredCourseRepository.findById(courseId);
 
@@ -57,9 +55,7 @@ public class MockPaymentService {
             }
 
             OfferedCourses offeredCourse = offeredCourseOpt.get();
-
             checkCourseAvailability(offeredCourse);
-
             totalAmount += offeredCourse.getCost();
         }
 
@@ -83,7 +79,7 @@ public class MockPaymentService {
         response.setFamilyMemberId(familyMemberId);
         return response;
     }
-    private void checkCourseAvailability(OfferedCourses offeredCourse) {
+    public void checkCourseAvailability(OfferedCourses offeredCourse) {
         Long availableSeats = offeredCourse.getNoOfSeats();
         Long enrolledCount = familyCourseRegistrationRepository.countByOfferedCourseIdAndIsWithdrawn(offeredCourse, IsWithdrawn.NO);
 

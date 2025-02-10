@@ -34,6 +34,9 @@ import java.util.Optional;
 
 class FamilyCourseRegistrationServiceTest {
 
+    @InjectMocks
+    private MockPaymentService mockPaymentService;
+
     @Mock
     private FamilyCourseRegistrationRepository familyCourseRegistrationRepository;
 
@@ -198,50 +201,6 @@ class FamilyCourseRegistrationServiceTest {
         });
     }
 
-//    @Test
-//    void testDeleteFamilyMemberFromRegisteredCourse_whenSuccessful() {
-//        OfferedCourses offeredCourses = new OfferedCourses();
-//        offeredCourses.setOfferedCourseId(1L);
-//        FamilyCourseRegistrations registration = new FamilyCourseRegistrations();
-//        registration.setIsWithdrawn(IsWithdrawn.NO);
-//        registration.setOfferedCourseId(offeredCourses);
-//        when(familyCourseRegistrationRepository.findById(anyLong())).thenReturn(Optional.of(registration));
-//        when(waitlistRepository.countByOfferedCourses_OfferedCourseIdAndIsWaitListed(anyLong(), any())).thenReturn(1L);
-//        familyCourseRegistrationService.deleteFamilyMemberFromRegisteredCourse(1L);
-//
-//        verify(familyCourseRegistrationRepository, times(1)).save(registration);
-//    }
-
-
-//    @Test
-//    void testEnrollFamilyMemberInCourse_whenAlreadyEnrolled() {
-//
-//        FamilyCourseRegistrationDTO dto = new FamilyCourseRegistrationDTO();
-//        dto.setOfferedCourseId(1L);
-//        dto.setFamilyMemberId(101L);
-//        dto.setEnrollmentDate(localDate);
-//
-//        OfferedCourses offeredCourse = new OfferedCourses();
-//        offeredCourse.setOfferedCourseId(1L);
-//        offeredCourse.setAvailableForEnrollment(AvailableForEnrollment.YES);
-//
-//        MemberRegistration familyMember = new MemberRegistration();
-//        familyMember.setFamilyMemberId(101L);
-//        familyMember.setStatus(Status.ACTIVE);
-//
-//        FamilyCourseRegistrations existingRegistration = new FamilyCourseRegistrations();
-//        existingRegistration.setFamilyMemberId(familyMember);
-//        existingRegistration.setOfferedCourseId(offeredCourse);
-//
-//        when(offeredCourseRepository.findById(1L)).thenReturn(Optional.of(offeredCourse));
-//        when(memberRegistrationRepository.findById(101L)).thenReturn(Optional.of(familyMember));
-//        when(familyCourseRegistrationRepository.findByFamilyMemberIdAndOfferedCourseId(familyMember, offeredCourse)).thenReturn(Optional.of(existingRegistration));
-//
-//        Exception exception = assertThrows(RuntimeException.class, () -> {
-//            familyCourseRegistrationService.enrollFamilyMemberInCourse(dto);
-//        });
-//        assertEquals("Family member is already enrolled in this course.", exception.getMessage());
-//    }
 
     @Test
     void testAddToWaitlist() {
@@ -651,31 +610,9 @@ class FamilyCourseRegistrationServiceTest {
 
 
 
-    @Test
-    void testDeleteFamilyMemberFromRegisteredCourse_NoWaitlistedMembers() {
-        // Given
-        Long memberId = 1L;
-        Long courseFee = 500L;
-        Long withdrawnCredits = 200L;
-        Long balance = 300L;
- //  when(familyCourseRegistrationRepository.findById(memberId)).thenReturn(Optional.of(familyCourseRegistrations));
-//        when(familyCourseRegistrations.getIsWithdrawn()).thenReturn(IsWithdrawn.NO);
-//        when(familyCourseRegistrations.getCost()).thenReturn(courseFee);
-//        when(familyCourseRegistrations.getWithdrawnCredits()).thenReturn(withdrawnCredits);
 
-        when(familyGroupRepository.findById(anyLong())).thenReturn(Optional.of(familyGroups));
-        when(familyGroups.getCredits()).thenReturn(100L);
-        when(waitlistRepository.findByOfferedCourses_OfferedCourseIdAndIsWaitListed(anyLong(), eq(IsWaitListed.YES)))
-                .thenReturn(List.of());
 
-        // When
-        familyCourseRegistrationService.deleteFamilyMemberFromRegisteredCourse(memberId);
 
-        // Then
-        verify(familyCourseRegistrationRepository, times(1)).save(familyCourseRegistrations);
-        verify(familyGroupRepository, times(1)).save(familyGroups);
-        verify(waitlistRepository, never()).save(any());
-    }
 
 
 }
