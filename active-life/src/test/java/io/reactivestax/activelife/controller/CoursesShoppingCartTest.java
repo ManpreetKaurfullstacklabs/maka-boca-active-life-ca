@@ -1,114 +1,131 @@
-//package io.reactivestax.activelife.controller;
-//
-//import io.reactivestax.activelife.dto.OfferedCoursesShoppingCartDTO;
-//import io.reactivestax.activelife.dto.ShoppingCartDTO;
-//import io.reactivestax.activelife.service.FamilyCourseRegistrationService;
-//import io.reactivestax.activelife.service.ShoppingCartService;
-//import org.junit.jupiter.api.BeforeEach;
-//import org.junit.jupiter.api.Test;
-//import org.mockito.Mockito;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-//import org.springframework.boot.test.mock.mockito.MockBean;
-//import org.springframework.http.MediaType;
-//import org.springframework.test.web.servlet.MockMvc;
-//
-//import java.util.Arrays;
-//import java.util.Collections;
-//import java.util.List;
-//
-//import static org.mockito.ArgumentMatchers.any;
-//import static org.mockito.ArgumentMatchers.eq;
-//import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-//import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-//
-//@WebMvcTest(CoursesShoppingCart.class)
-//class CoursesShoppingCartTest {
-//
-//    @Autowired
-//    private MockMvc mockMvc;
-//
-//    @MockBean
-//    private ShoppingCartService shoppingCartService;
-//
-//    @MockBean
-//    private FamilyCourseRegistrationService familyCourseRegistrationService;
-//
-//    private ShoppingCartDTO shoppingCartDTO;
-//
-//    @BeforeEach
-//    void setUp() {
-//        shoppingCartDTO = new ShoppingCartDTO();
-//        shoppingCartDTO.setFamilyMemberId(1L);
-//        shoppingCartDTO.setOfferedCourseId(101L);
-//        shoppingCartDTO.setPrice(150L);
-//    }
-//
-//    @Test
-//    void addToCart_ShouldReturnSuccess() throws Exception {
-//        mockMvc.perform(post("/api/shoppingcart/add-to-cart")
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content("{\"familyMemberId\":1, \"offeredCourseId\":101, \"price\":150}"))
-//                .andExpect(status().isOk())
-//                .andExpect(content().string("course are added to cart.."));
-//
-//        Mockito.verify(shoppingCartService, Mockito.times(1)).addToCart(any(ShoppingCartDTO.class));
-//    }
-//
-//    @Test
-//    void getCourses_ShouldReturnCoursesList() throws Exception {
-//        List<ShoppingCartDTO> courses = Arrays.asList(shoppingCartDTO);
-//        Mockito.when(shoppingCartService.getCoursesForMember(1L)).thenReturn(courses);
-//
-//        mockMvc.perform(get("/api/shoppingcart/getcourses/1"))
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$.size()").value(1))
-//                .andExpect(jsonPath("$[0].familyMemberId").value(1))
-//                .andExpect(jsonPath("$[0].offeredCourseId").value(101))
-//                .andExpect(jsonPath("$[0].price").value(150));
-//
-//        Mockito.verify(shoppingCartService, Mockito.times(1)).getCoursesForMember(1L);
-//    }
-//
-//    @Test
-//    void getCourses_ShouldReturnNotFound_WhenEmpty() throws Exception {
-//        Mockito.when(shoppingCartService.getCoursesForMember(1L)).thenReturn(Collections.emptyList());
-//
-//        mockMvc.perform(get("/api/shoppingcart/getcourses/1"))
-//                .andExpect(status().isNotFound());
-//
-//        Mockito.verify(shoppingCartService, Mockito.times(1)).getCoursesForMember(1L);
-//    }
-//
-//    @Test
-//    void deleteFromCache_ShouldReturnSuccess() throws Exception {
-//        shoppingCartDTO = new ShoppingCartDTO();
-//        shoppingCartDTO.setFamilyMemberId(2L);
-//        shoppingCartDTO.setOfferedCourseId(101L);
-//        shoppingCartDTO.setPrice(150L);
-//
-//        mockMvc.perform(delete("/api/shoppingcart/1"))
-//                .andExpect(status().isOk())
-//                .andExpect(content().string("deleted"));
-//
-//        Mockito.verify(shoppingCartService, Mockito.times(1)).deleteFromUser(2L);
-//    }
-//
-//    @Test
-//    void addToWaitlist_ShouldReturnSuccess() throws Exception {
-//        OfferedCoursesShoppingCartDTO waitlistDTO = new OfferedCoursesShoppingCartDTO();
-//        waitlistDTO.setFamilyMemberId(1L);
-//        waitlistDTO.setOfferedCourseId(101L);
-//
-//        Mockito.when(familyCourseRegistrationService.handleWaitlist(eq(1L), eq(101L)))
-//                .thenReturn("Added to waitlist");
-//
-//        mockMvc.perform(post("/api/shoppingcart/waitlist")
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content("{\"familyMemberId\":1, \"offeredCourseId\":101}"))
-//                .andExpect(status().isOk())
-//                .andExpect(content().string("Added to waitlist"));
-//
-//        Mockito.verify(familyCourseRegistrationService, Mockito.times(1)).handleWaitlist(1L, 101L);
-//    }
-//}
+package io.reactivestax.activelife.controller;
+
+import io.reactivestax.activelife.Enums.PaymentStatus;
+import io.reactivestax.activelife.dto.*;
+import io.reactivestax.activelife.service.FamilyCourseRegistrationService;
+import io.reactivestax.activelife.service.MockPaymentService;
+import io.reactivestax.activelife.service.ShoppingCartService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
+import java.util.List;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+class CoursesShoppingCartTest {
+
+    private MockMvc mockMvc;
+
+    @Mock
+    private ShoppingCartService shoppingCartService;
+
+    @Mock
+    private MockPaymentService mockPaymentService;
+
+    @Mock
+    private FamilyCourseRegistrationService familyCourseRegistrationService;
+
+    @InjectMocks
+    private CoursesShoppingCart coursesShoppingCart;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        mockMvc = MockMvcBuilders.standaloneSetup(coursesShoppingCart).build();
+    }
+
+    @Test
+    void addToWaitList() throws Exception {
+        Long familyMemberId = 1L;
+        Long offeredCourseId = 1L;
+     //   OfferedCoursesShoppingCartDTO shoppingCartDTO = new OfferedCoursesShoppingCartDTO(familyMemberId, offeredCourseId);
+
+        // Mock the service layer
+        when(familyCourseRegistrationService.handleWaitlist(familyMemberId, offeredCourseId)).thenReturn("Course added to waitlist");
+
+        mockMvc.perform(post("/api/shoppingcart/waitlist")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"familyMemberId\": " + familyMemberId + ", \"offeredCourseId\": " + offeredCourseId + "}"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Course added to waitlist"));
+    }
+
+    @Test
+    void addToCart() throws Exception {
+        ShoppingCartDTO shoppingCartDTO = new ShoppingCartDTO();
+        shoppingCartDTO.setFamilyMemberId(1L);
+        shoppingCartDTO.setOfferedCourseId(1L);
+        shoppingCartDTO.setPrice(100L);
+
+        // Mock the service layer for void method
+        doNothing().when(shoppingCartService).addToCart(shoppingCartDTO);
+
+        mockMvc.perform(post("/api/shoppingcart/add-to-cart")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"familyMemberId\": 1, \"offeredCourseId\": 1, \"price\": 100.0}"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Course added to cart successfully."));
+    }
+
+    @Test
+    void deleteFromCache() throws Exception {
+        Long familyMemberId = 1L;
+
+        // Mock the service layer for void method
+        doNothing().when(shoppingCartService).deleteFromUser(familyMemberId);
+
+        mockMvc.perform(delete("/api/shoppingcart/{familyMemberId}", familyMemberId))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Cart deleted successfully."));
+    }
+
+    @Test
+    void processPayment() throws Exception {
+        PaymentRequestDTO paymentRequest = new PaymentRequestDTO();
+        paymentRequest.setFamilyMemberId(1L);
+        paymentRequest.setAmount(200.0);
+
+        PaymentResponseDTO paymentResponse = new PaymentResponseDTO();
+        paymentResponse.setStatus(PaymentStatus.SUCCESS);
+        paymentResponse.setAmount(200.0);
+
+        when(mockPaymentService.processPayment(any(PaymentRequestDTO.class))).thenReturn(paymentResponse);
+
+        mockMvc.perform(post("/api/shoppingcart/process")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"familyMemberId\": 1, \"amount\": 200.0}"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void getCourses() throws Exception {
+        Long familyMemberId = 1L;
+
+        ShoppingCartDTO shoppingCartDTO = new ShoppingCartDTO();
+        shoppingCartDTO.setFamilyMemberId(familyMemberId);
+        shoppingCartDTO.setOfferedCourseId(1L);
+        shoppingCartDTO.setPrice(100L);
+
+        List<ShoppingCartDTO> cartItems = List.of(shoppingCartDTO);
+
+        ShoppingCartResponseDTO shoppingCartResponseDTO = new ShoppingCartResponseDTO(familyMemberId, cartItems, 100L);
+
+        when(shoppingCartService.getCoursesForMember(familyMemberId)).thenReturn(shoppingCartResponseDTO);
+
+        mockMvc.perform(get("/api/shoppingcart/getcourses/{familyMemberId}", familyMemberId))
+                .andExpect(status().isOk());
+    }
+
+
+
+}
