@@ -36,6 +36,7 @@ public class CoursesShoppingCart {
     public ResponseEntity<PaymentResponseDTO> processPayment(@RequestBody PaymentRequestDTO paymentRequest) {
         PaymentResponseDTO response = mockPaymentService.processPayment(paymentRequest);
         mockPaymentService.addedToRegistration(paymentRequest);
+        shoppingCartService.deleteFromUser(paymentRequest.getFamilyMemberId());
         return ResponseEntity.ok(response);
     }
 

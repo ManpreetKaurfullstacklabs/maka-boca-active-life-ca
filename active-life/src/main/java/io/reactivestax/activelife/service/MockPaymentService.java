@@ -72,9 +72,6 @@ public class MockPaymentService {
         response.setMessage("Payment processed successfully.");
         response.setAmount(totalAmount);
         response.setFamilyMemberId(familyMemberId);
-
-      //  shoppingCartService.deleteFromUser(familyMemberId);
-
         return response;
     }
     private PaymentResponseDTO createFailedResponse(String message, Long familyMemberId, double amount) {

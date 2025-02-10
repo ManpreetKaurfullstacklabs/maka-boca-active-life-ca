@@ -1,14 +1,10 @@
 package io.reactivestax.activelife.service;
 
-import io.reactivestax.activelife.Enums.AvailableForEnrollment;
 import io.reactivestax.activelife.Enums.IsWithdrawn;
 import io.reactivestax.activelife.Enums.Status;
 import io.reactivestax.activelife.domain.course.OfferedCourses;
-import io.reactivestax.activelife.domain.membership.FamilyCourseRegistrations;
-import io.reactivestax.activelife.domain.membership.MemberRegistration;
 import io.reactivestax.activelife.dto.ShoppingCartDTO;
 import io.reactivestax.activelife.dto.ShoppingCartResponseDTO;
-import io.reactivestax.activelife.exception.InvalidCourseIdException;
 import io.reactivestax.activelife.exception.InvalidMemberIdException;
 import io.reactivestax.activelife.repository.courses.OfferedCourseRepository;
 import io.reactivestax.activelife.repository.memberregistration.FamilyCourseRegistrationRepository;
@@ -45,7 +41,7 @@ public class ShoppingCartService {
                 .getStatus();
 
         if (status.equals(Status.INACTIVE)) {
-            throw new InvalidMemberIdException("Member is not active");
+            throw new NullPointerException("Member is not active");
         }
         if (offeredCoursesOpt.isEmpty()) {
             throw new IllegalArgumentException("Invalid offered course ID");
