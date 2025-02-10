@@ -1,17 +1,12 @@
 package io.reactivestax.activelife.controller;
 
-import io.reactivestax.activelife.dto.OfferedCoursesShoppingCartDTO;
-import io.reactivestax.activelife.dto.ShoppingCartDTO;
+import io.reactivestax.activelife.dto.*;
 import io.reactivestax.activelife.service.FamilyCourseRegistrationService;
+import io.reactivestax.activelife.service.MockPaymentService;
 import io.reactivestax.activelife.service.ShoppingCartService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/shoppingcart")
@@ -21,45 +16,38 @@ public class CoursesShoppingCart {
     private ShoppingCartService shoppingCartService;
 
     @Autowired
+    private MockPaymentService mockPaymentService;
+
+    @Autowired
     private FamilyCourseRegistrationService familyCourseRegistrationService;
 
     @PostMapping("/waitlist")
-    public  ResponseEntity<String> addToWaitList (@RequestBody OfferedCoursesShoppingCartDTO shoppingCartDTO){
-        String reponse = familyCourseRegistrationService.handleWaitlist(shoppingCartDTO.getFamilyMemberId(), shoppingCartDTO.getOfferedCourseId());
-        return ResponseEntity.ok(reponse);
+    public ResponseEntity<String> addToWaitList(@RequestBody OfferedCoursesShoppingCartDTO shoppingCartDTO) {
+        String response = familyCourseRegistrationService.handleWaitlist(shoppingCartDTO.getFamilyMemberId(), shoppingCartDTO.getOfferedCourseId());
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/add-to-cart")
-    public ResponseEntity<String> addToCart( @RequestBody ShoppingCartDTO shoppingCartDTO) {
+    public ResponseEntity<String> addToCart(@RequestBody ShoppingCartDTO shoppingCartDTO) {
         shoppingCartService.addToCart(shoppingCartDTO);
-        return ResponseEntity.ok("course are added to cart..");
+        return ResponseEntity.ok("Course added to cart successfully.");
+    }
+    @PostMapping("/process")
+    public ResponseEntity<PaymentResponseDTO> processPayment(@RequestBody PaymentRequestDTO paymentRequest) {
+        PaymentResponseDTO response = mockPaymentService.processPayment(paymentRequest);
+        return ResponseEntity.ok(response);
     }
 
-    // ✅ Get List of Courses for a Member
+
     @GetMapping("/getcourses/{familyMemberId}")
-    public ResponseEntity<List<ShoppingCartDTO>> getCourses(@PathVariable Long familyMemberId) {
-        List<ShoppingCartDTO> courses = shoppingCartService.getCoursesForMember(familyMemberId);
-        if (courses.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(courses);
+    public ResponseEntity<ShoppingCartResponseDTO> getCourses(@PathVariable Long familyMemberId) {
+        ShoppingCartResponseDTO coursesForMember = shoppingCartService.getCoursesForMember(familyMemberId);
+        return ResponseEntity.ok(coursesForMember);
     }
 
-//    @GetMapping("/getcache/{familyMemberId}")
-//    public ResponseEntity<Map<Long, String>> getCache(@PathVariable Long familyMemberId) {
-//        Map<Long, String> cart = shoppingCartService.getCart(familyMemberId);
-//        if (cart.isEmpty()) {
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of());
-//        }
-//
-//        return ResponseEntity.ok(cart);
-//    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteFromCache(@PathVariable Long familyMemberId){
+    @DeleteMapping("/{familyMemberId}")
+    public ResponseEntity<String> deleteFromCache(@PathVariable Long familyMemberId) {
         shoppingCartService.deleteFromUser(familyMemberId);
-
-        return ResponseEntity.ok("deleted");
+        return ResponseEntity.ok("Cart deleted successfully.");
     }
-
 }

@@ -1,13 +1,23 @@
 package io.reactivestax.activelife.service;
 
+import io.reactivestax.activelife.Enums.AvailableForEnrollment;
+import io.reactivestax.activelife.Enums.IsWithdrawn;
+import io.reactivestax.activelife.Enums.Status;
 import io.reactivestax.activelife.domain.course.OfferedCourses;
+import io.reactivestax.activelife.domain.membership.FamilyCourseRegistrations;
+import io.reactivestax.activelife.domain.membership.MemberRegistration;
 import io.reactivestax.activelife.dto.ShoppingCartDTO;
+import io.reactivestax.activelife.dto.ShoppingCartResponseDTO;
+import io.reactivestax.activelife.exception.InvalidCourseIdException;
+import io.reactivestax.activelife.exception.InvalidMemberIdException;
 import io.reactivestax.activelife.repository.courses.OfferedCourseRepository;
+import io.reactivestax.activelife.repository.memberregistration.FamilyCourseRegistrationRepository;
 import io.reactivestax.activelife.repository.memberregistration.MemberRegistrationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
+
 import java.util.*;
 
 @Service
@@ -22,13 +32,29 @@ public class ShoppingCartService {
     @Autowired
     private CacheManager cacheManager;
 
+    @Autowired
+    private FamilyCourseRegistrationRepository familyCourseRegistrationRepository;
+
+
+
     public void addToCart(ShoppingCartDTO shoppingCartDTO) {
         Optional<OfferedCourses> offeredCoursesOpt = offeredCourseRepository.findById(shoppingCartDTO.getOfferedCourseId());
+        if(offeredCoursesOpt.isPresent()){
+            throw  new InvalidCourseIdException("Already exist can't add again");
+        }
+        Status status = memberRegistrationRepository.findById(shoppingCartDTO.getFamilyMemberId())
+                .orElseThrow(() -> new InvalidMemberIdException("Member not found"))
+                .getStatus();
+
+        if (status.equals(Status.INACTIVE)) {
+            throw new InvalidMemberIdException("Member is not active");
+        }
         if (offeredCoursesOpt.isEmpty()) {
             throw new IllegalArgumentException("Invalid offered course ID");
         }
 
         OfferedCourses offeredCourses = offeredCoursesOpt.get();
+        checkCourseIsAvailabeOrNot(offeredCourses );
         shoppingCartDTO.setPrice(offeredCourses.getCost());
 
         Cache cartCache = cacheManager.getCache("cartItems");
@@ -50,12 +76,13 @@ public class ShoppingCartService {
         return new HashMap<>();
     }
 
-
-    public List<ShoppingCartDTO> getCoursesForMember(Long familyMemberId) {
+    public ShoppingCartResponseDTO getCoursesForMember(Long familyMemberId) {
         Map<Long, ShoppingCartDTO> cart = getCart(familyMemberId);
-        return new ArrayList<>(cart.values());
-    }
+        List<ShoppingCartDTO> courses = new ArrayList<>(cart.values());
+        double totalPrice = courses.stream().mapToDouble(ShoppingCartDTO::getPrice).sum();
 
+        return new ShoppingCartResponseDTO(familyMemberId, courses, totalPrice);
+    }
 
     public void deleteFromUser(Long familyMemberId) {
         Cache cartCache = cacheManager.getCache("cartItems");
@@ -63,4 +90,14 @@ public class ShoppingCartService {
             cartCache.evict(familyMemberId);
         }
     }
+
+    public void checkCourseIsAvailabeOrNot(OfferedCourses offeredCourse){
+        Long availableSeats = offeredCourse.getNoOfSeats();
+        Long enrolledCount = familyCourseRegistrationRepository.countByOfferedCourseIdAndIsWithdrawn(offeredCourse, IsWithdrawn.NO);
+        if(enrolledCount.equals(availableSeats)){
+            throw new RuntimeException("Course seats are full . Can't add to cart.");
+        }
+
+    }
+
 }
