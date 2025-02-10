@@ -39,9 +39,7 @@ public class ShoppingCartService {
 
     public void addToCart(ShoppingCartDTO shoppingCartDTO) {
         Optional<OfferedCourses> offeredCoursesOpt = offeredCourseRepository.findById(shoppingCartDTO.getOfferedCourseId());
-        if(offeredCoursesOpt.isPresent()){
-            throw  new InvalidCourseIdException("Already exist can't add again");
-        }
+
         Status status = memberRegistrationRepository.findById(shoppingCartDTO.getFamilyMemberId())
                 .orElseThrow(() -> new InvalidMemberIdException("Member not found"))
                 .getStatus();
