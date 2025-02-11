@@ -3,7 +3,6 @@ package io.reactivestax.activelife.domain.agegroup;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
@@ -34,5 +33,5 @@ public class AgeGroups {
 
     @Column(name = "lastUpdated_by")
     private Long lastUpLocalDatedBy;
-    
+
 }

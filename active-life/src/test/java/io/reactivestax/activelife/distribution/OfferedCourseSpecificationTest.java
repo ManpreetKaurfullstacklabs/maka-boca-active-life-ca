@@ -45,6 +45,14 @@ class OfferedCourseSpecificationTest {
 
     @Mock
     private Path<String> stringPath;
+    @Mock
+    private Path<?> coursesPath;
+
+    @Mock
+    private Path<?> subcategoriesPath;
+
+    @Mock
+    private Path<?> subcategoryNamePath;
 
 
 
@@ -87,10 +95,10 @@ class OfferedCourseSpecificationTest {
         Mockito.<Path<Subcategories>>when(coursePath.get("subcategories")).thenReturn(subCategoryPath);
         Mockito.<Path<String>>when(subCategoryPath.get("name")).thenReturn(stringPath);
         when(criteriaBuilder.equal(stringPath, "Wellness")).thenReturn(predicate);
-
         Specification<OfferedCourses> spec = OfferedCourseSpecification.hasSubCategory("Wellness");
         assertNotNull(spec);
     }
+
 
 
 
@@ -117,8 +125,6 @@ class OfferedCourseSpecificationTest {
         assertNotNull(resultPredicate);
     }
 
-
-
     @Test
     void testWithCity() {
         Mockito.<Path<Facilities>>when(root.get("facility")).thenReturn(facilityPath);
@@ -140,4 +146,58 @@ class OfferedCourseSpecificationTest {
         assertNotNull(spec);
         assertNotNull(spec.toPredicate(root, query, criteriaBuilder));
     }
+
+    @Test
+    void testWithCourseNameNull() {
+        Specification<OfferedCourses> spec = OfferedCourseSpecification.withCourseName(null);
+        assertNotNull(spec);
+        Predicate resultPredicate = spec.toPredicate(root, query, criteriaBuilder);
+        assertEquals(criteriaBuilder.conjunction(), resultPredicate);
+    }
+
+    @Test
+    void testWithCourseNameEmpty() {
+        Specification<OfferedCourses> spec = OfferedCourseSpecification.withCourseName("");
+        assertNotNull(spec);
+        Predicate resultPredicate = spec.toPredicate(root, query, criteriaBuilder);
+        assertEquals(criteriaBuilder.conjunction(), resultPredicate);
+    }
+
+    @Test
+    void testWithStartDateNull() {
+        Specification<OfferedCourses> spec = OfferedCourseSpecification.withStartDate(null);
+        assertNotNull(spec);
+        Predicate resultPredicate = spec.toPredicate(root, query, criteriaBuilder);
+        assertEquals(criteriaBuilder.conjunction(), resultPredicate);
+    }
+
+    @Test
+    void testWithEndDateNull() {
+        Specification<OfferedCourses> spec = OfferedCourseSpecification.withEndDate(null);
+        assertNotNull(spec);
+        Predicate resultPredicate = spec.toPredicate(root, query, criteriaBuilder);
+        assertEquals(criteriaBuilder.conjunction(), resultPredicate);
+    }
+
+    @Test
+    void testGetWildcardSearch() {
+        String search = "Yoga";
+        String expected = "%yoga%";
+        String result = OfferedCourseSpecification.getWildcardSearch(search);
+        assertEquals(expected, result);
+    }
+
+    @Test
+    void testWithCityNoMatch() {
+        Mockito.<Path<Facilities>>when(root.get("facility")).thenReturn(facilityPath);
+        Mockito.<Path<String>>when(facilityPath.get("city")).thenReturn(stringPath);
+        when(criteriaBuilder.like(stringPath, "%Toronto%")).thenReturn(predicate);
+
+        Specification<OfferedCourses> spec = OfferedCourseSpecification.withCity("NonExistentCity");
+        assertNotNull(spec);
+        Predicate resultPredicate = spec.toPredicate(root, query, criteriaBuilder);
+        assertEquals(criteriaBuilder.conjunction(), resultPredicate);
+    }
+
+
 }

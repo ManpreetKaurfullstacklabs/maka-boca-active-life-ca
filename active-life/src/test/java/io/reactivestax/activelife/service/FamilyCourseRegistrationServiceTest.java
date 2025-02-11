@@ -21,7 +21,7 @@ import io.reactivestax.activelife.repository.memberregistration.WaitlistReposito
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
-import org.springframework.test.util.ReflectionTestUtils;
+
 
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -29,6 +29,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -607,6 +608,61 @@ class FamilyCourseRegistrationServiceTest {
         assertEquals(5, updatedRegistration.getWithdrawnCredits(), "Withdrawn credits should remain unchanged.");
         assertEquals(LocalDateTime.of(2025, 3, 11, 14, 0), updatedRegistration.getLastUpdatedTime(), "Last updated time should be updated.");
     }
+
+    @Test
+    void testDeleteFamilyMember_InvalidId_ThrowsException() {
+        Long invalidId = 999L;
+        when(familyCourseRegistrationRepository.findById(invalidId)).thenReturn(Optional.empty());
+
+        assertThrows(InvalidMemberIdException.class,
+                () -> familyCourseRegistrationService.deleteFamilyMemberFromRegisteredCourse(invalidId)
+        );
+    }
+    @Test
+    void testDeleteFamilyMember_AlreadyWithdrawn_ThrowsException() {
+        Long memberId = 1L;
+        FamilyCourseRegistrations registration = new FamilyCourseRegistrations();
+        registration.setIsWithdrawn(IsWithdrawn.YES);
+        when(familyCourseRegistrationRepository.findById(memberId)).thenReturn(Optional.of(registration));
+
+        assertThrows(RuntimeException.class,
+                () -> familyCourseRegistrationService.deleteFamilyMemberFromRegisteredCourse(memberId)
+        );
+    }
+    @Test
+    void testDeleteFamilyMember_Withdraw_UpdatesCredits() {
+
+        OfferedCourses offeredCourses = new OfferedCourses();
+        offeredCourses.setOfferedCourseId(1L);
+
+        Long memberId = 2L;
+        Long groupId = 10L;
+        FamilyCourseRegistrations registration = new FamilyCourseRegistrations();
+        registration.setIsWithdrawn(IsWithdrawn.NO);
+        registration.setCost(100L);
+        registration.setWithdrawnCredits(30L);
+        registration.setOfferedCourseId(offeredCourses);
+
+        FamilyGroups group = new FamilyGroups();
+        group.setFamilyGroupId(groupId);
+        group.setCredits(50L);
+
+        MemberRegistration member = new MemberRegistration();
+        member.setFamilyGroupId(group);
+        registration.setFamilyMemberId(member);
+
+        when(familyCourseRegistrationRepository.findById(memberId)).thenReturn(Optional.of(registration));
+        when(familyGroupRepository.findById(groupId)).thenReturn(Optional.of(group));
+
+        familyCourseRegistrationService.deleteFamilyMemberFromRegisteredCourse(memberId);
+
+        assertEquals(70L, registration.getWithdrawnCredits());
+        assertEquals(120L, group.getCredits());
+
+        verify(familyCourseRegistrationRepository).save(registration);
+        verify(familyGroupRepository).save(group);
+    }
+
 
 
 

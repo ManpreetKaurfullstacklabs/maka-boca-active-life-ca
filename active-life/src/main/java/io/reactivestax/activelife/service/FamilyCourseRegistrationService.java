@@ -98,15 +98,12 @@ public class FamilyCourseRegistrationService {
         }
         Long courseFee = familyCourseRegistrations.getCost();
         Long withdrawalCredits = familyCourseRegistrations.getWithdrawnCredits();
-
         Long balance = courseFee - withdrawalCredits;
-
         if (balance > 0) {
             familyCourseRegistrations.setWithdrawnCredits(balance);
         } else {
             familyCourseRegistrations.setWithdrawnCredits(0L);
         }
-
         familyCourseRegistrations.setIsWithdrawn(IsWithdrawn.YES);
 
         Long withdrawnCreditsForGroup = familyCourseRegistrations.getWithdrawnCredits();
@@ -187,7 +184,7 @@ public class FamilyCourseRegistrationService {
 
 
     @Transactional
-    private String enrollMember(FamilyCourseRegistrationDTO familyCourseRegistrationDTO, IsWaitListed waitListed, IsWithdrawn isWithdrawn) {
+    public String enrollMember(FamilyCourseRegistrationDTO familyCourseRegistrationDTO, IsWaitListed waitListed, IsWithdrawn isWithdrawn) {
         MemberRegistration familyMember = getFamilyMember(familyCourseRegistrationDTO.getFamilyMemberId());
         OfferedCourses offeredCourse = getOfferedCourse(familyCourseRegistrationDTO.getOfferedCourseId());
 
