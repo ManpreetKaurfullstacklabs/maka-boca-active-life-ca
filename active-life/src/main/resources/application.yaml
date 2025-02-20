@@ -1,10 +1,31 @@
-server:
-  port: 8082
 
+server:
+  port: 40015
+  ssl:
+    enabled: true
+    key-store: classpath:keystore.p12
+    key-store-password: changeit
+   # client-auth: need
+    trust-store: classpath:truststore.p12
+    trust-store-password: changeit
+  http2:
+    enabled: true
 spring:
   application:
     name: active-life
-
+  management:
+    endpoints:
+      web:
+        exposure:
+          include: "*"
+    endpoint:
+      health:
+        show-details: always
+    health:
+  security:
+    user:
+      name: user
+      password: password123
   cache:
     type: caffeine
     caffeine:
@@ -17,8 +38,7 @@ spring:
       maximum-pool-size: 10
       minimum-idle: 5
       idle-timeout: 30000
-      connection-timeout: 20000
-
+      connection-timeout: 2000
   jpa:
     hibernate:
       ddl-auto: update

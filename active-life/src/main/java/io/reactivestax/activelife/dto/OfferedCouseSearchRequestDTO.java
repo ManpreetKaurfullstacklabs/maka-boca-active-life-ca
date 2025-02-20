@@ -12,7 +12,6 @@ public class OfferedCouseSearchRequestDTO {
     private String courseName;
     @PastOrPresent(message = "Start date must be in the past or present")
     private LocalDate startDate;
-
     @FutureOrPresent(message = "End date must be in the future or present")
     private LocalDate endDate;
     private String city;

@@ -15,7 +15,6 @@ import io.reactivestax.activelife.repository.memberregistration.FamilyGroupRepos
 import io.reactivestax.activelife.repository.memberregistration.LoginRepository;
 import io.reactivestax.activelife.utility.distribution.SmsService;
 import io.reactivestax.activelife.utility.interfaces.FamilyMemberMapper;
-import org.springframework.jms.core.JmsTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,8 +41,6 @@ public class MemberRegistrationService {
     @Autowired
     private SmsService smsService;
 
-    @Autowired
-    private JmsTemplate jmsTemplate;
 
     @Transactional
     public String addNewFamilyMemberOnSignup(MemberRegistrationDTO memberRegistrationDTO) {
