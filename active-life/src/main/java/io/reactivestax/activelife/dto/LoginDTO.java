@@ -12,4 +12,5 @@ public class LoginDTO {
 
     @NotBlank(message = "PIN cannot be blank")
     private String pin;
+
 }

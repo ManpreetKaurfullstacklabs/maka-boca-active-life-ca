@@ -1,15 +1,12 @@
-
 server:
-  port: 40015
+  port: 8082
   ssl:
     enabled: true
     key-store: classpath:keystore.p12
     key-store-password: changeit
-   # client-auth: need
+#     client-auth: need
     trust-store: classpath:truststore.p12
     trust-store-password: changeit
-  http2:
-    enabled: true
 spring:
   application:
     name: active-life
@@ -43,3 +40,18 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
+logging:
+  level:
+    root: OFF
+    javax.net.ssl: DEBUG
+    org.springframework: INFO
+    com.example: DEBUG
+    org.apache.catalina.core: DEBUG
+    org.apache.tomcat.util.net: DEBUG
+    org.springframework.web: DEBUG
+  file:
+    name: application.log
+    path: logs
+    max-history: 30
+  pattern:
+    file: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"

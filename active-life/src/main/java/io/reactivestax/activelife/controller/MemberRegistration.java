@@ -8,6 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 
 @RestController
 @RequestMapping("/api/familyregistration")
@@ -23,9 +26,15 @@ public class MemberRegistration {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String>  addFamilyMemberAlongFamilyGroup(@Valid @RequestBody LoginDTO login) {
-        String value  = memberRegistrationService.loginExistingMember(login);
-        return ResponseEntity.ok( value);
+    public ResponseEntity<?> login(@Valid @RequestBody LoginDTO loginDTO) {
+        try {
+            String token = memberRegistrationService.loginExistingMember(loginDTO);
+            Map<String, String> response = new HashMap<>();
+            response.put("token", token);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body("Login failed: " + e.getMessage());
+        }
     }
     @GetMapping("/{id}")
     public ResponseEntity<MemberRegistrationDTO> getFamilyMember( @Valid @PathVariable  String id) {

@@ -1,6 +1,7 @@
 package io.reactivestax.activelife.service;
 
 import io.reactivestax.activelife.Enums.GroupOwner;
+import io.reactivestax.activelife.Enums.Role;
 import io.reactivestax.activelife.Enums.Status;
 
 import io.reactivestax.activelife.domain.membership.Login;
@@ -44,7 +45,6 @@ public class MemberRegistrationService {
 
     @Transactional
     public String addNewFamilyMemberOnSignup(MemberRegistrationDTO memberRegistrationDTO) {
-
         Optional<MemberRegistration> existingFamilyMember = familyMemberRepository.findByMemberLogin(memberRegistrationDTO.getMemberLoginId());
         if (existingFamilyMember.isPresent()) {
             throw new InvalidMemberIdException("Member Login ID already exists");
@@ -65,7 +65,6 @@ public class MemberRegistrationService {
         setFamilyMemberDetails(memberRegistrationDTO, memberRegistration, pin);
         familyMemberRepository.save(memberRegistration);
         saveLoginAudit(memberRegistration);
-
         return pin;
     }
 
@@ -95,6 +94,7 @@ public class MemberRegistrationService {
         Login login = new Login();
         login.setFamilyMember(memberRegistration);
         login.setLocalDateTime(LocalDateTime.now());
+        login.setRole(memberRegistration.getRole());
         login.setCreatedBy(memberRegistration.getFamilyGroupId().getFamilyGroupId().toString());
         login.setFamilyPin(memberRegistration.getPin());
         String verificationId = UUID.randomUUID().toString();
@@ -164,6 +164,7 @@ public class MemberRegistrationService {
         memberRegistration.setPostalCode(memberRegistrationDTO.getPostalCode());
         memberRegistration.setPreferredMode(memberRegistrationDTO.getPreferredMode());
         memberRegistration.setMemberLogin(memberRegistrationDTO.getMemberLoginId());
+        memberRegistration.setRole(Role.ROLE_USER);
         memberRegistration.setPin(pin);
         memberRegistration.setCountry(memberRegistrationDTO.getCountry());
         memberRegistration.setHomePhoneNo(memberRegistrationDTO.getHomePhoneNo());

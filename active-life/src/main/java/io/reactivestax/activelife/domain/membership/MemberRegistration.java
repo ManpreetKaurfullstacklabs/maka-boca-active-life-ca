@@ -3,6 +3,7 @@ package io.reactivestax.activelife.domain.membership;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import io.reactivestax.activelife.Enums.GroupOwner;
 import io.reactivestax.activelife.Enums.PreferredMode;
+import io.reactivestax.activelife.Enums.Role;
 import io.reactivestax.activelife.Enums.Status;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -85,9 +86,14 @@ public class MemberRegistration {
     @Column(name = "otp")
     private String otp;
 
+    @Column(name = "role")
+    @Enumerated(EnumType.STRING)
+    private Role role;
+
     @JsonBackReference
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "family_group_id")
     private  FamilyGroups familyGroupId;
+
 
 }

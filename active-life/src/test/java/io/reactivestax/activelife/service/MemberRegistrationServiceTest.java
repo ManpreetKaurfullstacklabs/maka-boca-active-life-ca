@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.jms.core.JmsTemplate;
+
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 
 import java.time.LocalDate;
@@ -55,8 +55,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 
 
-    @Mock
-    private JmsTemplate jmsTemplate;
+
 
       private GlobalExceptionHandler globalExceptionHandler;
 

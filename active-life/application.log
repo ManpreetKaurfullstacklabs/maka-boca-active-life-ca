@@ -1,0 +1,4 @@
+ 
+2025-02-21 11:41:12 - Commencing graceful shutdown. Waiting for active requests to complete
+2025-02-21 11:41:12 - Graceful shutdown complete
+2025-02-21 11:41:12 - Closing JPA EntityManagerFactory for persistence unit 'default'

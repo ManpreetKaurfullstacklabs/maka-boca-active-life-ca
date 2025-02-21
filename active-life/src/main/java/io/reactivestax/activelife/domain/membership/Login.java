@@ -1,4 +1,5 @@
 package io.reactivestax.activelife.domain.membership;
+import io.reactivestax.activelife.Enums.Role;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -29,6 +30,10 @@ public class Login {
 
     @Column(name="uuid", unique = true)
     private String verificationUUID;
+
+    @Column(name="role")
+    @Enumerated(EnumType.STRING)
+    private Role role;
 
 
 }
