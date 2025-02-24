@@ -1,7 +1,5 @@
 package io.reactivestax.activelife.controller;
 
-
-import io.reactivestax.activelife.dto.OfferedCouseSearchRequestDTO;
 import io.reactivestax.activelife.dto.OfferedCourseDTO;
 import io.reactivestax.activelife.dto.UpdateCourseDTO;
 import io.reactivestax.activelife.service.OfferredCourseService;

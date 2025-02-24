@@ -7,7 +7,6 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -61,7 +60,7 @@ public class MemberRegistration {
     }
     @PostMapping("login/verify")
     public ResponseEntity<String> verifyLogin( @Valid @RequestBody LoginDTO loginDTO) {
-        memberRegistrationService.findFamilyMemberByOtpVerification(loginDTO);
-        return ResponseEntity.ok("verified");
+        String familyMemberByOtpVerification = memberRegistrationService.findFamilyMemberByOtpVerification(loginDTO);
+        return ResponseEntity.ok("jwt token : "+familyMemberByOtpVerification);
     }
 }

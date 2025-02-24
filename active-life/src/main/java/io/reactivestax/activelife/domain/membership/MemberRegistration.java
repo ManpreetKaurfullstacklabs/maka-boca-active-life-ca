@@ -95,5 +95,4 @@ public class MemberRegistration {
     @JoinColumn(name = "family_group_id")
     private  FamilyGroups familyGroupId;
 
-
 }

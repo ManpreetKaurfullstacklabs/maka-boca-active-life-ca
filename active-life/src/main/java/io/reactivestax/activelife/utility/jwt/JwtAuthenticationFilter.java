@@ -3,98 +3,72 @@ package io.reactivestax.activelife.utility.jwt;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import io.reactivestax.activelife.constants.SecurityConstants;
+import io.reactivestax.activelife.dto.LoginDTO;
+import io.reactivestax.activelife.service.MemberRegistrationService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-
 import java.io.IOException;
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 @Slf4j
-
-public class JwtAuthenticationFilter  extends UsernamePasswordAuthenticationFilter {
+public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
-
-    private static final Function<GrantedAuthority,String> authToRoleFn = authority -> authority.getAuthority().replace("ROLE_","").toLowerCase();
-
     private final ObjectMapper mapper;
+    private final MemberRegistrationService memberRegistrationService;
 
-    public JwtAuthenticationFilter(AuthenticationManager authenticationManager, ObjectMapper mapper) {
+    public JwtAuthenticationFilter(AuthenticationManager authenticationManager, ObjectMapper mapper, MemberRegistrationService memberRegistrationService) {
         this.authenticationManager = authenticationManager;
         this.mapper = mapper;
+        this.memberRegistrationService = memberRegistrationService;
         setFilterProcessesUrl(SecurityConstants.LOGIN_URL);
     }
 
     @Override
-    public Authentication attemptAuthentication(HttpServletRequest req,
-                                                HttpServletResponse res) throws AuthenticationException {
+    public Authentication attemptAuthentication(HttpServletRequest req, HttpServletResponse res) {
+        LoginDTO loginDTO = null;
         try {
-            //unmarshall Json payload
-            LoginUser loginUser;
-            if(req.getContentType().equalsIgnoreCase(MediaType.APPLICATION_JSON_VALUE)) {
-                 loginUser = mapper.readValue(req.getInputStream(), LoginUser.class);
-                 log.debug("Attempting to authenticate user: {}", loginUser);
-            } else {
-                throw new AccessDeniedException("Unable to find user credentials");
-            }
-
-            return authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            loginUser.getUsername(),
-                            loginUser.getPassword(),
-                            new ArrayList<>())
-            );
-        } catch (IOException io) {
-            throw new AccessDeniedException("Unable to parse user credentials", io);
+            loginDTO = mapper.readValue(req.getInputStream(), LoginDTO.class);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
+        log.debug("Attempting to authenticate user: {}", loginDTO);
+
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                loginDTO.getMemberLoginId(), loginDTO.getPin(), new ArrayList<>());
+
+        return authenticationManager.authenticate(authenticationToken);
     }
 
     @Override
-    protected void successfulAuthentication(HttpServletRequest req,
-                                            HttpServletResponse res,
-                                            FilterChain chain,
-                                            Authentication auth) throws IOException {
+    protected void successfulAuthentication(HttpServletRequest req, HttpServletResponse res, FilterChain chain, Authentication auth) throws IOException {
+        String username = auth.getName();
 
-        User principal = (User) auth.getPrincipal(); // logged in user
-        List<String> claims = principal.getAuthorities().stream().map(authToRoleFn).collect(Collectors.toList());
+        boolean isGroupOwner = memberRegistrationService.isGroupOwner(username);
 
-        String token = JWT.create()
-                .withSubject(principal.getUsername())
-                .withClaim("scopes", claims)
-                .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
-                .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
+        if (isGroupOwner) {
 
-        Map<String,String> payload = new HashMap<>();
-        payload.put("token",token);
-        res.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        res.getWriter().write(mapper.writeValueAsString(payload));
-        res.getWriter().flush();
-    }
+            String token = JWT.create()
+                    .withSubject(username)
+                    .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
+                    .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
 
-    @Getter
-    @Setter
-    @NoArgsConstructor
-    @Builder
-    @AllArgsConstructor
-    static class LoginUser {
-        private String username;
-        private String password;
+            res.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            res.getWriter().write("{\"token\":\"" + token + "\"}");
+            res.getWriter().flush();
+        } else {
+            res.sendError(HttpServletResponse.SC_UNAUTHORIZED, "User is not a Group Owner");
+        }
     }
 }

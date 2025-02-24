@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import io.reactivestax.activelife.Enums.PreferredMode;
+import io.reactivestax.activelife.Enums.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -73,4 +74,5 @@ public class MemberRegistrationDTO {
 
    // @NotNull(message = "Family group ID is required")
     private Long familyGroupId;
+
 }

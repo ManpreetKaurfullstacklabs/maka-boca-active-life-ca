@@ -1,12 +1,12 @@
 server:
-  port: 8082
+  port: 40015
   ssl:
     enabled: true
     key-store: classpath:keystore.p12
     key-store-password: changeit
 #     client-auth: need
-    trust-store: classpath:truststore.p12
-    trust-store-password: changeit
+#    trust-store: classpath:truststore.p12
+#    trust-store-password: changeit
 spring:
   application:
     name: active-life
@@ -19,10 +19,6 @@ spring:
       health:
         show-details: always
     health:
-  security:
-    user:
-      name: user
-      password: password123
   cache:
     type: caffeine
     caffeine:
@@ -42,16 +38,9 @@ spring:
     show-sql: true
 logging:
   level:
-    root: OFF
-    javax.net.ssl: DEBUG
-    org.springframework: INFO
-    com.example: DEBUG
-    org.apache.catalina.core: DEBUG
-    org.apache.tomcat.util.net: DEBUG
-    org.springframework.web: DEBUG
-  file:
-    name: application.log
-    path: logs
-    max-history: 30
-  pattern:
-    file: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    root: INFO
+    org.springframework.security: DEBUG  # Logs security-related events (use TRACE for even more details)
+    org.springframework.web: DEBUG       # Logs incoming requests
+    org.springframework.data.jpa: DEBUG  # Logs JPA queries
+    org.hibernate.SQL: DEBUG             # Logs raw SQL statements
+    org.hibernate.type.descriptor.sql: TRACE  # Logs SQL query parameters (optional)
