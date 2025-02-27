@@ -53,7 +53,6 @@ public class FamilyCourseRegistrations {
     @JoinColumn(name="offer_course_id" )
     private OfferedCourses offeredCourseId;
 
-
     @ManyToOne
     @JoinColumn(name="family_member_id" )
     private MemberRegistration familyMemberId;

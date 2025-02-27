@@ -1,9 +1,6 @@
 package io.reactivestax.activelife.service;
 
-import io.reactivestax.activelife.Enums.AvailableForEnrollment;
-import io.reactivestax.activelife.Enums.IsWaitListed;
-import io.reactivestax.activelife.Enums.IsWithdrawn;
-import io.reactivestax.activelife.Enums.Status;
+import io.reactivestax.activelife.Enums.*;
 import io.reactivestax.activelife.domain.membership.FamilyGroups;
 import io.reactivestax.activelife.repository.memberregistration.FamilyGroupRepository;
 import io.reactivestax.activelife.repository.memberregistration.MemberRegistrationRepository;
@@ -64,6 +61,10 @@ public class FamilyCourseRegistrationService {
         Optional<FamilyCourseRegistrations> existingRegistration = familyCourseRegistrationRepository
                 .findByFamilyMemberIdAndOfferedCourseId(familyMember, offeredCourse);
 
+        MemberRegistration memberRegistration = memberRegistrationRepository.findByFamilyMemberId(familyCourseRegistrationDTO.getFamilyMemberId()).get();
+        if(memberRegistration.getGroupOwner().equals(GroupOwner.NO)){
+            throw  new InvalidMemberIdException("this member is not group owner and not authenticated to do registration");
+        }
         if (existingRegistration.isPresent() && existingRegistration.get().getIsWithdrawn() == IsWithdrawn.NO) {
             throw new RuntimeException("Family member is already enrolled in this course.");
         }

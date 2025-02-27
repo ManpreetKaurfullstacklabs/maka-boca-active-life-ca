@@ -180,7 +180,7 @@ public class MemberRegistrationService {
         memberRegistration.setPostalCode(memberRegistrationDTO.getPostalCode());
         memberRegistration.setPreferredMode(memberRegistrationDTO.getPreferredMode());
         memberRegistration.setMemberLogin(memberRegistrationDTO.getMemberLoginId());
-        memberRegistration.setRole(Role.ROLE_USER);
+        memberRegistration.setRole(Role.USER);
         memberRegistration.setPin(encodedPin);
         memberRegistration.setCountry(memberRegistrationDTO.getCountry());
         memberRegistration.setHomePhoneNo(memberRegistrationDTO.getHomePhoneNo());
@@ -221,12 +221,9 @@ public class MemberRegistrationService {
         if (!memberRegistration.getOtp().equals(loginDTO.getPin())) {
             throw new RuntimeException("Wrong OTP");
         }
-
         memberRegistration.setStatus(Status.ACTIVE);
         familyMemberRepository.save(memberRegistration);
-
         String token = jwtUtil.generateToken(loginDTO.getMemberLoginId(), loginDTO.getPin());
-
         return token;
     }
 
@@ -241,12 +238,5 @@ public class MemberRegistrationService {
         return pin.toString();
     }
 
-    public boolean isGroupOwner(String username) {
-        MemberRegistration memberRegistration = familyMemberRepository.findByMemberLogin(username).get();
 
-        if (memberRegistration != null) {
-            return memberRegistration.getGroupOwner() == GroupOwner.YES;
-        }
-        return false;
-    }
 }

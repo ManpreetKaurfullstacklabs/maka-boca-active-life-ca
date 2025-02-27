@@ -1,29 +1,32 @@
 package io.reactivestax.activelife.service;
 
+import io.reactivestax.activelife.Enums.Role;
 import io.reactivestax.activelife.domain.membership.MemberRegistration;
 
 import io.reactivestax.activelife.repository.memberregistration.MemberRegistrationRepository;
-import lombok.AllArgsConstructor;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
-@AllArgsConstructor
 public class AppUserDetailsServiceImpl implements UserDetailsService {
 
-    private final  MemberRegistrationRepository memberRegistrationRepository;
+    private final MemberRegistrationRepository familyMemberRepository;
+
+    public AppUserDetailsServiceImpl(MemberRegistrationRepository familyMemberRepository) {
+        this.familyMemberRepository = familyMemberRepository;
+    }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        MemberRegistration user = memberRegistrationRepository.findByMemberLogin(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+        MemberRegistration familyMember = familyMemberRepository.findByMemberLogin(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        return org.springframework.security.core.userdetails.User
-                .withUsername(user.getMemberLogin())
-                .password(user.getPin())
-                .authorities(user.getRole().name())
+        return User.withUsername(familyMember.getMemberLogin())
+                .password(familyMember.getPin())
+                .authorities(Role.USER.name())
                 .build();
     }
 }
