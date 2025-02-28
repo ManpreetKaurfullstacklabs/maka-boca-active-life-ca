@@ -24,7 +24,7 @@ spring:
     caffeine:
       spec: maximumSize=100,expireAfterWrite=60s,recordStats
   datasource:
-    url: jdbc:postgresql://localhost:5432/active_life
+    url: jdbc:postgresql://active-life:5432/active_life
     username: postgres
     password: postgres
     hikari:

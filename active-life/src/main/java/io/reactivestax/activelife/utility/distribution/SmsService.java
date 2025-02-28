@@ -10,11 +10,11 @@ import org.springframework.stereotype.Service;
 @Service
 public class SmsService {
 
-    @Value("${twilio.account_sid}")
-    private String accountSid;
-
-    @Value("${twilio.auth_token}")
-    private String authToken;
+//    @Value("${twilio.account_sid}")
+//    private String accountSid;
+//
+//    @Value("${twilio.auth_token}")
+//    private String authToken;
 
 
     public void verificationLink(String phone, String message) {
