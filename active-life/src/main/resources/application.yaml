@@ -12,7 +12,6 @@ spring:
     endpoint:
       health:
         show-details: always
-    health:
   cache:
     type: caffeine
     caffeine:
@@ -30,6 +29,15 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: https://dev-69216149.okta.com/oauth2/ausnnvikrcQbK6mZ05d7/v1/keys
+
+jwt:
+  secret: your-256-bit-secret  # Replace with a Base64-encoded secret key
+
 logging:
   level:
     root: INFO

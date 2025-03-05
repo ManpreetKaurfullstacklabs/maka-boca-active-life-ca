@@ -9,6 +9,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -42,11 +43,14 @@ public class ApplicationSecurityConfig {
                         .permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/familyregistration/verify/**")
                         .permitAll()
+
                         .anyRequest()
                         .authenticated()
                 )
+               // .oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults()))
                 .addFilter(new JwtAuthenticationFilter(authenticationManager))
                 .addFilter(new JwtAuthorizationFilter(authenticationManager))
+                .oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults()))
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
