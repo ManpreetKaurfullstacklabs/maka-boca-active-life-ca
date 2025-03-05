@@ -6,11 +6,7 @@ services:
     ports:
       - "8080:8080"
     environment:
-<<<<<<< HEAD
       SPRING_DATASOURCE_URL: jdbc:postgresql://active-life:5432/active_life
-=======
-      SPRING_DATASOURCE_URL: jdbc:postgresql://dgit b:5432/active_life
->>>>>>> faa7f71 (final commit)
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
     depends_on:
