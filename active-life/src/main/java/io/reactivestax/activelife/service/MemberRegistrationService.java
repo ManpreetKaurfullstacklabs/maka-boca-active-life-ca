@@ -48,8 +48,6 @@ public class MemberRegistrationService {
     @Lazy
     private PasswordEncoder passwordEncoder;
 
-
-
     @Autowired
     private JwtUtil jwtUtil;
 
@@ -132,9 +130,10 @@ public class MemberRegistrationService {
         if (memberRegistration.getMemberLogin().equals(loginDTO.getMemberLoginId())) {
             if(passwordEncoder.matches(loginDTO.getPin(),memberRegistration.getPin())&& memberRegistration.getStatus().equals(Status.ACTIVE)){
                 // if (memberRegistration.getPin().equals(loginDTO.getPin()) && memberRegistration.getStatus().equals(Status.ACTIVE)) {
-                String otp = generateOtp();
-                smsService.sendSms(memberRegistration.getHomePhoneNo(), "Your OTP number is " + otp);
-                memberRegistration.setOtp(otp);
+              //  String otp = generateOtp();
+                smsService.sendOtpRequest(memberRegistration.getHomePhoneNo(), loginDTO.getMemberLoginId());
+              //  smsService.sendSms(memberRegistration.getHomePhoneNo(), "Your OTP number is " + otp,loginDTO.getMemberLoginId());
+               // memberRegistration.setOtp(otp);
                 familyMemberRepository.save(memberRegistration);
                 return "OTP sent successfully";
             }
@@ -149,7 +148,7 @@ public class MemberRegistrationService {
                 String verificationId = UUID.randomUUID().toString();
                 memberRegistration.setVerificationUUID(verificationId);
                 String verificationLink = "http://localhost:8082/api/v1/familymember/verify/" + verificationId;
-                smsService.verificationLink(memberRegistration.getHomePhoneNo(), verificationLink);
+                smsService.verificationLink(memberRegistration.getHomePhoneNo(), verificationLink, loginDTO.getMemberLoginId());
                 return "Verification link sent successfully";
             }
         }
@@ -159,14 +158,14 @@ public class MemberRegistrationService {
         return "Invalid " ;
     }
 
-    public String generateOtp() {
-        Random random = new Random();
-        StringBuilder otp = new StringBuilder();
-        for (int i = 0; i < 6; i++) {
-            otp.append(random.nextInt(10));
-        }
-        return otp.toString();
-    }
+//    public String generateOtp() {
+//        Random random = new Random();
+//        StringBuilder otp = new StringBuilder();
+//        for (int i = 0; i < 6; i++) {
+//            otp.append(random.nextInt(10));
+//        }
+//        return otp.toString();
+//    }
 
     public String setFamilyMemberDetails(MemberRegistrationDTO memberRegistrationDTO, MemberRegistration memberRegistration, String encodedPin) {
         memberRegistration.setMemberName(memberRegistrationDTO.getMemberName());
@@ -189,8 +188,8 @@ public class MemberRegistrationService {
         memberRegistration.setStatus(Status.INACTIVE);
         String verificationId = UUID.randomUUID().toString();
         memberRegistration.setVerificationUUID(verificationId);
-        String verificationLink = "http://localhost:8082/api/familyregistration/verify/" + verificationId;
-        smsService.sendSms(memberRegistration.getHomePhoneNo(), "Please verify using this link: " + verificationLink);
+        String verificationLink = "http://localhost:8080/api/familyregistration/verify/"+ verificationId;
+        smsService.sendSms(memberRegistration.getHomePhoneNo(), "Please verify using this link: " + verificationLink,memberRegistrationDTO.getMemberLoginId());
         return  encodedPin;
     }
 

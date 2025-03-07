@@ -20,6 +20,7 @@ public class FamilyMemberCourseRegistration {
 
     @PostMapping("/member")
     @PreAuthorize("hasRole('USER')")
+   // @PreAuthorize("hasAuthority('SCOPE_ems.sms')")
     public ResponseEntity<String> addNewMemberToOfferedCourse(@RequestBody FamilyCourseRegistrationDTO familyCourseRegistrationDTO) {
         String response = familyCourseRegistrationService.enrollFamilyMemberInCourse(familyCourseRegistrationDTO);
         return ResponseEntity.ok(response);

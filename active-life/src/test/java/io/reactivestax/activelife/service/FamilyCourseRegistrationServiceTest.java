@@ -376,7 +376,7 @@ class FamilyCourseRegistrationServiceTest {
         assertEquals(IsWaitListed.NO, waitList.getIsWaitListed());
         verify(waitlistRepository, times(1)).save(waitList);
         verify(smsService, times(1)).sendSms("+1234567890",
-                "Hello John Doe, a seat has opened up for the course: Spring Boot Basics. Please proceed with your enrollment if you wish to join.");
+                "Hello John Doe, a seat has opened up for the course: Spring Boot Basics. Please proceed with your enrollment if you wish to join.",anyString());
     }
 
 

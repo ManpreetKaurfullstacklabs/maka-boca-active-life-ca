@@ -217,7 +217,7 @@ class MemberRegistrationTest {
         when(familyRegistrationService.loginExistingMember(any(LoginDTO.class)))
                 .thenReturn("OTP sent successfully");
 
-          doNothing().when(smsService).sendSms(anyString(), anyString());
+          doNothing().when(smsService).sendSms(anyString(), anyString(),anyString());
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/familyregistration/login")
                         .contentType(MediaType.APPLICATION_JSON)

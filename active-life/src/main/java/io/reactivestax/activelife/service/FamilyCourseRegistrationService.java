@@ -52,6 +52,8 @@ public class FamilyCourseRegistrationService {
 
     private static final int MAX_WAITLIST_SIZE = 5;
 
+    String BASE_URL = "http://localhost:8082/api/v1/ems/sms";
+
     @Transactional
     public String enrollFamilyMemberInCourse(FamilyCourseRegistrationDTO familyCourseRegistrationDTO) {
         OfferedCourses offeredCourse = getOfferedCourse(familyCourseRegistrationDTO.getOfferedCourseId());
@@ -311,10 +313,9 @@ public class FamilyCourseRegistrationService {
                 waitlistRepository.save(waitList);
                 String memberName = waitlistedFamilyMember.getMemberName();
                 String name = offeredCourse.getCourses().getName();
-
                 String message = "Hello " + memberName + ", a seat has opened up for the course: " + name +
                         ". Please proceed with your enrollment if you wish to join.";
-                smsService.sendSms(waitlistedFamilyMember.getHomePhoneNo(), message);
+                smsService.sendSms(waitlistedFamilyMember.getHomePhoneNo(), message,waitlistedFamilyMember.getMemberLogin());
             }
         }
     }
