@@ -12,8 +12,8 @@ import java.util.Map;
 @Service
 public class SmsService {
 
-    private static final String BASE_URL = "http://localhost:8082/api/v1/ems/sms";
-    private static final String OTP_URL=   "http://localhost:8082/api/v1/otp/sms";
+    private static final String BASE_URL = "https://localhost:8082/api/v1/ems/sms";
+    private static final String OTP_URL=   "https://localhost:8082/api/v1/otp/sms";
 
     @Autowired
     private final RestTemplate restTemplate;
@@ -26,7 +26,6 @@ public class SmsService {
 
     public void sendSms(String phone, String message,String memberloginId) {
 
-        //String customerId = "your-customer-id";
         Map<String, Object> smsRequest = new HashMap<>();
         smsRequest.put("customerId", memberloginId);
         smsRequest.put("message", message);
@@ -56,7 +55,6 @@ public class SmsService {
         otpRequest.put("customerId", memberLoginId);
         otpRequest.put("requestType", "SMS");
         otpRequest.put("phoneNo",customerContact);
-
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
@@ -64,7 +62,6 @@ public class SmsService {
 
         ResponseEntity<String> response = restTemplate.exchange(OTP_URL, HttpMethod.POST, request, String.class);
 
-        // Handle the response (for example, logging or checking the status)
         if (response.getStatusCode() == HttpStatus.OK) {
             System.out.println("OTP request sent successfully.");
         } else {
