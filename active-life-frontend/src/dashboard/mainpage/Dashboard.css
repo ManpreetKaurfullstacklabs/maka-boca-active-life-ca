@@ -17,9 +17,9 @@
 }
 
 
-/* Top Navigation */
 .top-nav {
     position: fixed;
+    padding-top: 20px;
     top: 0;
     left: 0;
     width: 100%;

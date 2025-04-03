@@ -20,12 +20,10 @@ const Login = () => {
         });
     };
 
-
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
         setError("");
-
 
         try {
             const res = await fetch("http://localhost:40015/api/familyregistration/login", {
@@ -33,19 +31,18 @@ const Login = () => {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(formData),
             });
-
-            const responseData = await res.json();
-
             if (res.ok) {
-                console.log(responseData)
-                navigate('/otp', { state: { responseData } });
-                console.log(responseData)
+                const responseData = await res.json();
+                console.log("API Response:", responseData);
+                navigate('/otp', { state: { responseData, memberLoginId:  formData.memberLoginId} });
             } else {
-                setError(responseData.message || "Invalid credentials. Please try again.");
+                if (res.status === 401) {
+                    setError("Activation required. check your phone");
+                    }
             }
         } catch (error) {
             console.error("Error:", error);
-            setError("Something went wrong. Please try again.");
+            setError("Invalid credentials. Please try again.");
         } finally {
             setLoading(false);
         }
@@ -55,7 +52,7 @@ const Login = () => {
         <div className="login-container">
             <div className="login-box">
                 <h2>Login</h2>
-                {error && <p className="error-message">{error}</p>}
+                {error && <p className="error-message">{error}</p>} {/* Display error message */}
                 <form onSubmit={handleSubmit}>
                     <input
                         type="text"
@@ -75,7 +72,6 @@ const Login = () => {
                         value={formData.pin}
                         required
                     />
-                    <h1></h1>
                     <button type="submit" className="login-btn" disabled={loading}>
                         {loading ? "Logging in..." : "Login"}
                     </button>

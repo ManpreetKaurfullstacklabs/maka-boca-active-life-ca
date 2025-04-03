@@ -1,13 +1,12 @@
 import React from "react";
-import "./About.css"; // Import the CSS for styling
+import "./About.css";
 
 const About = () => {
     return (
         <div className="about-container">
-            {/* About Header */}
+
             <h1 className="about-header">About Active Life</h1>
 
-            {/* About Content (Overlay) */}
             <div className="about-content">
                 <p>
                     Welcome to Active Life, your ultimate destination for health, fitness, and well-being! We offer a diverse range of fitness programs, wellness activities, and expert-led courses to help you achieve your health goals. Whether you're looking to build strength, improve flexibility, lose weight, or embrace a healthier lifestyle, Active Life has something for everyone.
