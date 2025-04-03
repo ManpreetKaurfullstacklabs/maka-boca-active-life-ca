@@ -1,9 +1,7 @@
 package io.reactivestax.activelife.service;
 
 import io.reactivestax.activelife.Enums.IsWaitListed;
-import io.reactivestax.activelife.dto.OfferedCourseFeeDTO;
-import io.reactivestax.activelife.dto.OfferedCouseSearchRequestDTO;
-import io.reactivestax.activelife.dto.UpdateCourseDTO;
+import io.reactivestax.activelife.dto.*;
 import io.reactivestax.activelife.exception.InvalidFacilityIdException;
 import io.reactivestax.activelife.utility.criteriabuilder.OfferedCourseSpecification;
 
@@ -11,7 +9,6 @@ import io.reactivestax.activelife.domain.course.Courses;
 import io.reactivestax.activelife.domain.course.OfferedCourseFee;
 import io.reactivestax.activelife.domain.course.OfferedCourses;
 import io.reactivestax.activelife.domain.facility.Facilities;
-import io.reactivestax.activelife.dto.OfferedCourseDTO;
 import io.reactivestax.activelife.exception.InvalidCourseIdException;
 import io.reactivestax.activelife.repository.courses.CoursesRepository;
 import io.reactivestax.activelife.repository.courses.OfferedCourseFeeRepository;
@@ -102,7 +99,6 @@ public class OfferredCourseService {
         offeredCourseFeeDTO.setLastUpdatedBy(offeredCourseFee.getLastUpdatedBy());
         offeredCourseFeeDTO.setCreatedBy(offeredCourseFee.getCreatedBy());
         offeredCourseFeeDTO.setLastUpdatedTimestamp(offeredCourseFee.getLastUpdatedTimestamp());
-
         offeredCourseDTO.setCoursesId(offeredCourses.getOfferedCourseId());
         offeredCourseDTO.setEndTime(offeredCourses.getEndTime());
         offeredCourseDTO.setIsAllDay(offeredCourses.getIsAllDay());
@@ -157,6 +153,66 @@ public class OfferredCourseService {
     }
 
 
+    public List<OfferedCourseDTO> getOfferedCoursesList() {
+
+        List<OfferedCourses> offeredCourseList = offeredCourseRepository.findAll();
+
+        return offeredCourseList.stream()
+                .map(offeredCourse -> {
+
+                    OfferedCourseDTO offeredCourseDTO = new OfferedCourseDTO();
+                    offeredCourseDTO.setCoursesId(offeredCourse.getOfferedCourseId());
+                    offeredCourseDTO.setStartDate(offeredCourse.getStartDate());
+                    offeredCourseDTO.setEndDate(offeredCourse.getEndDate());
+                    offeredCourseDTO.setStartTime(offeredCourse.getStartTime());
+                    offeredCourseDTO.setEndTime(offeredCourse.getEndTime());
+                    offeredCourseDTO.setNoOfSeats(offeredCourse.getNoOfSeats());
+                    offeredCourseDTO.setIsAllDay(offeredCourse.getIsAllDay());
+                    offeredCourseDTO.setRegistrationStartDate(offeredCourse.getRegistrationStartDate());
+                    offeredCourseDTO.setAvailableForEnrollment(offeredCourse.getAvailableForEnrollment());
+
+                    OfferedCourseFee offeredCourseFee = offeredCourse.getOfferedCourseFee();
+                    OfferedCourseFeeDTO offeredCourseFeeDTO = new OfferedCourseFeeDTO();
+                    offeredCourseFeeDTO.setFeeId(offeredCourseFee.getFeeId());
+                    offeredCourseFeeDTO.setFeeType(offeredCourseFee.getFeeType());
+                    offeredCourseFeeDTO.setCourseFee(offeredCourseFee.getCourseFee());
+                    offeredCourseFeeDTO.setCreatedTimestamp(offeredCourseFee.getCreatedTimestamp());
+                    offeredCourseFeeDTO.setLastUpdatedBy(offeredCourseFee.getLastUpdatedBy());
+                    offeredCourseFeeDTO.setCreatedBy(offeredCourseFee.getCreatedBy());
+                    offeredCourseFeeDTO.setLastUpdatedTimestamp(offeredCourseFee.getLastUpdatedTimestamp());
+                    offeredCourseDTO.setOfferedCourseFeeDTO(offeredCourseFeeDTO);
+
+                    Courses courses = offeredCourse.getCourses();
+                    CourseDTO courseDTO = new CourseDTO();
+                    courseDTO.setCourseId(courses.getCourseId());
+                    courseDTO.setName(courses.getName());
+                    courseDTO.setDescription(courses.getDescription());
+                    courseDTO.setSubcategories(courses.getSubcategories());
+                    courseDTO.setAgeGroups(courses.getAgeGroups());
+                    offeredCourseDTO.setCourseDTO(courseDTO);
+
+
+
+
+                    Facilities facilities = offeredCourse.getFacilities();
+                    if (facilities != null) {
+                        offeredCourseDTO.setFacilities(facilities.getId());
+                    }
+                    FacilititesDTO facilititesDTO = new FacilititesDTO();
+                    facilititesDTO.setId(facilities.getId());
+                    facilititesDTO.setDescription(facilities.getDescription());
+                    facilititesDTO.setStreetNo(facilities.getStreetNo());
+                    facilititesDTO.setStreetName(facilities.getStreetName());
+                    facilititesDTO.setCity(facilities.getCity());
+                    facilititesDTO.setProvince(facilities.getProvince());
+                    facilititesDTO.setCountry(facilities.getCountry());
+                    facilititesDTO.setPostalCode(facilities.getPostalCode());
+                    offeredCourseDTO.setFacilititesDTO(facilititesDTO);
+
+                    return offeredCourseDTO;
+                })
+                .collect(Collectors.toList());
+    }
 
 
 

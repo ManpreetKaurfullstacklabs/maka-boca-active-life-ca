@@ -378,4 +378,26 @@ public class FamilyCourseRegistrationService {
     }
 
 
+    public FamilyCourseRegistrationDTO getAllFamilyMemberRegistrationByLoginId(Long id) {
+        Optional<FamilyCourseRegistrations> byId = familyCourseRegistrationRepository.findById(id);
+        if (byId.isEmpty()) {
+            throw new InvalidMemberIdException("Family course registration not found.");
+        }
+        FamilyCourseRegistrations familyCourseRegistrations = byId.get();
+        FamilyCourseRegistrationDTO familyCourseRegistrationDTO = new FamilyCourseRegistrationDTO();
+        MemberRegistration member = memberIsEnrolledOrNot(familyCourseRegistrations.getFamilyMemberId().getFamilyMemberId());
+        familyCourseRegistrationDTO.setFamilyMemberId(member.getFamilyMemberId());
+        familyCourseRegistrationDTO.setEnrollmentDate(familyCourseRegistrations.getEnrollmentDate());
+        familyCourseRegistrationDTO.setCreatedAt(familyCourseRegistrations.getCreatedAt());
+        OfferedCourses offeredCourses = offeredCourseExistsOrNot(familyCourseRegistrations.getOfferedCourseId().getOfferedCourseId());
+        familyCourseRegistrationDTO.setOfferedCourseId(offeredCourses.getOfferedCourseId());
+        familyCourseRegistrationDTO.setCreatedBy(familyCourseRegistrations.getCreatedBy());
+        familyCourseRegistrationDTO.setLastUpdatedTime(familyCourseRegistrations.getLastUpdatedTime());
+        familyCourseRegistrationDTO.setLastUpdateBy(familyCourseRegistrations.getLastUpdateBy());
+        familyCourseRegistrationDTO.setIsWithdrawn(familyCourseRegistrations.getIsWithdrawn());
+
+        return familyCourseRegistrationDTO;
+    }
+
+
 }

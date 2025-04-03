@@ -12,8 +12,8 @@ import java.util.Map;
 @Service
 public class SmsService {
 
-    private static final String BASE_URL = "https://localhost:8082/api/v1/ems/sms";
-    private static final String OTP_URL=   "https://localhost:8082/api/v1/otp/sms";
+    private static final String BASE_URL = "http://localhost:8082/api/v1/ems/sms";
+    private static final String OTP_URL=   "http://localhost:8082/api/v1/otp/sms";
 
     @Autowired
     private final RestTemplate restTemplate;

@@ -45,4 +45,10 @@ public class FamilyMemberCourseRegistration {
         familyCourseRegistrationService.deleteFamilyMemberFromRegisteredCourse(id);
         return ResponseEntity.ok("Family member withdrawn from course successfully");
     }
+    @GetMapping("/memberLoginId/{id}")
+    public ResponseEntity<FamilyCourseRegistrationDTO> getMemberDetailsWithLoginId(@PathVariable Long id) {
+        FamilyCourseRegistrationDTO allFamilyMemberRegistration = familyCourseRegistrationService.getAllFamilyMemberRegistrationByLoginId(id);
+        return ResponseEntity.ok(allFamilyMemberRegistration);
+    }
+
 }
