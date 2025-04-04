@@ -1,5 +1,5 @@
-import React from "react";
-import {BrowserRouter, Routes, Route, useNavigate} from "react-router-dom";
+import React, {useEffect, useState} from "react";
+import {BrowserRouter, Routes, Route, useNavigate, Outlet} from "react-router-dom";
 import Dashboard from "./dashboard/mainpage/Dashboard";
 import About from "./dashboard/about/About";
 import Signup from "./dashboard/signup/Signup.jsx";
@@ -7,7 +7,67 @@ import Login from "./dashboard/login/Login.jsx";
 import "./dashboard/mainpage/dropdown.css"
 import Otp from "./dashboard/login/Otp.jsx";
 import Registration from "./dashboard/registration/Registration.jsx";
+import CourseDescription from "./dashboard/registration/CourseDescription.jsx";
+import Cart from "./dashboard/Cart.jsx";
+import {useSelector} from "react-redux";
 
+function CommonHeader () {
+    const [member, setMember] = useState([])
+    const  authToken = localStorage.getItem("jwtToken")
+    const loginId = localStorage.getItem("memberLoginId")
+    const navigate = useNavigate();
+    const cartCount = useSelector(state => state?.cart?.items)?.length
+
+    useEffect(() => {
+
+        const wrapperFn = async () => {
+            const memberInfo = await fetch("http://localhost:40015/api/familyregistration/" + loginId, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${authToken}`
+                    }
+                }
+            );
+            if (memberInfo.ok) {
+                const memberData = await memberInfo.json();
+                setMember(memberData)
+                console.log(memberData)
+            }
+        }
+        wrapperFn()
+    }, [])
+
+    if (!member) {
+       return  <Outlet />
+    }
+    const handleLogout = () => {
+        localStorage.removeItem("jwtToken");
+        localStorage.removeItem("memberLoginId");
+    };
+
+
+    return (
+        <div>
+            <h1>Offered Courses</h1>
+            <div className="item-container">
+                <div className="top-nav-bar">
+                    <div className="member-name">
+                        Welcome {member && member.memberName ? member.memberName : "Member Name"}
+                    </div>
+                    <div className={"logout"}>
+                        <i className="fa badge fa-lg" value={cartCount} onClick={() => navigate("/cart")} style={{ cursor: "pointer" }}>
+                            &#xf07a;
+                        </i>
+                        <button onClick={() => {handleLogout()}}>Logout</button>
+                    </div>
+
+                </div>
+                <Outlet />
+            </div>
+        </div>
+    )
+}
 
 function Navigation() {
 
@@ -53,7 +113,13 @@ const App = () => {
                 <Route path="/signup" element={<Signup/>} />
                 <Route path="/login" element={<Login/>} />
                 <Route path="/otp" element={<Otp/>} />
-                <Route path={"/registration"} element={<Registration/>}/>
+
+                <Route element={<CommonHeader />}>
+                    <Route path={"/registration"} element={<Registration/>}/>
+                    <Route path ="/CourseDescription/:id" element={<CourseDescription/>}/>
+                    <Route path ={"/Cart"} element={<Cart/>}/>
+                </Route>
+
             </Routes>
         </BrowserRouter>
     );
