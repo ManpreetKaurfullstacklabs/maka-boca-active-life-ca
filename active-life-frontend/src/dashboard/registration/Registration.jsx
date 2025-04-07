@@ -2,7 +2,9 @@ import "./Registration.css";
 import {useLocation, useNavigate} from "react-router-dom";
 import {useEffect, useState} from "react";
 import {addToCart} from "../../redux/CartSlice.js";
-import {useDispatch} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
+import {setCourses} from "../../redux/OfferedCourcesSlice.js";
+
 
 
 
@@ -11,7 +13,9 @@ const Registration = () => {
     const {state: {memberLoginId, jwtToken}} = useLocation()
     const dispatch = useDispatch();
 
-    const [courses, setCourses] = useState([]);
+ //   const [courses, setCourses] = useState([]);
+
+    const courses = useSelector((state) => state.offeredCourses.courses);
     const [member, setMember] = useState([])
     const [error, setError] = useState(" ");
 
@@ -40,12 +44,12 @@ const Registration = () => {
                 );
                 if (res.ok) {
                     const responseData = await res.json();
-                    setCourses(responseData);
+                    dispatch(setCourses(responseData));
                     const memberData = await memberInfo.json();
                     setMember(memberData)
-                    console.log(memberData)
                     localStorage.setItem("familyMemberId", memberData.familyMemberId)
-                } else {
+                }
+                 else {
                     setError("error while loading");
                 }
             } catch (error) {
