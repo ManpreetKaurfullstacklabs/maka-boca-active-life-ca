@@ -54,7 +54,7 @@ const Allcourses = () => {
         fetchCourses();
     }, [dispatch]);
 
-    // Filter courses based on course name
+
     const filterCoursesByName = (query) => {
         if (!query) return allCourses;
         return allCourses.filter(course =>
@@ -62,7 +62,6 @@ const Allcourses = () => {
         );
     };
 
-    // Filter courses based on city (or other criteria)
     const filterCoursesByCity = (query) => {
         if (!query) return allCourses;
         return allCourses.filter(course =>
