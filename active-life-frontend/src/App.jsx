@@ -9,18 +9,28 @@ import Otp from "./dashboard/login/Otp.jsx";
 import Registration from "./dashboard/registration/Registration.jsx";
 import CourseDescription from "./dashboard/registration/CourseDescription.jsx";
 import Cart from "./dashboard/Cart.jsx";
-import {useSelector} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
+import {clearCart} from "./redux/CartSlice.js";
+import { initializeCartFromLocalStorage } from "./redux/CartSlice";
+import AllCourses from "./dashboard/allcourses/AllCourses.jsx";
+
+
 
 function CommonHeader () {
-    const [member, setMember] = useState([])
+    const [member, setMember] = useState(null);
     const  authToken = localStorage.getItem("jwtToken")
     const loginId = localStorage.getItem("memberLoginId")
     const navigate = useNavigate();
     const cartCount = useSelector(state => state?.cart?.items)?.length
+    const dispatch = useDispatch();
+
+
 
     useEffect(() => {
 
+
         const wrapperFn = async () => {
+
             const memberInfo = await fetch("http://localhost:40015/api/familyregistration/" + loginId, {
                     method: "GET",
                     headers: {
@@ -38,13 +48,17 @@ function CommonHeader () {
         wrapperFn()
     }, [])
 
+
     if (!member) {
-       return  <Outlet />
+        return <Outlet />;
     }
+
     const handleLogout = () => {
-        localStorage.removeItem("jwtToken");
-        localStorage.removeItem("memberLoginId");
+        dispatch(clearCart());
+        localStorage.clear();
+        window.location.href = "/";
     };
+
 
 
     return (
@@ -55,7 +69,7 @@ function CommonHeader () {
                     <div className="member-name">
                         Welcome {member && member.memberName ? member.memberName : "Member Name"}
                     </div>
-                    <div className={"logout"}>
+                    <div className="logout" >
                         <i className="fa badge fa-lg" value={cartCount} onClick={() => navigate("/cart")} style={{ cursor: "pointer" }}>
                             &#xf07a;
                         </i>
@@ -76,13 +90,29 @@ function Navigation() {
     const handleNavigation = (path) => {
         navigate(path);
     };
+    // const courses = useSelector((state) => state.offeredCourses.courses);
     return (
         <nav>
             <div className="top-nav">
                 <ul>
-                    <li onClick={() => handleNavigation("/Home")}>Home</li>
-                    <li onClick={() => handleNavigation("/facilities")}>Locations</li>
-                    <li onClick={() => handleNavigation("/courses")}>Services</li>
+                    <li onClick={() => handleNavigation("/")}>Home</li>
+                    <li onClick={() => handleNavigation("/allCourses")}>Browse Courses</li>
+                    {/*<div className="dropdown">*/}
+                    {/*    <li>Courses</li>*/}
+                    {/*    <div className="dropdown-content">*/}
+                    {/*        {courses.length > 0 ? (*/}
+                    {/*            courses.map((course) => (*/}
+                    {/*                <li key={course.offeredCourseId} onClick={() => navigate(`/CourseDescription/${course.offeredCourseId}`)}>*/}
+                    {/*                    {course.courseDTO.subcategories.name}*/}
+                    {/*                </li>*/}
+                    {/*            ))*/}
+                    {/*        ) : (*/}
+                    {/*            <p>No offered courses available</p>*/}
+                    {/*        )}*/}
+                    {/*    </div>*/}
+                    {/*</div>*/}
+
+
                     <div className="dropdown">
                         <li onClick={() => handleNavigation("/registration")}>Registration</li>
                         <div className="dropdown-content">
@@ -94,6 +124,7 @@ function Navigation() {
                     <li onClick={() => handleNavigation("/about")}>About</li>
                     <li onClick={() => handleNavigation("/contacts")}>Contacts</li>
 
+
                 </ul>
             </div>
         </nav>
@@ -102,7 +133,6 @@ function Navigation() {
 
 
 const App = () => {
-
 
     return (
         <BrowserRouter>
@@ -113,10 +143,12 @@ const App = () => {
                 <Route path="/signup" element={<Signup/>} />
                 <Route path="/login" element={<Login/>} />
                 <Route path="/otp" element={<Otp/>} />
+                <Route path ="/allCourses" element={<AllCourses/>}/>
 
                 <Route element={<CommonHeader/>}>
                     <Route path={"/registration"} element={<Registration/>}/>
                     <Route path ="/CourseDescription/:id" element={<CourseDescription/>}/>
+
                     <Route path ={"/Cart"} element={<Cart/>}/>
                 </Route>
 

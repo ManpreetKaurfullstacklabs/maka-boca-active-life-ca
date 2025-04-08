@@ -1,6 +1,9 @@
 import "./Login.css";
 import {useLocation, useNavigate} from "react-router-dom";
-import { useState } from "react";
+import React, { useState } from "react";
+import {toast, ToastContainer} from "react-toastify";
+import {initializeCartFromLocalStorage} from "../../redux/CartSlice.js";
+import {useDispatch} from "react-redux";
 
 const Otp = () => {
     const { state: { memberLoginId } } = useLocation()
@@ -13,6 +16,8 @@ const Otp = () => {
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
     const [formSubmitted, setFormSubmitted] = useState(false);
+    const dispatch = useDispatch();
+
 
     const handleChange = (e) => {
         setFormData({
@@ -43,13 +48,16 @@ const Otp = () => {
             console.log(res)
             localStorage.setItem('jwtToken', res);
             localStorage.setItem('memberLoginId',memberLoginId)
+            dispatch(initializeCartFromLocalStorage());
             setFormSubmitted(true);
             console.log(res);
             navigate('/registration', { state: { responseData: res,memberLoginId:memberLoginId }});
 
         } catch (error) {
             console.error("Error:", error);
-            setError("Something went wrong. Please try again.");
+            toast.error(' Error while adding to cart:', {
+                position: 'center',
+            });
         } finally {
             setLoading(false);
         }
@@ -59,7 +67,7 @@ const Otp = () => {
         <div className="login-container">
             {!formSubmitted ? (
                 <div className="signup-box">
-                    <div className="login-box">
+                    {/*<div className="login-box">*/}
                         <h2>Otp Verification</h2>
                         <form onSubmit={handleSubmit}>
                             <input
@@ -75,10 +83,18 @@ const Otp = () => {
                             <button type="submit" className="login-btn"  disabled={loading}>
                                 {loading ? "Verifying..." : "Verify"}
                             </button>
+                            <ToastContainer
+                                position="bottom-center"
+                                autoClose={1500}
+                                hideProgressBar
+                                closeOnClick
+                                pauseOnHover={false}
+                                draggable={false}
+                            />
                         </form>
                         {error && <p className="error-message">{error}</p>}
                     </div>
-                </div>
+                // </div>
             ) : (
                 <div>
                     <h3>OTP Verified! Redirecting...</h3>

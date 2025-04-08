@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import "./Login.css";
 import { useNavigate } from "react-router-dom";
+import {toast, ToastContainer} from "react-toastify";
 
 const Login = () => {
     const navigate = useNavigate();
@@ -34,22 +35,29 @@ const Login = () => {
             if (res.ok) {
                 const responseData = await res.json();
                 console.log("API Response:", responseData);
+                toast.success('Credential Verified !', {
+                    position: 'center',
+                });
                 navigate('/otp', { state: { responseData, memberLoginId:  formData.memberLoginId} });
             } else {
                 if (res.status === 401) {
+
                     setError("Activation required. check your phone");
                     }
             }
         } catch (error) {
             console.error("Error:", error);
-            setError("Invalid credentials. Please try again.");
+            toast.error('Invalid credentials. Please try again.');
+
         } finally {
             setLoading(false);
         }
     };
 
     return (
+
         <div className="login-container">
+            {/*<ToastContainer />*/}
             <div className="login-box">
                 <h2>Login</h2>
                 {error && <p className="error-message">{error}</p>} {/* Display error message */}
@@ -74,7 +82,16 @@ const Login = () => {
                     />
                     <button type="submit" className="login-btn" disabled={loading}>
                         {loading ? "Logging in..." : "Login"}
+                        <ToastContainer
+                            position="bottom-center"
+                            autoClose={1500}
+                            hideProgressBar
+                            closeOnClick
+                            pauseOnHover={false}
+                            draggable={false}
+                        />
                     </button>
+
                 </form>
             </div>
         </div>

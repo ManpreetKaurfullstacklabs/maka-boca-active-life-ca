@@ -1,26 +1,27 @@
 import "./Registration.css";
 import {useLocation, useNavigate} from "react-router-dom";
-import {useEffect, useState} from "react";
-import {addToCart} from "../../redux/CartSlice.js";
+import React, {useEffect, useState} from "react";
+import {addToCart, loadDataFromBackend} from "../../redux/CartSlice.js";
 import {useDispatch, useSelector} from "react-redux";
 import {setCourses} from "../../redux/OfferedCourcesSlice.js";
-
-
-
+import 'react-toastify/dist/ReactToastify.css';
+import { toast, ToastContainer, Slide } from 'react-toastify';
+import {fetchCart} from "../../redux/fetchCart.js";
+import {store} from "../../redux/store.js";
 
 const Registration = () => {
     const navigate = useNavigate();
     const {state: {memberLoginId, jwtToken}} = useLocation()
     const dispatch = useDispatch();
 
- //   const [courses, setCourses] = useState([]);
-
     const courses = useSelector((state) => state.offeredCourses.courses);
     const [member, setMember] = useState([])
     const [error, setError] = useState(" ");
+    const [searchQuery, setSearchQuery] = useState("");
 
     const authToken = localStorage.getItem("jwtToken", jwtToken)
     const loginId = localStorage.getItem("memberLoginId", memberLoginId)
+    const familyMemberId = localStorage.getItem("familyMemberId")
     console.log(loginId)
 
 
@@ -48,6 +49,11 @@ const Registration = () => {
                     const memberData = await memberInfo.json();
                     setMember(memberData)
                     localStorage.setItem("familyMemberId", memberData.familyMemberId)
+                    fetchCart(authToken).then(
+                        (data) => {
+                            store.dispatch(loadDataFromBackend(data.courses))
+                        }
+                    )
                 }
                  else {
                     setError("error while loading");
@@ -63,6 +69,7 @@ const Registration = () => {
         } else {
             setError("error while loading ")
         }
+
     }, [authToken]);
 
     const   handleAddToCart = async (course) => {
@@ -72,7 +79,6 @@ const Registration = () => {
                 offeredCourseId: course.offeredCourseId,
                 quantity: 1,
             };
-
             const response = await fetch("http://localhost:40015/api/shoppingcart/add-to-cart", {
                 method: "POST",
                 headers: {
@@ -83,29 +89,70 @@ const Registration = () => {
             });
 
             if (response.ok) {
-                dispatch(addToCart(cartItem));
-                alert("added to cart")
+                dispatch(addToCart({ ...course, familyMemberId }));
+
+                console.log("Success toast should show");
+                //   alert("added to cart")
+                toast.success('Course added to cart successfully!', {
+                    position: 'top-right',
+                });
+
             }
             else {
                 if (response.status === 409) {
-                    alert('Course is already in the cart!');
+                    toast.warning('Course is already in the cart!', {
+                        position:'top-right',
+                    });
                 }
             }
         } catch (error) {
             console.error("Error while adding to cart:", error);
+            toast.error(' Error while adding to cart:', {
+                position: 'top-right',
+            });
         }
     };
 
+    const handleSearchChange = (e) => {
+        setSearchQuery(e.target.value);
+    };
+
+
+    const filteredCourses = courses.filter(course =>
+        course.courseDTO.subcategories.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
     return (
         <div>
+        <div style={{ width: '100%' }}>
+            <ToastContainer
+                position="bottom-center"
+                autoClose={1500}
+                hideProgressBar
+                closeOnClick
+                pauseOnHover={false}
+                draggable={false}
+            />
             <h1>Available Courses</h1>
             {error && <p className="error-message">{error}</p>}
+            <div>
+                <input
+                    type="text"
+                    placeholder="Search courses..."
+                    value={searchQuery}
+                    onChange={handleSearchChange}
+                    className="search-bar"
+                />
+            </div>
             <div className="course-list">
-                {courses.map((course) => {
-                    const courseName = course.courseDTO.subcategories.name;
-                    const imageName = courseName.split(" ")[0];
-                    let courseImage;
-                    switch (imageName) {
+                {filteredCourses.length === 0 ? (
+                    <p>No courses found matching your search.</p>
+                ) : (
+                    filteredCourses.map((course) => {
+                        const courseName = course.courseDTO.subcategories.name;
+                        const imageName = courseName.split(" ")[0];
+                        let courseImage;
+                        switch (imageName) {
                         case "Hatha":
                             courseImage = "/public/Hatha-yoga.jpg";
                             break;
@@ -124,9 +171,7 @@ const Registration = () => {
                     return (
                         <div className="card" key={course.coursesId}
                              onClick={() => {
-                                 navigate(`/CourseDescription/${course.offeredCourseId}`);
-                             }}
-                        >
+                                 navigate(`/CourseDescription/${course.offeredCourseId}`);}}>
                             <img className="img" src={courseImage} alt={courseName}/>
                             <p><b>{course.barcode}</b></p>
                             <p><b>Course Name</b>: {courseName}</p>
@@ -142,8 +187,10 @@ const Registration = () => {
                             </button>
                         </div>
                     );
-                })}
+                })
+                )}
             </div>
+        </div>
         </div>
     );
 };

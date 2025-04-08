@@ -50,13 +50,13 @@ const CourseDescription = () => {
             }
         }
 
-        if (authToken){
+        if (authToken && id){
             fetchCourse()
         }
         else {
             setError("error while loading ")
         }
-    }, [authToken]);
+    }, [authToken, id]);
 
     const handleLogout = () => {
         localStorage.removeItem("jwtToken");

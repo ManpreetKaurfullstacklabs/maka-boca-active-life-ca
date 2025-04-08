@@ -55,7 +55,7 @@ const Signup = () => {
                 setFormSubmitted(true)
                 setResponse(responseData)
                 setFormData(blankedState)
-                alert("Signup successful! Please check your phone for an activation link.")
+                alert("Signup successful! Please check your phone for an activation link. and your password is "+ responseData)
                 setTimeout(() => {
                     navigate('/login', { state: { responseData } });
                 }, 2000);

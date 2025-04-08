@@ -1,10 +1,12 @@
 
 .login-container {
     display: flex;
+    padding-top: 20px;
     justify-content: center;
     align-items: center;
     height: 100vh;
     background-color: #f4f4f4;
+    margin-top: 40px;
 }
 
 .login-box {
@@ -26,8 +28,8 @@
 }
 
 .login-btn {
-    width: 100%;
-    padding: 5px 10px;
+    width: 50%;
+    padding: 5px 10px 5px 10px;
     background: coral;
     border: none;
     color: white;
@@ -36,7 +38,7 @@
     cursor: pointer;
 }
 
-/* Hover Effect */
+
 .login-btn:hover {
     background: orange;
 }

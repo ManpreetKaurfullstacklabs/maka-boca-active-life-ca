@@ -1,5 +1,4 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
 import "./Dashboard.css";
 
 const Dashboard = () => {
@@ -15,7 +14,6 @@ const Dashboard = () => {
             <div className="content-overlay">
                 <h1>Welcome to Active Life</h1>
                 <p>Sweat, smile, and repeat!</p>
-                <button className="cta-button">Get Started</button>
             </div>
         </div>
     );

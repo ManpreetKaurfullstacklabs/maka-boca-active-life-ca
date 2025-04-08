@@ -1,6 +1,8 @@
 import { configureStore } from '@reduxjs/toolkit';
-import cartReducer from './CartSlice.js';
+import cartReducer, {loadDataFromBackend} from './CartSlice.js';
 import offeredCourseReducer from './OfferedCourcesSlice.js'
+import {fetchCart} from "./fetchCart.js";
+
 
 export const store = configureStore({
     reducer: {
@@ -8,3 +10,4 @@ export const store = configureStore({
         offeredCourses: offeredCourseReducer,
     },
 });
+
