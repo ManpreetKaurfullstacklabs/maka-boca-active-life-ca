@@ -62,6 +62,7 @@ const Allcourses = () => {
         );
     };
 
+
     const filterCoursesByCity = (query) => {
         if (!query) return allCourses;
         return allCourses.filter(course =>

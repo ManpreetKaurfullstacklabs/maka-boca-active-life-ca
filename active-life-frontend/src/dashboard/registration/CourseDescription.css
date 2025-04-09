@@ -22,7 +22,7 @@
 }
 
 .cta-button {
-    background-color: #FF4500;
+    background-color: black;
     color: white;
     border: none;
     padding: 10px 20px;
@@ -33,7 +33,7 @@
 }
 
 .cta-button:hover {
-    background-color: #E63900;
+    background-color: blue;
 }
 
 .course-title {

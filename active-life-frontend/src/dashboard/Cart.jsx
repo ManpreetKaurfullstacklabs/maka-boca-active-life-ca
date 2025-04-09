@@ -2,7 +2,6 @@ import "./Cart.css";
 import { useDispatch, useSelector } from "react-redux";
 import {addToCart, clearCart, loadDataFromBackend, removeFromCart as reduxRemoveFromCart} from "../redux/CartSlice";
 import { toast, ToastContainer } from "react-toastify";
-import {useNavigate} from "react-router-dom";
 import React, {useEffect, useState} from "react";
 import { FaTrash } from "react-icons/fa";
 import {fetchCart} from "../redux/fetchCart.js";
@@ -13,7 +12,6 @@ const Cart = () => {
     const cartItems = useSelector((state) => state?.cart?.items || []);
     const courses = useSelector((state) => state?.offeredCourses?.courses || []);
     const authToken = localStorage.getItem("jwtToken");
-    const navigate = useNavigate();
     const [paymentSuccess, setPaymentSuccess] = useState(false);
 
 
@@ -95,7 +93,6 @@ const Cart = () => {
 
             if (response.ok) {
 
-                // dispatch(reduxRemoveFromCart(course.offeredCourseId));
                 dispatch(reduxRemoveFromCart({ offeredCourseId: course.offeredCourseId }));
 
                 toast.success('Removed from cart!', {
@@ -104,13 +101,13 @@ const Cart = () => {
             } else {
                 const result = await response.json();
                 toast.warning(result.message || "Failed to remove course", {
-                    position: 'top-center',
+                    position: 'top-right',
                 });
             }
         } catch (error) {
             console.error("Error while removing from cart:", error);
             toast.error('Error while removing from cart', {
-                position: 'top-center',
+                position: 'top-right',
             });
         }
     };
@@ -123,7 +120,7 @@ const Cart = () => {
     return (
         <div className="cart-box">
             <ToastContainer
-                position="bottom-center"
+                position="top-right"
                 autoClose={1500}
                 hideProgressBar
                 closeOnClick
@@ -136,18 +133,15 @@ const Cart = () => {
                 <p>No items in cart.</p>
             ) : (
                 <>
-                    {/* Header Row */}
                     <div className="cart-header">
                         <div>Course ID</div>
                         <div>Name</div>
                         <div>Price</div>
                         <div>Action</div>
                     </div>
-
                     {cartItems.map((item) => {
                         const course = courseMap[item.offeredCourseId];
                         if (!course) return null;
-
                         return (
                             <div className="cart-item" key={item.offeredCourseId}>
                                 <p>{course.barcode}</p>

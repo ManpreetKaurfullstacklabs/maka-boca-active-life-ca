@@ -1,8 +1,11 @@
 
 import "./CourseDescription.css";
 import {useLocation, useNavigate, useParams } from "react-router-dom";
-import {useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {addToCart} from "../../redux/CartSlice.js";
+import {useDispatch} from "react-redux";
+import 'react-toastify/dist/ReactToastify.css';
+import { toast, ToastContainer, Slide } from 'react-toastify';
 
 
 
@@ -13,12 +16,14 @@ const CourseDescription = () => {
     const params = useParams()
     const[course, setCourse] = useState({})
     const[loading, setLoading] = useState(true)
+    const dispatch = useDispatch();
 
     const[error, setError] = useState(" ");
 
 
     const authToken = localStorage.getItem("jwtToken")
     const loginId = localStorage.getItem("memberLoginId")
+    const familyMemberId = localStorage.getItem("familyMemberId")
     console.log(authToken, loginId)
     console.log(params);
     const { id } = useParams();
@@ -58,14 +63,6 @@ const CourseDescription = () => {
         }
     }, [authToken, id]);
 
-    const handleLogout = () => {
-        localStorage.removeItem("jwtToken");
-        localStorage.removeItem("memberLoginId");
-        navigate("/login");
-    };
-
-
-
 
     const getImageForCourse = (name) => {
         const imageKey = name?.split(" ")[0];
@@ -96,10 +93,8 @@ const CourseDescription = () => {
             const cartItem = {
                 familyMemberId: localStorage.getItem("familyMemberId"),
                 offeredCourseId: course.offeredCourseId,
-                // courseFee: course.offeredCourseFeeDTO.courseFee,
                 quantity: 1,
             };
-
             const response = await fetch("http://localhost:40015/api/shoppingcart/add-to-cart", {
                 method: "POST",
                 headers: {
@@ -110,19 +105,40 @@ const CourseDescription = () => {
             });
 
             if (response.ok) {
-                dispatch(addToCart(cartItem));
-                console.log("Added to Cart");
-                alert("added to cart")
-            } else {
-                console.error("Failed to add to cart");
+                dispatch(addToCart({ ...course, familyMemberId }));
+
+                console.log("Success toast should show");
+                //   alert("added to cart")
+                toast.success('Course added to cart successfully!', {
+                    position: 'top-right',
+                });
+
+            }
+            else {
+                if (response.status === 409) {
+                    toast.warning('Course is already in the cart!', {
+                        position:'top-right',
+                    });
+                }
             }
         } catch (error) {
             console.error("Error while adding to cart:", error);
+            toast.error(' Error while adding to cart:', {
+                position: 'top-right',
+            });
         }
     };
 
     return (
         <div>
+            <ToastContainer
+                position="bottom-center"
+                autoClose={1500}
+                hideProgressBar
+                closeOnClick
+                pauseOnHover={false}
+                draggable={false}
+            />
             <h1 className="course-title">Course Details</h1>
 
             <div className="course-container">

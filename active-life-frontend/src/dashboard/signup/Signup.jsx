@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "./Signup.css";
+import "./MemberSignup.css";
 import { useNavigate } from "react-router-dom";
 
 const Signup = () => {
@@ -72,33 +72,48 @@ const Signup = () => {
 
 
     return (
-        <div className="signup-container">
-            {!formSubmitted ? <div className="signup-box">
-                <h2>Signup</h2><form onSubmit={handleSubmit}>
-                <input type="text" name="memberName" className="input-field" placeholder="Member Name" onChange={handleChange} required />
-                <input type="date" name="dob" className="input-field" placeholder="DOB" onChange={handleChange} required />
-                <select name="gender" className="input-field" onChange={handleChange} required>
-                    <option value="">Select Gender</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                    <option value="Other">Other</option>
-                </select>
-                <input type="email" name="email" className="input-field" placeholder="Email" onChange={handleChange} required />
-                <input type="text" name="streetNo" className="input-field" placeholder="Street No" onChange={handleChange} required />
-                <input type="text" name="streetName" className="input-field" placeholder="Street Name" onChange={handleChange} required />
-                <input type="text" name="preferredMode" className="input-field" placeholder="Preferred Mode" onChange={handleChange} required />
-                <input type="text" name="city" className="input-field" placeholder="City" onChange={handleChange} required />
-                <input type="text" name="province" className="input-field" placeholder="Province" onChange={handleChange} required />
-                <input type="text" name="country" className="input-field" placeholder="Country" onChange={handleChange} required />
-                <input type="text" name="postalCode" className="input-field" placeholder="Postal Code" onChange={handleChange} required />
-                <input type="tel" name="bussinessPhoneNo" className="input-field" placeholder="Business Phone No" onChange={handleChange} />
-                <input type="tel" name="homePhoneNo" className="input-field" placeholder="Home Phone No" onChange={handleChange} />
-                <input type="text" name="language" className="input-field" placeholder="Language" onChange={handleChange} required />
-                <input type="text" name="memberLoginId" className="input-field" placeholder="Member ID" onChange={handleChange} required />
-                <button type="submit" className="signup-btn">Sign Up</button>
-            </form>
-            </div> : response }
+        <div className="signup-wrapper">
+            {!formSubmitted ? (
+                <div className="signup-card">
+                    <h2>Registration Form</h2>
+                    <form onSubmit={handleSubmit} className="form-grid">
+                        <div className="form-section">
+                            <input type="text" name="memberName" className="form-input" placeholder="Member Name" onChange={handleChange} required />
+                            <input type="date" name="dob" className="form-input" placeholder="DOB" onChange={handleChange} required />
+                            <select name="gender" className="form-input" onChange={handleChange} required>
+                                <option value="">Select Gender</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                            </select>
+                            <input type="email" name="email" className="form-input" placeholder="Email" onChange={handleChange} required />
+                            <input type="text" name="streetNo" className="form-input" placeholder="Street No" onChange={handleChange} required />
+                            <input type="text" name="streetName" className="form-input" placeholder="Street Name" onChange={handleChange} required />
+                            <input type="text" name="preferredMode" className="form-input" placeholder="Preferred Mode" onChange={handleChange} required />
+                        </div>
+
+                        <div className="form-section">
+                            <input type="text" name="city" className="form-input" placeholder="City" onChange={handleChange} required />
+                            <input type="text" name="province" className="form-input" placeholder="Province" onChange={handleChange} required />
+                            <div className="form-row">
+                                <input type="text" name="country" className="form-input half-width" placeholder="Country" onChange={handleChange} required />
+                                <input type="text" name="postalCode" className="form-input half-width" placeholder="Postal Code" onChange={handleChange} required />
+                            </div>
+                            <input type="tel" name="bussinessPhoneNo" className="form-input" placeholder="Business Phone No" onChange={handleChange} />
+                            <input type="tel" name="homePhoneNo" className="form-input" placeholder="Home Phone No" onChange={handleChange} />
+                            <input type="text" name="language" className="form-input" placeholder="Language" onChange={handleChange} required />
+                            <input type="text" name="memberLoginId" className="form-input" placeholder="Member ID" onChange={handleChange} required />
+                        </div>
+
+                        <div className="form-actions">
+                            <button type="submit" className="form-submit-btn">Sign Up</button>
+                        </div>
+                    </form>
+                </div>
+            ) : (
+                <p>{response}</p>
+            )}
         </div>
+
     );
 };
 

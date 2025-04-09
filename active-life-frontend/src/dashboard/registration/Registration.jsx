@@ -19,11 +19,10 @@ const Registration = () => {
     const [error, setError] = useState(" ");
     const [searchQuery, setSearchQuery] = useState("");
 
-    const authToken = localStorage.getItem("jwtToken", jwtToken)
-    const loginId = localStorage.getItem("memberLoginId", memberLoginId)
+    const authToken = localStorage.getItem("jwtToken")
+    const loginId = localStorage.getItem("memberLoginId" )
     const familyMemberId = localStorage.getItem("familyMemberId")
     console.log(loginId)
-
 
     useEffect(() => {
         const fetchCourse = async () => {
@@ -55,7 +54,7 @@ const Registration = () => {
                         }
                     )
                 }
-                 else {
+                else {
                     setError("error while loading");
                 }
             } catch (error) {
@@ -72,7 +71,7 @@ const Registration = () => {
 
     }, [authToken]);
 
-    const   handleAddToCart = async (course) => {
+    const handleAddToCart = async (course) => {
         try {
             const cartItem = {
                 familyMemberId: localStorage.getItem("familyMemberId"),
@@ -92,11 +91,9 @@ const Registration = () => {
                 dispatch(addToCart({ ...course, familyMemberId }));
 
                 console.log("Success toast should show");
-                //   alert("added to cart")
                 toast.success('Course added to cart successfully!', {
                     position: 'top-right',
                 });
-
             }
             else {
                 if (response.status === 409) {
@@ -117,13 +114,16 @@ const Registration = () => {
         setSearchQuery(e.target.value);
     };
 
-
-    const filteredCourses = courses.filter(course =>
-        course.courseDTO.subcategories.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filteredCourses = courses.filter(course => {
+        // Safely access subcategories with optional chaining
+        const subcategories = course?.courseDTO?.subcategories;
+        if (subcategories && subcategories.name) {
+            return subcategories.name.toLowerCase().includes(searchQuery.toLowerCase());
+        }
+        return false;
+    });
 
     return (
-        <div>
         <div style={{ width: '100%' }}>
             <ToastContainer
                 position="bottom-center"
@@ -134,7 +134,6 @@ const Registration = () => {
                 draggable={false}
             />
             <h1>Available Courses</h1>
-            {error && <p className="error-message">{error}</p>}
             <div>
                 <input
                     type="text"
@@ -149,48 +148,53 @@ const Registration = () => {
                     <p>No courses found matching your search.</p>
                 ) : (
                     filteredCourses.map((course) => {
-                        const courseName = course.courseDTO.subcategories.name;
-                        const imageName = courseName.split(" ")[0];
-                        let courseImage;
-                        switch (imageName) {
-                        case "Hatha":
-                            courseImage = "/public/Hatha-yoga.jpg";
-                            break;
-                        case "Mindful":
-                            courseImage = "/public/Mindful-Meditation.jpg";
-                            break;
-                        case "Lose":
-                            courseImage = "/public/Weight-Lose.jpg";
-                            break;
-                        case "Healthy":
-                            courseImage = "/public/Healthy-meals.jpg";
-                            break;
-                        default:
-                            courseImage = "public/Cardio.jpg";
-                    }
-                    return (
-                        <div className="card" key={course.coursesId}
-                             onClick={() => {
-                                 navigate(`/CourseDescription/${course.offeredCourseId}`);}}>
-                            <img className="img" src={courseImage} alt={courseName}/>
-                            <p><b>{course.barcode}</b></p>
-                            <p><b>Course Name</b>: {courseName}</p>
-                            <p><b>No of seats </b>: {course.noOfSeats}</p>
-                            <p><b>Start Date</b>: {course.startDate}</p>
-                            <p><b>End Date </b>: {course.endDate}</p>
-                            <p>{course.courseDTO.ageGroups.description}</p>
-                            <p><b>Available for Enrollment</b> {course.availableForEnrollment}</p>
-                            <p><b> Price :</b>${course.offeredCourseFeeDTO.courseFee}</p>
-                            <button className="cta-button" onClick={(e) => {
-                                e.stopPropagation(); handleAddToCart(course)
-                            }}>Add To Cart
-                            </button>
-                        </div>
-                    );
-                })
+                            const courseName = course.courseDTO.subcategories.name;
+                            const imageName = courseName.split(" ")[0];
+                            let courseImage;
+                            switch (imageName) {
+                                case "Hatha":
+                                    courseImage = "/public/Hatha-yoga.jpg";
+                                    break;
+                                case "Mindful":
+                                    courseImage = "/public/Mindful-Meditation.jpg";
+                                    break;
+                                case "Lose":
+                                    courseImage = "/public/Weight-Lose.jpg";
+                                    break;
+                                case "Healthy":
+                                    courseImage = "/public/Healthy-meals.jpg";
+                                    break;
+                                default:
+                                    courseImage = "public/Cardio.jpg";
+                            }
+                            const isAvailable = course.availableForEnrollment === "YES";
+                            return (
+                                <div className="card" key={course.coursesId}
+                                     onClick={() => {
+                                         navigate(`/CourseDescription/${course.offeredCourseId}`);
+                                     }}>
+                                    <img className="img" src={courseImage} alt={courseName}/>
+                                    <p><b>{course.barcode}</b></p>
+                                    <p><b>Course Name</b>: {courseName}</p>
+                                    <p><b>No of seats </b>: {course.noOfSeats}</p>
+                                    <p><b>Start Date</b>: {course.startDate}</p>
+                                    <p><b>End Date </b>: {course.endDate}</p>
+                                    <p>{course.courseDTO.ageGroups.description}</p>
+                                    <p><b>Available for Enrollment</b> {course.availableForEnrollment}</p>
+                                    <p><b> Price :</b>${course.offeredCourseFeeDTO.courseFee}</p>
+                                    <button
+                                        className={`cta-button ${!isAvailable ? 'disabled' : ''}`}
+                                        disabled={!isAvailable}
+                                        onClick={(e) => {
+                                            e.stopPropagation(); handleAddToCart(course)
+                                        }}>{isAvailable ? "Add To cart" : "Not Available"}
+                                    </button>
+                                </div>
+                            );
+                        }
+                    )
                 )}
             </div>
-        </div>
         </div>
     );
 };

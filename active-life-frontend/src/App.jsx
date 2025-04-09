@@ -11,8 +11,8 @@ import CourseDescription from "./dashboard/registration/CourseDescription.jsx";
 import Cart from "./dashboard/Cart.jsx";
 import {useDispatch, useSelector} from "react-redux";
 import {clearCart} from "./redux/CartSlice.js";
-import { initializeCartFromLocalStorage } from "./redux/CartSlice";
 import AllCourses from "./dashboard/allcourses/AllCourses.jsx";
+import EnrolledCourses from "./dashboard/registration/EnrolledCourses.jsx";
 
 
 
@@ -69,6 +69,9 @@ function CommonHeader () {
                     <div className="member-name">
                         Welcome {member && member.memberName ? member.memberName : "Member Name"}
                     </div>
+                    <div className={"member-name"}>
+                        <button className={"member-name"} onClick={()=> navigate("/enrolledCourses")}>Enrolled Courses </button>
+                    </div>
                     <div className="logout" >
                         <i className="fa badge fa-lg" value={cartCount} onClick={() => navigate("/cart")} style={{ cursor: "pointer" }}>
                             &#xf07a;
@@ -88,43 +91,19 @@ function Navigation() {
 
     const navigate = useNavigate();
     const handleNavigation = (path) => {
+        debugger
         navigate(path);
     };
-    // const courses = useSelector((state) => state.offeredCourses.courses);
     return (
         <nav>
             <div className="top-nav">
                 <ul>
                     <li onClick={() => handleNavigation("/")}>Home</li>
-                    <li onClick={() => handleNavigation("/allCourses")}>Browse Courses</li>
-                    {/*<div className="dropdown">*/}
-                    {/*    <li>Courses</li>*/}
-                    {/*    <div className="dropdown-content">*/}
-                    {/*        {courses.length > 0 ? (*/}
-                    {/*            courses.map((course) => (*/}
-                    {/*                <li key={course.offeredCourseId} onClick={() => navigate(`/CourseDescription/${course.offeredCourseId}`)}>*/}
-                    {/*                    {course.courseDTO.subcategories.name}*/}
-                    {/*                </li>*/}
-                    {/*            ))*/}
-                    {/*        ) : (*/}
-                    {/*            <p>No offered courses available</p>*/}
-                    {/*        )}*/}
-                    {/*    </div>*/}
-                    {/*</div>*/}
-
-
-                    <div className="dropdown">
-                        <li onClick={() => handleNavigation("/registration")}>Registration</li>
-                        <div className="dropdown-content">
+                    <li onClick={() => handleNavigation("/allCourses")}>Courses</li>
                             <li onClick={() => handleNavigation("/login")}>Login</li>
                             <li onClick={() => handleNavigation("/signup")}>SignUp</li>
-                        </div>
-                    </div>
-
                     <li onClick={() => handleNavigation("/about")}>About</li>
                     <li onClick={() => handleNavigation("/contacts")}>Contacts</li>
-
-
                 </ul>
             </div>
         </nav>
@@ -148,7 +127,7 @@ const App = () => {
                 <Route element={<CommonHeader/>}>
                     <Route path={"/registration"} element={<Registration/>}/>
                     <Route path ="/CourseDescription/:id" element={<CourseDescription/>}/>
-
+                    <Route path ="/enrolledCourses" element={<EnrolledCourses/>}/>
                     <Route path ={"/Cart"} element={<Cart/>}/>
                 </Route>
 

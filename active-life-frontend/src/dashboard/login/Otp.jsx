@@ -55,9 +55,6 @@ const Otp = () => {
 
         } catch (error) {
             console.error("Error:", error);
-            toast.error(' Error while adding to cart:', {
-                position: 'center',
-            });
         } finally {
             setLoading(false);
         }
@@ -67,7 +64,7 @@ const Otp = () => {
         <div className="login-container">
             {!formSubmitted ? (
                 <div className="signup-box">
-                    {/*<div className="login-box">*/}
+                    <div className="login-box">
                         <h2>Otp Verification</h2>
                         <form onSubmit={handleSubmit}>
                             <input
@@ -83,18 +80,10 @@ const Otp = () => {
                             <button type="submit" className="login-btn"  disabled={loading}>
                                 {loading ? "Verifying..." : "Verify"}
                             </button>
-                            <ToastContainer
-                                position="bottom-center"
-                                autoClose={1500}
-                                hideProgressBar
-                                closeOnClick
-                                pauseOnHover={false}
-                                draggable={false}
-                            />
                         </form>
                         {error && <p className="error-message">{error}</p>}
                     </div>
-                // </div>
+                 </div>
             ) : (
                 <div>
                     <h3>OTP Verified! Redirecting...</h3>
