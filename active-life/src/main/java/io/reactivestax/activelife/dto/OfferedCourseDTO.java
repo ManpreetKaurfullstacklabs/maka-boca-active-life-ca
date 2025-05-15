@@ -1,19 +1,27 @@
 package io.reactivestax.activelife.dto;
 import io.reactivestax.activelife.Enums.AvailableForEnrollment;
 import io.reactivestax.activelife.Enums.IsAllDay;
+import io.reactivestax.activelife.domain.facility.Facilities;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class OfferedCourseDTO {
 
-
+    private  Long offeredCourseId;
 
     @NotNull(message = "Start date is required")
     private LocalDate startDate;
+
+    private String barcode;
 
     @NotNull(message = "End date is required")
     private LocalDate endDate;
@@ -45,5 +53,8 @@ public class OfferedCourseDTO {
 
     @NotNull(message = "Offered course fee is required")
     private OfferedCourseFeeDTO offeredCourseFeeDTO;
+
+    private CourseDTO courseDTO;
+    private FacilititesDTO facilititesDTO;
 
 }

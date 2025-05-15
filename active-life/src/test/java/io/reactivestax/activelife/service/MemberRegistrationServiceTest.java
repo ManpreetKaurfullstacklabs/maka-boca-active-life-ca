@@ -71,7 +71,7 @@ import static org.junit.jupiter.api.Assertions.*;
         MockitoAnnotations.openMocks(this);
 
         memberRegistrationDTO = new MemberRegistrationDTO();
-        memberRegistrationDTO.setMemberName("John Doe");
+        memberRegistrationDTO.setMemberLogin("John Doe");
         memberRegistrationDTO.setDob(localDate);
         memberRegistrationDTO.setGender("Male");
         memberRegistrationDTO.setEmail("john.doe@example.com");
@@ -118,7 +118,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
         assertNotNull(memberRegistration.getVerificationUUID());
         String verificationLink = "http://localhost:8082/api/familyregistration/verify/" + memberRegistration.getVerificationUUID();
-        verify(smsService, times(1)).sendSms(memberRegistration.getHomePhoneNo(), "Please verify using this link: " + verificationLink);
+        verify(smsService, times(1)).sendSms(memberRegistration.getHomePhoneNo(), "Please verify using this link: " + verificationLink,anyString());
 
         assertEquals(generatedPin, pin);
     }
@@ -164,7 +164,7 @@ import static org.junit.jupiter.api.Assertions.*;
         String result = memberRegistrationService.loginExistingMember(loginDTO);
 
         assertEquals("OTP sent successfully", result);
-        verify(smsService).sendSms(eq(memberRegistration.getHomePhoneNo()), contains("Your OTP number"));
+        verify(smsService).sendSms(eq(memberRegistration.getHomePhoneNo()), contains("Your OTP number"),anyString());
     }
 
     @Test
@@ -183,7 +183,7 @@ import static org.junit.jupiter.api.Assertions.*;
         String result = memberRegistrationService.loginExistingMember(loginDTO);
 
         assertEquals("Verification link sent successfully", result);
-        verify(smsService).verificationLink(eq(inactiveFamilyMember.getHomePhoneNo()), contains("http://localhost:8082/api/v1/familymember/verify/"));
+        verify(smsService).verificationLink(eq(inactiveFamilyMember.getHomePhoneNo()), contains("http://localhost:8082/api/v1/familymember/verify/"),anyString());
     }
 
 
@@ -364,7 +364,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
         when(familyMemberRepository.findByMemberLogin(memberLoginId)).thenReturn(Optional.of(memberRegistration));
         String result = memberRegistrationService.loginExistingMember(loginDTO);
-        verify(smsService, times(1)).sendSms(eq("123-456-7890"), startsWith("Your OTP number is"));
+        verify(smsService, times(1)).sendSms(eq("123-456-7890"), startsWith("Your OTP number is"),anyString());
         assertEquals("OTP sent successfully", result);
     }
 
@@ -507,13 +507,13 @@ import static org.junit.jupiter.api.Assertions.*;
         assertEquals(6, pin.length());
         assertTrue(pin.matches("\\d{6}"));
     }
-    @Test
-    void testGenerateOtp() {
-        String otp = memberRegistrationService.generateOtp();
-        assertNotNull(otp);
-        assertEquals(6, otp.length());
-        assertTrue(otp.matches("\\d{6}"));
-    }
+//    @Test
+//    void testGenerateOtp() {
+//        String otp = memberRegistrationService.generateOtp();
+//        assertNotNull(otp);
+//        assertEquals(6, otp.length());
+//        assertTrue(otp.matches("\\d{6}"));
+//    }
 
     @Test
     void testFindFamilyMemberByOtpVerification() {
@@ -547,7 +547,7 @@ import static org.junit.jupiter.api.Assertions.*;
         familyMember.setStatus(Status.ACTIVE);
         when(familyMemberRepository.findByMemberLogin("1")).thenReturn(Optional.of(familyMember));
 
-        doNothing().when(smsService).sendSms(anyString(), anyString());
+        doNothing().when(smsService).sendSms(anyString(), anyString(),anyString());
 
         String result = memberRegistrationService.loginExistingMember(loginDTO);
 
@@ -569,7 +569,7 @@ import static org.junit.jupiter.api.Assertions.*;
         when(familyMemberRepository.findByMemberLogin("1")).thenReturn(Optional.of(familyMember));
 
 
-        doNothing().when(smsService).verificationLink(anyString(), anyString());
+        doNothing().when(smsService).verificationLink(anyString(), anyString(),anyString());
         String result = memberRegistrationService.loginExistingMember(loginDTO);
         assertEquals("Verification link sent successfully", result);
 

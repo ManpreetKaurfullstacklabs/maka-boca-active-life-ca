@@ -2,6 +2,7 @@ package io.reactivestax.activelife.service;
 
 import io.reactivestax.activelife.Enums.*;
 import io.reactivestax.activelife.domain.membership.FamilyGroups;
+import io.reactivestax.activelife.dto.*;
 import io.reactivestax.activelife.repository.memberregistration.FamilyGroupRepository;
 import io.reactivestax.activelife.repository.memberregistration.MemberRegistrationRepository;
 import io.reactivestax.activelife.domain.course.Courses;
@@ -10,7 +11,6 @@ import io.reactivestax.activelife.domain.course.OfferedCourses;
 import io.reactivestax.activelife.domain.membership.FamilyCourseRegistrations;
 import io.reactivestax.activelife.domain.membership.MemberRegistration;
 import io.reactivestax.activelife.domain.course.WaitList;
-import io.reactivestax.activelife.dto.FamilyCourseRegistrationDTO;
 import io.reactivestax.activelife.exception.InvalidCourseIdException;
 import io.reactivestax.activelife.exception.InvalidMemberIdException;
 import io.reactivestax.activelife.repository.courses.OfferedCourseFeeRepository;
@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class FamilyCourseRegistrationService {
@@ -52,6 +53,8 @@ public class FamilyCourseRegistrationService {
 
     private static final int MAX_WAITLIST_SIZE = 5;
 
+    String BASE_URL = "http://localhost:8082/api/v1/ems/sms";
+
     @Transactional
     public String enrollFamilyMemberInCourse(FamilyCourseRegistrationDTO familyCourseRegistrationDTO) {
         OfferedCourses offeredCourse = getOfferedCourse(familyCourseRegistrationDTO.getOfferedCourseId());
@@ -59,7 +62,7 @@ public class FamilyCourseRegistrationService {
         Long enrolledCount = familyCourseRegistrationRepository.countByOfferedCourseIdAndIsWithdrawn(offeredCourse, IsWithdrawn.NO);
         MemberRegistration familyMember = getFamilyMember(familyCourseRegistrationDTO.getFamilyMemberId());
         Optional<FamilyCourseRegistrations> existingRegistration = familyCourseRegistrationRepository
-                .findByFamilyMemberIdAndOfferedCourseId(familyMember, offeredCourse);
+                .findByFamilyMemberIdAndOfferedCourseIdAndIsWithdrawn(familyMember, offeredCourse, IsWithdrawn.NO);
 
         MemberRegistration memberRegistration = memberRegistrationRepository.findByFamilyMemberId(familyCourseRegistrationDTO.getFamilyMemberId()).get();
         if(memberRegistration.getGroupOwner().equals(GroupOwner.NO)){
@@ -133,7 +136,7 @@ public class FamilyCourseRegistrationService {
             waitlistRepository.save(firstWaitlistedMember);
 
             Optional<FamilyCourseRegistrations> existingEnrollment =
-                    familyCourseRegistrationRepository.findByFamilyMemberIdAndOfferedCourseId(memberToEnroll, offeredCourse);
+                    familyCourseRegistrationRepository.findByFamilyMemberIdAndOfferedCourseIdAndIsWithdrawn(memberToEnroll, offeredCourse, IsWithdrawn.NO);
 
             if (existingEnrollment.isPresent()) {
                 FamilyCourseRegistrations updatedEnrollment = existingEnrollment.get();
@@ -190,7 +193,7 @@ public class FamilyCourseRegistrationService {
         OfferedCourses offeredCourse = getOfferedCourse(familyCourseRegistrationDTO.getOfferedCourseId());
 
         Optional<FamilyCourseRegistrations> existingRegistration = familyCourseRegistrationRepository
-                .findByFamilyMemberIdAndOfferedCourseId(familyMember, offeredCourse);
+                .findByFamilyMemberIdAndOfferedCourseIdAndIsWithdrawn(familyMember, offeredCourse, IsWithdrawn.NO);
 
         if (existingRegistration.isPresent()) {
             FamilyCourseRegistrations registration = existingRegistration.get();
@@ -219,6 +222,9 @@ public class FamilyCourseRegistrationService {
         familyCourseRegistrationRepository.save(familyCourseRegistrations);
         return "Member successfully enrolled in course " + familyCourseRegistrationDTO.getOfferedCourseId();
     }
+    
+    
+    
 
 
     private OfferedCourses getOfferedCourse(Long offeredCourseId) {
@@ -273,23 +279,59 @@ public class FamilyCourseRegistrationService {
     public FamilyCourseRegistrationDTO getAllFamilyMemberRegistration(Long id) {
         Optional<FamilyCourseRegistrations> byId = familyCourseRegistrationRepository.findById(id);
         if (byId.isEmpty()) {
-            throw new InvalidMemberIdException("Family course registration not found.");
+            throw new InvalidMemberIdException("Member is not  course registration not found.");
         }
-        FamilyCourseRegistrations familyCourseRegistrations = byId.get();
-        FamilyCourseRegistrationDTO familyCourseRegistrationDTO = new FamilyCourseRegistrationDTO();
-        MemberRegistration member = memberIsEnrolledOrNot(familyCourseRegistrations.getFamilyMemberId().getFamilyMemberId());
-        familyCourseRegistrationDTO.setFamilyMemberId(member.getFamilyMemberId());
-        familyCourseRegistrationDTO.setEnrollmentDate(familyCourseRegistrations.getEnrollmentDate());
-        familyCourseRegistrationDTO.setCreatedAt(familyCourseRegistrations.getCreatedAt());
-        OfferedCourses offeredCourses = offeredCourseExistsOrNot(familyCourseRegistrations.getOfferedCourseId().getOfferedCourseId());
-        familyCourseRegistrationDTO.setOfferedCourseId(offeredCourses.getOfferedCourseId());
-        familyCourseRegistrationDTO.setCreatedBy(familyCourseRegistrations.getCreatedBy());
-        familyCourseRegistrationDTO.setLastUpdatedTime(familyCourseRegistrations.getLastUpdatedTime());
-        familyCourseRegistrationDTO.setLastUpdateBy(familyCourseRegistrations.getLastUpdateBy());
-        familyCourseRegistrationDTO.setIsWithdrawn(familyCourseRegistrations.getIsWithdrawn());
 
-        return familyCourseRegistrationDTO;
+        FamilyCourseRegistrations familyCourseRegistrations = byId.get();
+        MemberRegistration member = memberIsEnrolledOrNot(familyCourseRegistrations.getFamilyMemberId().getFamilyMemberId());
+        OfferedCourses offeredCourses = offeredCourseExistsOrNot(familyCourseRegistrations.getOfferedCourseId().getOfferedCourseId());
+
+        OfferedCourseDTO offeredCourseDTO = new OfferedCourseDTO();
+        offeredCourseDTO.setOfferedCourseId(offeredCourses.getOfferedCourseId());
+        offeredCourseDTO.setBarcode(offeredCourses.getBarcode());
+        offeredCourseDTO.setStartDate(offeredCourses.getStartDate());
+        offeredCourseDTO.setEndDate(offeredCourses.getEndDate());
+        offeredCourseDTO.setNoOfSeats(offeredCourses.getNoOfSeats());
+        offeredCourseDTO.setStartTime(offeredCourses.getStartTime());
+        offeredCourseDTO.setEndTime(offeredCourses.getEndTime());
+        offeredCourseDTO.setIsAllDay(offeredCourses.getIsAllDay());
+        offeredCourseDTO.setRegistrationStartDate(offeredCourses.getRegistrationStartDate());
+        offeredCourseDTO.setAvailableForEnrollment(offeredCourses.getAvailableForEnrollment());
+        offeredCourseDTO.setCoursesId(offeredCourses.getCourses().getCourseId());
+        offeredCourseDTO.setFacilities(offeredCourses.getFacilities().getId());
+
+        CourseDTO courseDTO = new CourseDTO();
+        courseDTO.setCourseId(offeredCourses.getCourses().getCourseId());
+        courseDTO.setName(offeredCourses.getCourses().getName());
+
+        offeredCourseDTO.setCourseDTO(courseDTO);
+
+
+        FacilititesDTO facilititesDTO = new FacilititesDTO();
+        facilititesDTO.setId(offeredCourses.getFacilities().getId());
+        facilititesDTO.setName(offeredCourses.getFacilities().getName());
+        facilititesDTO.setCity(offeredCourses.getFacilities().getCity());
+
+        offeredCourseDTO.setFacilititesDTO(facilititesDTO);
+
+
+
+        FamilyCourseRegistrationDTO dto = new FamilyCourseRegistrationDTO();
+        dto.setFamilyCourseRegistrationId(familyCourseRegistrations.getFamilyCourseRegistrationId());
+        dto.setFamilyMemberId(member.getFamilyMemberId());
+        dto.setEnrollmentDate(familyCourseRegistrations.getEnrollmentDate());
+        dto.setCreatedAt(familyCourseRegistrations.getCreatedAt());
+        dto.setOfferedCourseId(offeredCourses.getOfferedCourseId());
+        dto.setCreatedBy(familyCourseRegistrations.getCreatedBy());
+        dto.setLastUpdatedTime(familyCourseRegistrations.getLastUpdatedTime());
+        dto.setLastUpdateBy(familyCourseRegistrations.getLastUpdateBy());
+        dto.setIsWithdrawn(familyCourseRegistrations.getIsWithdrawn());
+        dto.setOfferedCourseDTO(offeredCourseDTO);
+
+        return dto;
     }
+
+
 
     public MemberRegistration memberIsEnrolledOrNot(Long id) {
         Optional<MemberRegistration> byId = memberRegistrationRepository.findById(id);
@@ -311,10 +353,9 @@ public class FamilyCourseRegistrationService {
                 waitlistRepository.save(waitList);
                 String memberName = waitlistedFamilyMember.getMemberName();
                 String name = offeredCourse.getCourses().getName();
-
                 String message = "Hello " + memberName + ", a seat has opened up for the course: " + name +
                         ". Please proceed with your enrollment if you wish to join.";
-                smsService.sendSms(waitlistedFamilyMember.getHomePhoneNo(), message);
+                smsService.sendSms(waitlistedFamilyMember.getHomePhoneNo(), message,waitlistedFamilyMember.getMemberLogin());
             }
         }
     }
@@ -340,11 +381,24 @@ public class FamilyCourseRegistrationService {
     }
 
     public FamilyCourseRegistrationDTO mapToDTO(FamilyCourseRegistrations familyCourseRegistrations) {
+
         FamilyCourseRegistrationDTO dto = new FamilyCourseRegistrationDTO();
         dto.setFamilyCourseRegistrationId(familyCourseRegistrations.getFamilyCourseRegistrationId());
         dto.setEnrollmentDate(familyCourseRegistrations.getEnrollmentDate());
         dto.setCreatedAt(familyCourseRegistrations.getCreatedAt());
         dto.setOfferedCourseId(familyCourseRegistrations.getOfferedCourseId().getOfferedCourseId());
+        OfferedCourses offeredCourse = familyCourseRegistrations.getOfferedCourseId();
+        OfferedCourseDTO offeredCourseDTO = new OfferedCourseDTO();
+        offeredCourseDTO.setOfferedCourseId(offeredCourse.getOfferedCourseId());
+        offeredCourseDTO.setBarcode(offeredCourse.getBarcode());
+        offeredCourseDTO.setStartDate(offeredCourse.getStartDate());
+        offeredCourseDTO.setEndDate(offeredCourse.getEndDate());
+        offeredCourseDTO.setNoOfSeats(offeredCourse.getNoOfSeats());
+        offeredCourseDTO.setNoOfSeats(offeredCourse.getNoOfSeats());
+        offeredCourseDTO.setStartTime(offeredCourse.getStartTime());
+        offeredCourseDTO.setEndTime(offeredCourse.getEndTime());
+        dto.setOfferedCourseDTO(offeredCourseDTO);
+
         dto.setFamilyMemberId(familyCourseRegistrations.getFamilyMemberId().getFamilyMemberId());
         dto.setLastUpdatedTime(familyCourseRegistrations.getLastUpdatedTime());
         dto.setCreatedBy(familyCourseRegistrations.getCreatedBy());
@@ -375,6 +429,90 @@ public class FamilyCourseRegistrationService {
             familyCourseRegistrationRepository.save(existingRegistration);
             return "Previously withdrawn member successfully reenrolled ";
     }
+
+
+    public FamilyCourseRegistrationDTO getAllFamilyMemberRegistrationByLoginId(Long id) {
+        Optional<FamilyCourseRegistrations> byId = familyCourseRegistrationRepository.findById(id);
+        if (byId.isEmpty()) {
+            throw new InvalidMemberIdException("Family course registration not found.");
+        }
+        FamilyCourseRegistrations familyCourseRegistrations = byId.get();
+        FamilyCourseRegistrationDTO familyCourseRegistrationDTO = new FamilyCourseRegistrationDTO();
+        MemberRegistration member = memberIsEnrolledOrNot(familyCourseRegistrations.getFamilyMemberId().getFamilyMemberId());
+        familyCourseRegistrationDTO.setFamilyMemberId(member.getFamilyMemberId());
+        familyCourseRegistrationDTO.setEnrollmentDate(familyCourseRegistrations.getEnrollmentDate());
+        familyCourseRegistrationDTO.setCreatedAt(familyCourseRegistrations.getCreatedAt());
+        OfferedCourses offeredCourses = offeredCourseExistsOrNot(familyCourseRegistrations.getOfferedCourseId().getOfferedCourseId());
+        familyCourseRegistrationDTO.setOfferedCourseId(offeredCourses.getOfferedCourseId());
+        familyCourseRegistrationDTO.setCreatedBy(familyCourseRegistrations.getCreatedBy());
+        familyCourseRegistrationDTO.setLastUpdatedTime(familyCourseRegistrations.getLastUpdatedTime());
+        familyCourseRegistrationDTO.setLastUpdateBy(familyCourseRegistrations.getLastUpdateBy());
+        familyCourseRegistrationDTO.setIsWithdrawn(familyCourseRegistrations.getIsWithdrawn());
+
+        return familyCourseRegistrationDTO;
+    }
+    public List<FamilyCourseRegistrationDTO> getAllFamilyMemberRegistrationByFamilyMemberId(Long id) {
+        List<FamilyCourseRegistrations> familyCourseRegistrationsList = familyCourseRegistrationRepository.findByEnrollmentActorId(id);
+
+        // If no records are found, throw an exception
+        if (familyCourseRegistrationsList.isEmpty()) {
+            throw new InvalidMemberIdException("No course registration found for the given family member.");
+        }
+
+        // Map the list of FamilyCourseRegistrations to a list of FamilyCourseRegistrationDTO
+        return familyCourseRegistrationsList.stream()
+                .map(familyCourseRegistrations -> {
+                    MemberRegistration member = memberIsEnrolledOrNot(familyCourseRegistrations.getFamilyMemberId().getFamilyMemberId());
+                    OfferedCourses offeredCourses = offeredCourseExistsOrNot(familyCourseRegistrations.getOfferedCourseId().getOfferedCourseId());
+
+                    // Mapping OfferedCourseDTO
+                    OfferedCourseDTO offeredCourseDTO = new OfferedCourseDTO();
+                    offeredCourseDTO.setOfferedCourseId(offeredCourses.getOfferedCourseId());
+                    offeredCourseDTO.setBarcode(offeredCourses.getBarcode());
+                    offeredCourseDTO.setStartDate(offeredCourses.getStartDate());
+                    offeredCourseDTO.setEndDate(offeredCourses.getEndDate());
+                    offeredCourseDTO.setNoOfSeats(offeredCourses.getNoOfSeats());
+                    offeredCourseDTO.setStartTime(offeredCourses.getStartTime());
+                    offeredCourseDTO.setEndTime(offeredCourses.getEndTime());
+                    offeredCourseDTO.setIsAllDay(offeredCourses.getIsAllDay());
+                    offeredCourseDTO.setRegistrationStartDate(offeredCourses.getRegistrationStartDate());
+                    offeredCourseDTO.setAvailableForEnrollment(offeredCourses.getAvailableForEnrollment());
+                    offeredCourseDTO.setCoursesId(offeredCourses.getCourses().getCourseId());
+                    offeredCourseDTO.setFacilities(offeredCourses.getFacilities().getId());
+
+                    // Mapping CourseDTO
+                    CourseDTO courseDTO = new CourseDTO();
+                    courseDTO.setCourseId(offeredCourses.getCourses().getCourseId());
+                    courseDTO.setName(offeredCourses.getCourses().getName());
+                    offeredCourseDTO.setCourseDTO(courseDTO);
+
+                    // Mapping FacilitiesDTO
+                    FacilititesDTO facilititesDTO = new FacilititesDTO();
+                    facilititesDTO.setId(offeredCourses.getFacilities().getId());
+                    facilititesDTO.setName(offeredCourses.getFacilities().getName());
+                    facilititesDTO.setCity(offeredCourses.getFacilities().getCity());
+                    offeredCourseDTO.setFacilititesDTO(facilititesDTO);
+
+                    // Mapping FamilyCourseRegistrationDTO
+                    FamilyCourseRegistrationDTO dto = new FamilyCourseRegistrationDTO();
+                    dto.setFamilyCourseRegistrationId(familyCourseRegistrations.getFamilyCourseRegistrationId());
+                    dto.setFamilyMemberId(member.getFamilyMemberId());
+                    dto.setEnrollmentDate(familyCourseRegistrations.getEnrollmentDate());
+                    dto.setCreatedAt(familyCourseRegistrations.getCreatedAt());
+                    dto.setOfferedCourseId(offeredCourses.getOfferedCourseId());
+                    dto.setCreatedBy(familyCourseRegistrations.getCreatedBy());
+                    dto.setLastUpdatedTime(familyCourseRegistrations.getLastUpdatedTime());
+                    dto.setLastUpdateBy(familyCourseRegistrations.getLastUpdateBy());
+                    dto.setIsWithdrawn(familyCourseRegistrations.getIsWithdrawn());
+                    dto.setOfferedCourseDTO(offeredCourseDTO);
+
+                    return dto;
+                })
+                .collect(Collectors.toList());
+    }
+
+
+
 
 
 }

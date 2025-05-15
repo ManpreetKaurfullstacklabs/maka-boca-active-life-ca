@@ -1,13 +1,6 @@
 package io.reactivestax.activelife.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import io.reactivestax.activelife.Enums.PreferredMode;
-import io.reactivestax.activelife.Enums.Role;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -15,8 +8,12 @@ import java.time.LocalDate;
 @Data
 public class MemberRegistrationDTO {
 
+    private Long familyMemberId;
+
    // @NotNull(message = "Member name is required")
   //  @NotEmpty(message = "Member name cannot be empty")
+    private String memberLogin;
+
     private String memberName;
 
   //  @NotNull(message = "Date of birth is required")

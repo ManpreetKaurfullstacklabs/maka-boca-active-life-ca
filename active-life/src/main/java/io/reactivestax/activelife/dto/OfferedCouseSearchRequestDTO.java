@@ -19,5 +19,4 @@ public class OfferedCouseSearchRequestDTO {
     private String categoryName;
     private String subCategory;
 
-
 }

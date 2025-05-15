@@ -42,7 +42,7 @@ class SmsServiceTest {
             when(messageCreatorMock.create()).thenReturn(mockMessage);
 
             String phoneNumber = "+1234567890";
-            smsService.sendSms(phoneNumber, "Test message");
+            smsService.sendSms(phoneNumber, "Test message",anyString());
             verify(messageCreatorMock, times(1)).create();
         }
     }
@@ -61,7 +61,7 @@ class SmsServiceTest {
             when(messageCreatorMock.create()).thenReturn(mockMessage);
 
             String phoneNumber = "+1234567890";
-            smsService.verificationLink(phoneNumber, "Test message");
+            smsService.verificationLink(phoneNumber, "Test message",anyString());
             verify(messageCreatorMock, times(1)).create();
         }
     }

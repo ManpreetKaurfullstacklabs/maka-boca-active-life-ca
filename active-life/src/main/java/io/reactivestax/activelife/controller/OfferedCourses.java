@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 
 
 @RestController
@@ -33,6 +34,10 @@ public class OfferedCourses {
     public ResponseEntity<String> updateCourseToOfferedCourse( @Valid @PathVariable Long id,  @RequestBody UpdateCourseDTO offeredCourseDTO) {
         offerredCourseService.updateOfferedCourseToDatabase(offeredCourseDTO,id);
         return ResponseEntity.ok("Courses updated sucessfully : " );
+    }
+    @GetMapping()
+    public List<OfferedCourseDTO> getOfferedCourseList () {
+       return   offerredCourseService.getOfferedCoursesList();
     }
 
 

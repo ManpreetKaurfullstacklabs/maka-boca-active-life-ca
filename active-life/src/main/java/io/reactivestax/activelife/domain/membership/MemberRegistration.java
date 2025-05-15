@@ -9,6 +9,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.time.LocalDate;
 
@@ -90,6 +91,7 @@ public class MemberRegistration {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    @ToString.Exclude
     @JsonBackReference
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "family_group_id")

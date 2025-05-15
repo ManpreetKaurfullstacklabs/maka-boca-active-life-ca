@@ -18,15 +18,21 @@ import io.reactivestax.activelife.repository.memberregistration.LoginRepository;
 import io.reactivestax.activelife.utility.distribution.SmsService;
 import io.reactivestax.activelife.utility.interfaces.FamilyMemberMapper;
 import io.reactivestax.activelife.utility.jwt.JwtUtil;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestTemplate;
+
 import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
+@AllArgsConstructor
 public class MemberRegistrationService {
 
     @Autowired
@@ -48,10 +54,11 @@ public class MemberRegistrationService {
     @Lazy
     private PasswordEncoder passwordEncoder;
 
-
-
     @Autowired
     private JwtUtil jwtUtil;
+
+    @Autowired
+    private final RestTemplate restTemplate ;
 
 
     @Transactional
@@ -60,25 +67,34 @@ public class MemberRegistrationService {
         if (existingFamilyMember.isPresent()) {
             throw new InvalidMemberIdException("Member Login ID already exists");
         }
+
         MemberRegistration memberRegistration = new MemberRegistration();
         String pin = generatePin();
         String encodedPin = passwordEncoder.encode(pin);
+
+        FamilyGroups familyGroup;
         if (memberRegistrationDTO.getFamilyGroupId() != null) {
             Optional<FamilyGroups> existingFamilyGroup = familyGroupRepository.findById(memberRegistrationDTO.getFamilyGroupId());
             if (existingFamilyGroup.isPresent()) {
-                memberRegistration.setFamilyGroupId(existingFamilyGroup.get());
+                familyGroup = existingFamilyGroup.get();
                 memberRegistration.setGroupOwner(GroupOwner.NO);
             } else {
-                FamilyGroups newFamilyGroup = createNewFamilyGroup(encodedPin, memberRegistrationDTO);
-                memberRegistration.setFamilyGroupId(newFamilyGroup);
+                familyGroup = createNewFamilyGroup(encodedPin, memberRegistrationDTO);
                 memberRegistration.setGroupOwner(GroupOwner.YES);
             }
+        } else {
+            familyGroup = createNewFamilyGroup(encodedPin, memberRegistrationDTO);
+            memberRegistration.setGroupOwner(GroupOwner.YES);
         }
+
+        memberRegistration.setFamilyGroupId(familyGroup);
         setFamilyMemberDetails(memberRegistrationDTO, memberRegistration, encodedPin);
         familyMemberRepository.save(memberRegistration);
         saveLoginAudit(memberRegistration);
+
         return pin;
     }
+
 
     public MemberRegistrationDTO getAllMembersbygivenMemberId(String id) {
         Optional<MemberRegistration> byMemberLogin = familyMemberRepository.findByMemberLogin(id);
@@ -123,50 +139,34 @@ public class MemberRegistrationService {
         familyMemberRepository.save(memberRegistration);
     }
 
-    public String loginExistingMember(LoginDTO loginDTO) {
+
+    public ResponseEntity<String> loginExistingMember(LoginDTO loginDTO) {
         Optional<MemberRegistration> byMemberLoginId = familyMemberRepository.findByMemberLogin(loginDTO.getMemberLoginId());
+
         if (byMemberLoginId.isEmpty()) {
-            return "Member Login Id does not exist : " + loginDTO.getMemberLoginId()+"  Signup please.";
+            return new ResponseEntity<>("Member Login Id does not exist: " + loginDTO.getMemberLoginId() + "  Signup please.", HttpStatus.BAD_REQUEST);
         }
+
         MemberRegistration memberRegistration = byMemberLoginId.get();
         if (memberRegistration.getMemberLogin().equals(loginDTO.getMemberLoginId())) {
-            if(passwordEncoder.matches(loginDTO.getPin(),memberRegistration.getPin())&& memberRegistration.getStatus().equals(Status.ACTIVE)){
-                // if (memberRegistration.getPin().equals(loginDTO.getPin()) && memberRegistration.getStatus().equals(Status.ACTIVE)) {
-                String otp = generateOtp();
-                smsService.sendSms(memberRegistration.getHomePhoneNo(), "Your OTP number is " + otp);
-                memberRegistration.setOtp(otp);
-                familyMemberRepository.save(memberRegistration);
-                return "OTP sent successfully";
-            }
-        }
 
-        if(passwordEncoder.matches(loginDTO.getPin(),memberRegistration.getPin())&& memberRegistration.getStatus().equals(Status.INACTIVE)){
-            //    if (memberRegistration.getMemberLogin().equals(loginDTO.getMemberLoginId()) && memberRegistration.getStatus().equals(Status.INACTIVE)) {
-            //    if (!memberRegistration.getPin().equals(loginDTO.getPin())) {
-            if (!passwordEncoder.matches(loginDTO.getPin(),memberRegistration.getPin())) {
-                throw new InvalidMemberIdException("Password does not match with Member login Id: " + memberRegistration.getMemberLogin());
-            } else {
+            if (passwordEncoder.matches(loginDTO.getPin(), memberRegistration.getPin()) && memberRegistration.getStatus().equals(Status.ACTIVE)) {
+                smsService.sendOtpRequest(memberRegistration.getHomePhoneNo(), loginDTO.getMemberLoginId());
+                familyMemberRepository.save(memberRegistration);
+                return new ResponseEntity<>("OTP sent successfully", HttpStatus.OK);
+            }
+
+            if (passwordEncoder.matches(loginDTO.getPin(), memberRegistration.getPin()) && memberRegistration.getStatus().equals(Status.INACTIVE)) {
                 String verificationId = UUID.randomUUID().toString();
                 memberRegistration.setVerificationUUID(verificationId);
-                String verificationLink = "http://localhost:8082/api/v1/familymember/verify/" + verificationId;
-                smsService.verificationLink(memberRegistration.getHomePhoneNo(), verificationLink);
-                return "Verification link sent successfully";
+                String verificationLink = "http://localhost:40015/api/v1/familymember/verify/" + verificationId;
+                smsService.verificationLink(memberRegistration.getHomePhoneNo(), verificationLink, loginDTO.getMemberLoginId());
+                return new ResponseEntity<>("Verification link sent successfully", HttpStatus.UNAUTHORIZED);
             }
         }
-        if (loginDTO.getMemberLoginId().equals(memberRegistration.getMemberLogin()) && loginDTO.getPin().equals(memberRegistration.getPin()) && memberRegistration.getStatus().equals(Status.ACTIVE)) {
-            return "Successfully verified";
-        }
-        return "Invalid " ;
+        return new ResponseEntity<>("Invalid credentials", HttpStatus.UNAUTHORIZED);
     }
 
-    public String generateOtp() {
-        Random random = new Random();
-        StringBuilder otp = new StringBuilder();
-        for (int i = 0; i < 6; i++) {
-            otp.append(random.nextInt(10));
-        }
-        return otp.toString();
-    }
 
     public String setFamilyMemberDetails(MemberRegistrationDTO memberRegistrationDTO, MemberRegistration memberRegistration, String encodedPin) {
         memberRegistration.setMemberName(memberRegistrationDTO.getMemberName());
@@ -189,8 +189,8 @@ public class MemberRegistrationService {
         memberRegistration.setStatus(Status.INACTIVE);
         String verificationId = UUID.randomUUID().toString();
         memberRegistration.setVerificationUUID(verificationId);
-        String verificationLink = "http://localhost:8082/api/familyregistration/verify/" + verificationId;
-        smsService.sendSms(memberRegistration.getHomePhoneNo(), "Please verify using this link: " + verificationLink);
+        String verificationLink = "http://localhost:40015/api/familyregistration/verify/"+ verificationId;
+//        smsService.sendSms(memberRegistration.getHomePhoneNo(), "Please verify using this link: " + verificationLink,memberRegistrationDTO.getMemberLoginId());
         return  encodedPin;
     }
 
@@ -212,20 +212,44 @@ public class MemberRegistrationService {
     public String findFamilyMemberByOtpVerification(LoginDTO loginDTO) {
         Optional<MemberRegistration> familyMemberOpt = familyMemberRepository.findByMemberLogin(loginDTO.getMemberLoginId());
 
-        if (familyMemberOpt.isEmpty()) {
+        if (!familyMemberOpt.isPresent()) {
             throw new InvalidMemberIdException("This member does not exist");
         }
 
         MemberRegistration memberRegistration = familyMemberOpt.get();
 
-        if (!memberRegistration.getOtp().equals(loginDTO.getPin())) {
-            throw new RuntimeException("Wrong OTP");
+        String otpVerificationUrl = "http://localhost:8082/api/v1/otp/verify";
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Content-Type", "application/json");
+
+        Map<String, String> requestBody = new HashMap<>();
+        requestBody.put("customerId", loginDTO.getMemberLoginId());
+        requestBody.put("otpNo", loginDTO.getPin());
+
+        HttpEntity<Map<String, String>> requestEntity = new HttpEntity<>(requestBody, headers);
+
+        try {
+            ResponseEntity<String> response = restTemplate.exchange(
+                    otpVerificationUrl,
+                    HttpMethod.PUT,
+                    requestEntity,
+                    String.class
+            );
+
+            if (response.getStatusCode().is2xxSuccessful()) {
+                return jwtUtil.generateToken(loginDTO.getMemberLoginId(), loginDTO.getPin());
+            } else {
+                throw new RuntimeException("OTP verification failed with status: " + response.getStatusCode());
+            }
+        } catch (HttpClientErrorException.NotFound e) {
+            throw new RuntimeException("OTP does not exist or has expired. Please request a new OTP.");
+        } catch (Exception e) {
+            throw new RuntimeException("Error calling OTP verification API: " + e.getMessage());
         }
-        memberRegistration.setStatus(Status.ACTIVE);
-        familyMemberRepository.save(memberRegistration);
-        String token = jwtUtil.generateToken(loginDTO.getMemberLoginId(), loginDTO.getPin());
-        return token;
     }
+
+
+
 
 
 

@@ -5,6 +5,7 @@ import io.reactivestax.activelife.dto.LoginDTO;
 import io.reactivestax.activelife.service.MemberRegistrationService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
@@ -23,16 +24,21 @@ public class MemberRegistration {
         String pin = memberRegistrationService.addNewFamilyMemberOnSignup(memberRegistrationDTO);
         return ResponseEntity.ok("family member added successfully with pin number : " + pin);
     }
-
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginDTO loginDTO) {
         try {
-            String token = memberRegistrationService.loginExistingMember(loginDTO);
-            Map<String, String> response = new HashMap<>();
-            response.put("token", token);
-            return ResponseEntity.ok(response);
+            ResponseEntity<String> responseEntity = memberRegistrationService.loginExistingMember(loginDTO);
+            if (responseEntity.getStatusCode() == HttpStatus.OK) {
+                Map<String, String> response = new HashMap<>();
+                response.put("message", responseEntity.getBody());
+                return ResponseEntity.ok(response);
+            } else {
+
+                return ResponseEntity.status(responseEntity.getStatusCode()).body(responseEntity.getBody());
+            }
         } catch (Exception e) {
-            return ResponseEntity.status(401).body("Login failed: " + e.getMessage());
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Login failed: " + e.getMessage());
         }
     }
     @GetMapping("/{id}")
@@ -61,6 +67,6 @@ public class MemberRegistration {
     @PostMapping("login/verify")
     public ResponseEntity<String> verifyLogin( @Valid @RequestBody LoginDTO loginDTO) {
         String familyMemberByOtpVerification = memberRegistrationService.findFamilyMemberByOtpVerification(loginDTO);
-        return ResponseEntity.ok("jwt token : "+familyMemberByOtpVerification);
+        return ResponseEntity.ok(familyMemberByOtpVerification);
     }
 }
