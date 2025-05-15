@@ -3,11 +3,10 @@ name: CI Pipeline
 on:
   push:
     branches:
-      - active-life-frontend
+      - main
   pull_request:
     branches:
-      - active-life-frontend
-
+      - main
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
