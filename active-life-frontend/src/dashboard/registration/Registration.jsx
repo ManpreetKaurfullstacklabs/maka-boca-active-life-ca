@@ -115,7 +115,7 @@ const Registration = () => {
     };
 
     const filteredCourses = courses.filter(course => {
-        // Safely access subcategories with optional chaining
+
         const subcategories = course?.courseDTO?.subcategories;
         if (subcategories && subcategories.name) {
             return subcategories.name.toLowerCase().includes(searchQuery.toLowerCase());

@@ -10,6 +10,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.math.BigInteger;
 import java.time.LocalDate;
@@ -54,6 +55,7 @@ public class OfferedCourses {
 
 
     @ManyToOne(cascade = CascadeType.PERSIST)
+    @ToString.Exclude
     @JoinColumn(name="courses_fee_id")
     private OfferedCourseFee offeredCourseFee;
 
@@ -65,11 +67,13 @@ public class OfferedCourses {
     private  LocalDateTime createdAt;
 
     @ManyToOne
+    @ToString.Exclude
     @JoinColumn(name = "course_id")
     private  Courses  courses;
 
     @JsonBackReference
     @ManyToOne
+    @ToString.Exclude
     @JoinColumn(name = "facility_id")
     private Facilities facilities;
 

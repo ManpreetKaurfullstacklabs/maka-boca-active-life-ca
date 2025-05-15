@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 public class SearchQueryService {
 
     private final OfferedCourseRepository offeredCourseRepository;
+    private final OfferedCourseMapper offeredCourseMapper; // Injected mapper
 
     public List<OfferedCourseDTO> searchOfferedCourse(OfferedCouseSearchRequestDTO offeredCouseSearchRequestDTO) {
         Specification<OfferedCourses> offeredCoursesSpecification =
@@ -29,12 +30,10 @@ public class SearchQueryService {
                         .and(OfferedCourseSpecification.hasCategory(offeredCouseSearchRequestDTO.getCategoryName()))
                         .and(OfferedCourseSpecification.hasSubCategory(offeredCouseSearchRequestDTO.getSubCategory())));
 
-
         List<OfferedCourses> offeredCoursesList = offeredCourseRepository.findAll(offeredCoursesSpecification);
-        List<OfferedCourseDTO> collect = offeredCoursesList.stream()
-                .map(OfferedCourseMapper.INSTANCE::offeredCourseToOfferedCourseDTO)
-                .collect(Collectors.toList());
-        return collect;
-    }
 
+        return offeredCoursesList.stream()
+                .map(offeredCourseMapper::offeredCourseToOfferedCourseDTO)
+                .collect(Collectors.toList());
+    }
 }

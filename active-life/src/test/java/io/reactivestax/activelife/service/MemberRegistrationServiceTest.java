@@ -71,7 +71,7 @@ import static org.junit.jupiter.api.Assertions.*;
         MockitoAnnotations.openMocks(this);
 
         memberRegistrationDTO = new MemberRegistrationDTO();
-        memberRegistrationDTO.setMemberName("John Doe");
+        memberRegistrationDTO.setMemberLogin("John Doe");
         memberRegistrationDTO.setDob(localDate);
         memberRegistrationDTO.setGender("Male");
         memberRegistrationDTO.setEmail("john.doe@example.com");

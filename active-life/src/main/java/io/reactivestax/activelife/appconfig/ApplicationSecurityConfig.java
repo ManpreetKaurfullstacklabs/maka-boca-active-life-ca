@@ -38,14 +38,15 @@ public class ApplicationSecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManager authenticationManager) throws Exception {
         http
-             //   .csrf(csrf -> csrf.disable())
-                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // ✅ Added CORS here
+                .csrf(csrf -> csrf.disable())
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/api/familyregistration/signup",
-                                "/api/familyregistration/login", "/api/familyregistration/login/verify" )
+                                "/api/familyregistration/login", "/api/familyregistration/login/verify","/api/dashboard/search")
                         .permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/familyregistration/verify/**")
+                        .requestMatchers(HttpMethod.GET, "/api/familyregistration/verify/**","/api/offeredcourse"
+                        ,"http://localhost:40015/api/offeredcourse")
                         .permitAll()
 
                         .anyRequest()
@@ -68,9 +69,8 @@ public class ApplicationSecurityConfig {
         corsConfiguration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         corsConfiguration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept"));
         corsConfiguration.setAllowCredentials(true);
-
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", corsConfiguration);
+        source.registerCorsConfiguration("/**" , corsConfiguration);
         return source;
     }
 

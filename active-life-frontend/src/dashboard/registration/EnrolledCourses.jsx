@@ -97,8 +97,7 @@ const EnrolledCourses = () => {
                 pauseOnHover={false}
                 draggable={false}
             />
-            <h1><b>Courses You are enrolled In</b></h1>
-
+            <h1><b>Active Learning Programs</b></h1>
             {error && <p className="error-message">{error}</p>}
 
             <div className="course-list">
@@ -133,6 +132,7 @@ const EnrolledCourses = () => {
                                     }
                                 >
                                     {isAvailable ? "Withdraw" : "Not Available"}
+
                                 </button>
                             </div>
                         );

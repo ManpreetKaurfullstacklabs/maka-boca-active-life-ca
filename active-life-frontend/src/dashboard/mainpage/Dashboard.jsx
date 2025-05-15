@@ -1,7 +1,9 @@
 import React from "react";
 import "./Dashboard.css";
+import {useNavigate} from "react-router-dom";
 
 const Dashboard = () => {
+    const navigate = useNavigate();
 
     return (
         <div className="dashboard-container">
@@ -14,6 +16,7 @@ const Dashboard = () => {
             <div className="content-overlay">
                 <h1>Welcome to Active Life</h1>
                 <p>Sweat, smile, and repeat!</p>
+                <button className="cta-button" onClick={()=>navigate("/signup")}>Sign Up </button>
             </div>
         </div>
     );

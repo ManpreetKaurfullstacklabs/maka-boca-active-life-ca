@@ -5,7 +5,6 @@ import static org.mockito.Mockito.*;
 
 import io.reactivestax.activelife.Enums.IsWithdrawn;
 import io.reactivestax.activelife.Enums.PaymentStatus;
-import io.reactivestax.activelife.Enums.Status;
 import io.reactivestax.activelife.domain.course.OfferedCourses;
 import io.reactivestax.activelife.domain.membership.FamilyCourseRegistrations;
 import io.reactivestax.activelife.domain.membership.MemberRegistration;
@@ -119,7 +118,7 @@ class MockPaymentServiceTest {
 
     @Test
     void testAddedToRegistration_Success() {
-        when(familyCourseRegistrationRepository.findByFamilyMemberIdAndOfferedCourseId(memberRegistration, offeredCourse))
+        when(familyCourseRegistrationRepository.findByFamilyMemberIdAndOfferedCourseIdAndIsWithdrawn(memberRegistration, offeredCourse))
                 .thenReturn(Optional.empty());
 
         String result = mockPaymentService.addedToRegistration(paymentRequest);
@@ -133,7 +132,7 @@ class MockPaymentServiceTest {
         FamilyCourseRegistrations existingRegistration = new FamilyCourseRegistrations();
         existingRegistration.setIsWithdrawn(IsWithdrawn.NO);
 
-        when(familyCourseRegistrationRepository.findByFamilyMemberIdAndOfferedCourseId(memberRegistration, offeredCourse))
+        when(familyCourseRegistrationRepository.findByFamilyMemberIdAndOfferedCourseIdAndIsWithdrawn(memberRegistration, offeredCourse))
                 .thenReturn(Optional.of(existingRegistration));
 
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {

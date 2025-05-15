@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import "./Login.css";
 import { useNavigate } from "react-router-dom";
 import {toast, ToastContainer} from "react-toastify";
+import {Link} from "react-router";
 
 const Login = () => {
     const navigate = useNavigate();
@@ -41,9 +42,11 @@ const Login = () => {
                 navigate('/otp', { state: { responseData, memberLoginId:  formData.memberLoginId} });
             } else {
                 if (res.status === 401) {
-
                     setError("Activation required. check your phone");
                     }
+                if(res.status===400){
+                    setError("Member does not exist Signup Please")
+                }
             }
         } catch (error) {
             console.error("Error:", error);
@@ -82,6 +85,7 @@ const Login = () => {
                     />
                     <button type="submit" className="login-btn" disabled={loading}>
                         {loading ? "Logging in..." : "Login"}
+
                         <ToastContainer
                             position="bottom-center"
                             autoClose={1500}
@@ -91,8 +95,8 @@ const Login = () => {
                             draggable={false}
                         />
                     </button>
-
                 </form>
+                <p>Don’t have an account? <Link to="/signup">Signup</Link></p>
             </div>
         </div>
     );

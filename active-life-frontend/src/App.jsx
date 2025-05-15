@@ -13,17 +13,16 @@ import {useDispatch, useSelector} from "react-redux";
 import {clearCart} from "./redux/CartSlice.js";
 import AllCourses from "./dashboard/allcourses/AllCourses.jsx";
 import EnrolledCourses from "./dashboard/registration/EnrolledCourses.jsx";
+import {Link} from "react-router";
 
 
-
-function CommonHeader () {
+function CommonHeader() {
     const [member, setMember] = useState(null);
-    const  authToken = localStorage.getItem("jwtToken")
+    const authToken = localStorage.getItem("jwtToken")
     const loginId = localStorage.getItem("memberLoginId")
     const navigate = useNavigate();
     const cartCount = useSelector(state => state?.cart?.items)?.length
     const dispatch = useDispatch();
-
 
 
     useEffect(() => {
@@ -50,7 +49,7 @@ function CommonHeader () {
 
 
     if (!member) {
-        return <Outlet />;
+        return <Outlet/>;
     }
 
     const handleLogout = () => {
@@ -60,27 +59,41 @@ function CommonHeader () {
     };
 
 
-
     return (
         <div>
             <h1>Offered Courses</h1>
             <div className="item-container">
                 <div className="top-nav-bar">
+                   <div className={"member-name"} >
+                       <img className={"img-profile"} src={"/icon.jpg"}/>
+
+                   </div>
                     <div className="member-name">
                         Welcome {member && member.memberName ? member.memberName : "Member Name"}
                     </div>
-                    <div className={"member-name"}>
-                        <button className={"member-name"} onClick={()=> navigate("/enrolledCourses")}>Enrolled Courses </button>
+                    <div className={"member-name"} onClick={() => navigate("/enrolledCourses")} style={{ cursor: "pointer" }}>
+                        Enrolled Courses
                     </div>
-                    <div className="logout" >
-                        <i className="fa badge fa-lg" value={cartCount} onClick={() => navigate("/cart")} style={{ cursor: "pointer" }}>
+                    <div className={"member-name"} onClick={() => navigate("/signup")} style={{ cursor: "pointer" }}>
+                        Add New Member
+                    </div>
+                    <div className={"member-name"} onClick={() => navigate("/signup")} style={{ cursor: "pointer" }}>
+                        Edit Information
+                    </div>
+
+                    <div className="logout">
+                        <i className="fa badge fa-lg" value={cartCount} onClick={() => navigate("/cart")}
+                           style={{cursor: "pointer"}}>
                             &#xf07a;
                         </i>
-                        <button onClick={() => {handleLogout()}}>Logout</button>
+                        <button  className={"cart-button"} onClick={() => {
+                            handleLogout()
+                        }}>Logout
+                        </button>
                     </div>
 
                 </div>
-                <Outlet />
+                <Outlet/>
             </div>
         </div>
     )
@@ -88,10 +101,9 @@ function CommonHeader () {
 
 function Navigation() {
 
-
     const navigate = useNavigate();
     const handleNavigation = (path) => {
-        debugger
+        // debugger
         navigate(path);
     };
     return (
@@ -100,10 +112,10 @@ function Navigation() {
                 <ul>
                     <li onClick={() => handleNavigation("/")}>Home</li>
                     <li onClick={() => handleNavigation("/allCourses")}>Courses</li>
-                            <li onClick={() => handleNavigation("/login")}>Login</li>
-                            <li onClick={() => handleNavigation("/signup")}>SignUp</li>
+                    {/*<li onClick={() => handleNavigation("/signup")}>SignUp</li>*/}
                     <li onClick={() => handleNavigation("/about")}>About</li>
-                    <li onClick={() => handleNavigation("/contacts")}>Contacts</li>
+                    <li onClick={() => handleNavigation("/login")}>Login</li>
+                    {/*<li onClick={() => handleNavigation("/contacts")}>Contacts</li>*/}
                 </ul>
             </div>
         </nav>
@@ -117,12 +129,13 @@ const App = () => {
         <BrowserRouter>
             <Navigation/>
             <Routes>
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/signup" element={<Signup/>} />
-                <Route path="/login" element={<Login/>} />
-                <Route path="/otp" element={<Otp/>} />
-                <Route path ="/allCourses" element={<AllCourses/>}/>
+
+                <Route path="/" element={<Dashboard/>}/>
+                <Route path="/about" element={<About/>}/>
+                <Route path="/signup" element={<Signup/>}/>
+                <Route path="/login" element={<Login/>}/>
+                <Route path="/otp" element={<Otp/>}/>
+                <Route path="/allCourses" element={<AllCourses/>}/>
 
                 <Route element={<CommonHeader/>}>
                     <Route path={"/registration"} element={<Registration/>}/>

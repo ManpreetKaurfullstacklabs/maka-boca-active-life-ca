@@ -13,6 +13,7 @@ import io.reactivestax.activelife.exception.InvalidMemberIdException;
 import io.reactivestax.activelife.repository.courses.OfferedCourseRepository;
 import io.reactivestax.activelife.repository.memberregistration.FamilyCourseRegistrationRepository;
 import io.reactivestax.activelife.repository.memberregistration.MemberRegistrationRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -36,6 +37,7 @@ public class MockPaymentService {
     @Autowired
     private MemberRegistrationRepository memberRegistrationRepository;
 
+    @Transactional
     public PaymentResponseDTO processPayment(PaymentRequestDTO paymentRequest) {
         PaymentResponseDTO response = new PaymentResponseDTO();
         Long familyMemberId = paymentRequest.getFamilyMemberId();
@@ -47,7 +49,7 @@ public class MockPaymentService {
             return createFailedResponse("Payment Failed: No courses in cart.", familyMemberId, 0.0);
         }
         double totalAmount = 0.0;
-        for (Long courseId : cartItems.keySet()) {
+        for (Long courseId : cartItems.keySet()) { // cartItems.valueSet().offeredCourseId()
             Optional<OfferedCourses> offeredCourseOpt = offeredCourseRepository.findById(courseId);
 
             if (offeredCourseOpt.isEmpty()) {
@@ -106,7 +108,7 @@ public class MockPaymentService {
                     .orElseThrow(() -> new InvalidMemberIdException("Invalid family member ID"));
 
             Optional<FamilyCourseRegistrations> existingRegistration = familyCourseRegistrationRepository
-                    .findByFamilyMemberIdAndOfferedCourseId(memberRegistration, offeredCourse );
+                    .findByFamilyMemberIdAndOfferedCourseIdAndIsWithdrawn(memberRegistration, offeredCourse, IsWithdrawn.NO );
 
             if (existingRegistration.isPresent() && existingRegistration.get().getIsWithdrawn().equals(IsWithdrawn.NO)) {
                 throw new RuntimeException("Already enrolled in course " + offeredCourse.getOfferedCourseId());
@@ -125,7 +127,6 @@ public class MockPaymentService {
             familyCourseRegistrations.setCreatedAt(LocalDateTime.now());
             familyCourseRegistrations.setLastUpdateBy(familyMemberId);
             familyCourseRegistrations.setLastUpdatedTime(LocalDateTime.now());
-
             familyCourseRegistrationRepository.save(familyCourseRegistrations);
         }
 

@@ -29,7 +29,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -154,7 +153,7 @@ class FamilyCourseRegistrationServiceTest {
 
         when(memberRegistrationRepository.findById(familyMemberId)).thenReturn(Optional.of(familyMember));
         when(offeredCourseRepository.findById(offeredCourseId)).thenReturn(Optional.of(offeredCourse));
-        when(familyCourseRegistrationRepository.findByFamilyMemberIdAndOfferedCourseId(familyMember, offeredCourse)).thenReturn(Optional.of(existingRegistration));
+        when(familyCourseRegistrationRepository.findByFamilyMemberIdAndOfferedCourseIdAndIsWithdrawn(familyMember, offeredCourse)).thenReturn(Optional.of(existingRegistration));
 
 
 
@@ -461,7 +460,7 @@ class FamilyCourseRegistrationServiceTest {
         when(memberRegistrationRepository.findById(1L)).thenReturn(Optional.of(familyMember));
         when(familyCourseRegistrationRepository.countByOfferedCourseIdAndIsWithdrawn(offeredCourse, IsWithdrawn.NO))
                 .thenReturn(5L);
-        when(familyCourseRegistrationRepository.findByFamilyMemberIdAndOfferedCourseId(familyMember, offeredCourse))
+        when(familyCourseRegistrationRepository.findByFamilyMemberIdAndOfferedCourseIdAndIsWithdrawn(familyMember, offeredCourse))
                 .thenReturn(Optional.empty());
 
         familyCourseRegistrationService.enrollFamilyMemberInCourse(dto);

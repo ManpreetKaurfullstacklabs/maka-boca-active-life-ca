@@ -16,10 +16,12 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class OfferedCourseDTO {
 
-
+    private  Long offeredCourseId;
 
     @NotNull(message = "Start date is required")
     private LocalDate startDate;
+
+    private String barcode;
 
     @NotNull(message = "End date is required")
     private LocalDate endDate;
@@ -53,10 +55,6 @@ public class OfferedCourseDTO {
     private OfferedCourseFeeDTO offeredCourseFeeDTO;
 
     private CourseDTO courseDTO;
-
     private FacilititesDTO facilititesDTO;
-
-
-
 
 }

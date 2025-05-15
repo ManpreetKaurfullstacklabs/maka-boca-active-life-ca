@@ -54,6 +54,10 @@ public class ShoppingCartService {
         Cache cartCache = cacheManager.getCache("cartItems");
         if (cartCache != null) {
             Map<Long, ShoppingCartDTO> cart = getCart(shoppingCartDTO.getFamilyMemberId());
+
+            if (cart.containsKey(shoppingCartDTO.getOfferedCourseId())) {
+                throw new IllegalStateException("Course is already in the cart");
+            }
             cart.put(shoppingCartDTO.getOfferedCourseId(), shoppingCartDTO);
             cartCache.put(shoppingCartDTO.getFamilyMemberId(), cart);
         }
@@ -84,6 +88,23 @@ public class ShoppingCartService {
             cartCache.evict(familyMemberId);
         }
     }
+
+    public void deletebyOfferedCourseId(Long familyMemberId, Long offeredCourseId) {
+        Cache cartCache = cacheManager.getCache("cartItems");
+        if (cartCache != null) {
+
+            Cache.ValueWrapper valueWrapper = cartCache.get(familyMemberId);
+            if (valueWrapper != null) {
+                Map<Long, ShoppingCartDTO> cart = (Map<Long, ShoppingCartDTO>) valueWrapper.get();
+
+                if (cart.containsKey(offeredCourseId)) {
+                    cart.remove(offeredCourseId);
+                    cartCache.put(familyMemberId, cart);
+                }
+            }
+        }
+    }
+
 
     public void checkCourseIsAvailabeOrNot(OfferedCourses offeredCourse){
         Long availableSeats = offeredCourse.getNoOfSeats();

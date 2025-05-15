@@ -38,4 +38,6 @@ public class FamilyCourseRegistrationDTO {
 
     private Long lastUpdateBy;
 
+    private OfferedCourseDTO offeredCourseDTO;
+
 }

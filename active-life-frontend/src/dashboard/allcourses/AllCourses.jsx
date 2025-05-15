@@ -174,9 +174,14 @@ const Allcourses = () => {
                                         disabled={!isAvailable}
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            if (isAvailable) {
-                                                // bruh will DD LATER
-                                            }
+                                            toast.info("You need to login first", {
+                                                position: "top-center",
+                                                autoClose: 1500,
+                                            });
+
+                                            setTimeout(() => {
+                                                navigate('/login');
+                                            }, 1000);
                                         }}
                                     >
                                         {isAvailable ? "Register Now" : "Not Available"}

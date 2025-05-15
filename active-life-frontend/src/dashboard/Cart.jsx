@@ -1,11 +1,10 @@
 import "./Cart.css";
 import { useDispatch, useSelector } from "react-redux";
-import {addToCart, clearCart, loadDataFromBackend, removeFromCart as reduxRemoveFromCart} from "../redux/CartSlice";
+import { addToCart, clearCart, loadDataFromBackend, removeFromCart as reduxRemoveFromCart } from "../redux/CartSlice";
 import { toast, ToastContainer } from "react-toastify";
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 import { FaTrash } from "react-icons/fa";
-import {fetchCart} from "../redux/fetchCart.js";
-
+import { fetchCart } from "../redux/fetchCart.js";
 
 const Cart = () => {
     const dispatch = useDispatch();
@@ -13,17 +12,13 @@ const Cart = () => {
     const courses = useSelector((state) => state?.offeredCourses?.courses || []);
     const authToken = localStorage.getItem("jwtToken");
     const [paymentSuccess, setPaymentSuccess] = useState(false);
-
-
+    const [isModalOpen, setIsModalOpen] = useState(false); // Modal state
 
     useEffect(() => {
-        fetchCart(authToken).then(
-            (data) => {
-                dispatch(loadDataFromBackend(data.courses))
-            }
-        )
+        fetchCart(authToken).then((data) => {
+            dispatch(loadDataFromBackend(data.courses));
+        });
     }, [authToken, dispatch]);
-
 
     const courseMap = courses.reduce((acc, course) => {
         acc[course.offeredCourseId] = course;
@@ -32,7 +27,7 @@ const Cart = () => {
 
     const proceedToBulkPayment = async () => {
         try {
-            const offeredCourseIds = cartItems.map(item => item.offeredCourseId);
+            const offeredCourseIds = cartItems.map((item) => item.offeredCourseId);
 
             const totalAmount = cartItems.reduce((total, item) => {
                 const course = courseMap[item.offeredCourseId];
@@ -43,71 +38,73 @@ const Cart = () => {
                 familyMemberId: localStorage.getItem("familyMemberId"),
                 amount: totalAmount,
                 paymentMethod: "CREDIT_CARD",
-                offeredCourseIds
+                offeredCourseIds,
             };
 
             const response = await fetch("http://localhost:40015/api/shoppingcart/process", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "Authorization": `Bearer ${authToken}`
+                    Authorization: `Bearer ${authToken}`,
                 },
-                body: JSON.stringify(cartItem)
+                body: JSON.stringify(cartItem),
             });
 
             const result = await response.json();
 
             if (response.ok && result.status === "SUCCESS") {
-                toast.success('Payment succeeded!', {
-                    position: 'top-center',
+                toast.success("Payment succeeded!", {
+                    position: "top-center",
                 });
                 dispatch(clearCart());
                 const familyMemberId = localStorage.getItem("familyMemberId");
                 localStorage.removeItem(`cart_${familyMemberId}`);
                 setPaymentSuccess(true);
-                // cartItems.clear;
+                setIsModalOpen(false); // Close the modal after successful payment
             } else {
-            //    alert(result.message)
-                toast.warning(result.message  , {
-                    position: 'top-center',
+                toast.warning(result.message, {
+                    position: "top-center",
                 });
+                setIsModalOpen(false); // Close the modal if payment failed
             }
         } catch (error) {
             console.error("Error during bulk payment:", error);
-            toast.error('An error occurred during the payment process.', {
-                position: 'top-center',
+            toast.error("An error occurred during the payment process.", {
+                position: "top-center",
             });
+            setIsModalOpen(false); // Close the modal if error occurs
         }
     };
 
     const handleRemoveFromCart = async (course) => {
         try {
             const familyMemberId = localStorage.getItem("familyMemberId");
-            const response = await fetch(`http://localhost:40015/api/shoppingcart/delete/${familyMemberId}/${course.offeredCourseId}`, {
-                method: "DELETE",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${authToken}`
+            const response = await fetch(
+                `http://localhost:40015/api/shoppingcart/delete/${familyMemberId}/${course.offeredCourseId}`,
+                {
+                    method: "DELETE",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${authToken}`,
+                    },
                 }
-            });
+            );
 
             if (response.ok) {
-
                 dispatch(reduxRemoveFromCart({ offeredCourseId: course.offeredCourseId }));
-
-                toast.success('Removed from cart!', {
-                    position: 'top-center',
+                toast.success("Removed from cart!", {
+                    position: "top-center",
                 });
             } else {
                 const result = await response.json();
                 toast.warning(result.message || "Failed to remove course", {
-                    position: 'top-right',
+                    position: "top-right",
                 });
             }
         } catch (error) {
             console.error("Error while removing from cart:", error);
-            toast.error('Error while removing from cart', {
-                position: 'top-right',
+            toast.error("Error while removing from cart", {
+                position: "top-right",
             });
         }
     };
@@ -116,6 +113,14 @@ const Cart = () => {
         const course = courseMap[item.offeredCourseId];
         return total + (course?.offeredCourseFeeDTO?.courseFee || 0);
     }, 0);
+
+    const handleOpenModal = () => {
+        setIsModalOpen(true);
+    };
+
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+    };
 
     return (
         <div className="cart-box">
@@ -157,14 +162,50 @@ const Cart = () => {
                         );
                     })}
 
-                    <p className="total-price"><b>Total:</b> ${totalPrice.toFixed(2)}</p>
+                    <p className="total-price">
+                        <b>Total:</b> ${totalPrice.toFixed(2)}
+                    </p>
 
-                    <button className="cta-button" onClick={proceedToBulkPayment}>
+                    <button className="cta-button" onClick={handleOpenModal}>
                         Proceed To Payment
                     </button>
                 </>
             )}
 
+            {/* Modal for Payment Confirmation */}
+            {isModalOpen && (
+                <div className="modal-overlay">
+                    <div className="modal">
+                        <h2>Confirm Payment</h2>
+                        <p>Are you sure you want to proceed with the payment?</p>
+                        <button
+                            onClick={proceedToBulkPayment}
+                            style={{
+                                padding: "10px 20px",
+                                backgroundColor: "green",
+                                color: "white",
+                                border: "none",
+                                borderRadius: "4px",
+                                marginRight: "10px",
+                            }}
+                        >
+                            Confirm
+                        </button>
+                        <button
+                            onClick={handleCloseModal}
+                            style={{
+                                padding: "10px 20px",
+                                backgroundColor: "red",
+                                color: "white",
+                                border: "none",
+                                borderRadius: "4px",
+                            }}
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

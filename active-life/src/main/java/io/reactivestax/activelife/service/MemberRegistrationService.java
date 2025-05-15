@@ -190,7 +190,7 @@ public class MemberRegistrationService {
         String verificationId = UUID.randomUUID().toString();
         memberRegistration.setVerificationUUID(verificationId);
         String verificationLink = "http://localhost:40015/api/familyregistration/verify/"+ verificationId;
-        smsService.sendSms(memberRegistration.getHomePhoneNo(), "Please verify using this link: " + verificationLink,memberRegistrationDTO.getMemberLoginId());
+//        smsService.sendSms(memberRegistration.getHomePhoneNo(), "Please verify using this link: " + verificationLink,memberRegistrationDTO.getMemberLoginId());
         return  encodedPin;
     }
 
