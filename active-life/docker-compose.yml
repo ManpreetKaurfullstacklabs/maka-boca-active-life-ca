@@ -1,18 +1,19 @@
+version: "3.8"
+
 services:
   app:
-    image: leofoto/boca-spring-boot-app-instance  # Name of the Spring Boot Docker image
-    build: .
-    #platform: linux/arm64
+    image: ghcr.io/manpreetkaurfullstacklabs/maka-boca-active-life-ca:latest
     ports:
       - "8080:8080"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://active-life:5432/active_life
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/active_life
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
     depends_on:
       - db
     networks:
       - boca-network
+    restart: always
 
   db:
     image: postgres:15
