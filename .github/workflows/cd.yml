@@ -12,15 +12,12 @@ jobs:
     steps:
       - name: Deploy to EC2 via SSH
         uses: appleboy/ssh-action@v1
-        env:
-          IMAGE: ghcr.io/${{ github.repository_owner }}/maka-boca-active-life-ca:sha-${{ github.sha }}
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          envs: IMAGE
           script: |
             cd ${{ secrets.DEPLOY_PATH }}
             docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
-            docker pull $IMAGE
-            IMAGE=$IMAGE docker compose up -d --remove-orphans
+            docker pull ghcr.io/${{ github.repository_owner }}/maka-boca-active-life-ca:latest
+            IMAGE=ghcr.io/${{ github.repository_owner }}/maka-boca-active-life-ca:latest docker compose up -d --remove-orphans
