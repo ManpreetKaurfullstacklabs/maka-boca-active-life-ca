@@ -37,6 +37,7 @@ jobs:
     - name: Build and push Docker image
       uses: docker/build-push-action@v5
       with:
-        context: .
+        context: ../../active-life
+        file: ../../active-life/Dockerfile
         push: true
         tags: ghcr.io/${{ steps.lower.outputs.owner }}/maka-boca-active-life-ca:sha-${{ github.sha }}
