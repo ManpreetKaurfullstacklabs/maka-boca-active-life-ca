@@ -4,14 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="99d8ade1-4be3-4663-9b8e-f18e8c0ae66c" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/active-life/src/test/java/io/reactivestax/activelife/service/FamilyCourseRegistrationServiceTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/active-life/src/test/java/io/reactivestax/activelife/service/FamilyCourseRegistrationServiceTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/active-life/src/test/java/io/reactivestax/activelife/service/MemberRegistrationServiceTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/active-life/src/test/java/io/reactivestax/activelife/service/MemberRegistrationServiceTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/active-life/src/test/java/io/reactivestax/activelife/service/MockPaymentServiceTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/active-life/src/test/java/io/reactivestax/activelife/service/MockPaymentServiceTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/active-life/src/test/java/io/reactivestax/activelife/service/SearchQueryServiceTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/active-life/src/test/java/io/reactivestax/activelife/service/SearchQueryServiceTest.java" afterDir="false" />
-    </list>
+    <list default="true" id="99d8ade1-4be3-4663-9b8e-f18e8c0ae66c" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
