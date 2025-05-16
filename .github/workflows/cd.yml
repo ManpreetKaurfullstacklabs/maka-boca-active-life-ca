@@ -23,6 +23,8 @@ jobs:
           script: |
             cd ${{ secrets.DEPLOY_PATH }}
             docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
-            docker compose down
-            docker container prune -f
+            docker compose down || true
+            docker container prune -f || true
+            docker volume prune -f || true
+            docker pull ghcr.io/${{ steps.lower.outputs.owner }}/maka-boca-active-life-ca:latest || true
             docker compose up -d --build
