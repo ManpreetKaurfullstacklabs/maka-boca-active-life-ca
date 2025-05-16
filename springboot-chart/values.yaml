@@ -1,0 +1,77 @@
+# Number of app replicas
+replicaCount: 1
+
+# Docker image configuration
+image:
+  repository: ghcr.io/manpreetkaurfullstacklabs/springboot-app
+  pullPolicy: Always
+  tag: latest
+
+# If you're using private registries, you can add imagePullSecrets here
+imagePullSecrets:
+  - name: []
+
+
+# Service account settings
+serviceAccount:
+  create: true
+  automount: true
+  annotations: {}
+  name: ""
+
+# Pod metadata
+podAnnotations: {}
+podLabels: {}
+
+# Pod security context (optional)
+podSecurityContext: {}
+
+# Container security settings (optional)
+securityContext: {}
+
+# Service configuration (Spring Boot runs on 8080)
+service:
+  type: ClusterIP
+  port: 8080
+
+# Ingress (not needed for OpenShift, OpenShift uses Route)
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+
+# Resource requests/limits (you can adjust if needed)
+resources: {}
+
+# Health checks (adjust path if using Spring Actuator)
+livenessProbe:
+  httpGet:
+    path: /
+    port: 8080
+
+readinessProbe:
+  httpGet:
+    path: /
+    port: 8080
+
+# Autoscaling is off for now
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+
+# Volume support (not needed now)
+volumes: []
+volumeMounts: []
+
+# Node/cluster targeting (optional)
+nodeSelector: {}
+tolerations: []
+affinity: {}

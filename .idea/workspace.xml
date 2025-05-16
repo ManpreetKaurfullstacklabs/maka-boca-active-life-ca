@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="99d8ade1-4be3-4663-9b8e-f18e8c0ae66c" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/active-life/src/test/java/io/reactivestax/activelife/service/FamilyCourseRegistrationServiceTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/active-life/src/test/java/io/reactivestax/activelife/service/FamilyCourseRegistrationServiceTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/active-life/src/test/java/io/reactivestax/activelife/service/MemberRegistrationServiceTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/active-life/src/test/java/io/reactivestax/activelife/service/MemberRegistrationServiceTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/active-life/src/test/java/io/reactivestax/activelife/service/MockPaymentServiceTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/active-life/src/test/java/io/reactivestax/activelife/service/MockPaymentServiceTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/active-life/src/test/java/io/reactivestax/activelife/service/SearchQueryServiceTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/active-life/src/test/java/io/reactivestax/activelife/service/SearchQueryServiceTest.java" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;ManpreetKaurfullstacklabs&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/ManpreetKaurfullstacklabs/maka-boca-active-life-ca.git&quot;,
+    &quot;accountId&quot;: &quot;940aff22-f6bb-4c2e-9d5b-f88f650d8cea&quot;
+  }
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 6
+}</component>
+  <component name="ProjectId" id="2xBdrPTsbapVsh8EBlCo9Bnch9q" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Application.ActiveLifeApplication.executor&quot;: &quot;Run&quot;,
+    &quot;Maven.active-life [compile].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.active-life [package].executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/Manpreet.Kaur/Source/SpringBoot-Project/maka-boca-active-life-ca&quot;
+  }
+}</component>
+  <component name="RunManager">
+    <configuration name="ActiveLifeApplication" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="io.reactivestax.activelife.ActiveLifeApplication" />
+      <module name="active-life" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="io.reactivestax.activelife.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Application.ActiveLifeApplication" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="99d8ade1-4be3-4663-9b8e-f18e8c0ae66c" name="Changes" comment="" />
+      <created>1747415599190</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1747415599190</updated>
+    </task>
+    <servers />
+  </component>
+</project>
