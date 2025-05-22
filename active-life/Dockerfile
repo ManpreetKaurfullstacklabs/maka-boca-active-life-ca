@@ -12,13 +12,16 @@
 #EXPOSE 8080
 #
 ## Run the application
-#ENTRYPOINT ["java", "-jar", "app.jar"]
+# ---- Stage 1: Build the app ----
+FROM maven:3.9.6-eclipse-temurin-17 AS build
+WORKDIR /app
+COPY . .
+RUN mvn clean package -DskipTests
 
+# ---- Stage 2: Run the app ----
 FROM eclipse-temurin:17-jdk
 RUN groupadd --system spring && useradd --system --create-home --gid spring spring
-RUN #apt-get update && apt-get install -y netcat && rm -rf /var/lib/apt/lists/*
-
 USER spring:spring
-ARG JAR_FILE=target/*.jar
-COPY ${JAR_FILE} app.jar
-ENTRYPOINT ["java","-jar","/app.jar"]
+COPY --from=build /app/target/*.jar app.jar
+EXPOSE 8080
+ENTRYPOINT ["java", "-jar", "app.jar"]
